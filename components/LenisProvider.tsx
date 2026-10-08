@@ -6,19 +6,21 @@ import Lenis from "lenis";
 export default function LenisProvider() {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
       smoothWheel: true,
-      smoothTouch: false,
+      lerp: 0.1,
     });
 
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
+    let animationFrameId: number;
 
-    requestAnimationFrame(raf);
+    const raf = (time: number) => {
+      lenis.raf(time);
+      animationFrameId = requestAnimationFrame(raf);
+    };
+
+    animationFrameId = requestAnimationFrame(raf);
 
     return () => {
+      cancelAnimationFrame(animationFrameId);
       lenis.destroy();
     };
   }, []);
