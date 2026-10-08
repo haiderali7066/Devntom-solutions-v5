@@ -99,7 +99,7 @@ export default function Footer({ showCta = true }: { showCta?: boolean }) {
         </div>
 
         <div className="flex flex-col items-start justify-between gap-5 border-t border-white/10 py-7 text-sm text-[#93A8C4] md:flex-row md:items-center">
-          <p>© {new Date().getFullYear()} Devntom Solutions. All rights reserved.</p>
+         <p>© 2026 Devntom Solutions. All rights reserved.</p>
           <ul className="flex flex-wrap gap-x-6 gap-y-2">
             {legal.map(([l, h]) => <li key={h}><Link href={h} className="transition-colors hover:text-white">{l}</Link></li>)}
           </ul>
