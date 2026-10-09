@@ -53,6 +53,7 @@ import {
   Smartphone,
   Star,
 } from "lucide-react";
+import Image from "next/image";
 
 const pop = Poppins({
   subsets: ["latin"],
@@ -1364,7 +1365,7 @@ export default function HomeClient() {
                       className="relative block h-6 w-6"
                       style={{ "--d": `${0.9 + i * 0.9}s` } as CSSProperties}
                     >
-                      <span className="spn absolute inset-0 animate-spin rounded-full border-2 border-[#3B82F6]/30 border-t-[#8B9CFF]" />
+                      <span className="spn absolute inset-0 animate-spin rounded-full border-2 border-[#3B82F6]/30 border-t-[#223fe7]" />
                       <span
                         aria-label="Done"
                         className="chk absolute inset-0 flex items-center justify-center rounded-full bg-[#10B981] text-xs font-bold text-black"
@@ -1435,7 +1436,7 @@ export default function HomeClient() {
                 href="/contact"
                 className={`inline-flex items-center gap-3 rounded-full border border-white/25 bg-gradient-to-b from-white/10 to-white/[.02] py-3 pl-4 pr-8 text-lg shadow-[0_0_40px_rgba(0,123,255,.25)] transition hover:border-[#3B82F6] ${ring} focus-visible:ring-offset-black`}
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#6366F1] text-xl leading-none">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3033fd] text-xl leading-none">
                   +
                 </span>
                 Your business
@@ -2048,12 +2049,13 @@ export default function HomeClient() {
               ))}
             />
             <div className="absolute left-1/2 top-1/2 flex h-[72px] w-[72px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#0B1F3B] shadow-[0_0_60px_rgba(0,123,255,.5)]">
-              <svg width="30" height="30" viewBox="0 0 32 32">
+              {/* <svg width="30" height="30" viewBox="0 0 32 32">
                 <path
                   d="M4 4h12a12 12 0 0 1 0 24H4l6-8h6a4 4 0 0 0 0-8H4z"
                   fill="#00B4FF"
                 />
-              </svg>
+              </svg> */}
+              <Image src="/sign.png" alt="Devntom Solutions" width={72} height={72} />
             </div>
           </div>
         </div>
