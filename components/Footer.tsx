@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Poppins, Roboto } from "next/font/google";
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaMedium, FaPinterestP, FaRedditAlien, FaStackOverflow, FaWhatsapp, FaXTwitter } from "react-icons/fa6";
 import { ArrowRight, ArrowUp, ArrowUpRight, Mail, Phone } from "lucide-react";
-
+import Image from "next/image";
 const pop = Poppins({ subsets: ["latin"], weight: ["200", "300", "400", "600", "700"], display: "swap" });
 const rob = Roboto({ subsets: ["latin"], weight: ["300", "400", "500"], display: "swap" });
 
@@ -54,10 +54,29 @@ export default function Footer({ showCta = true }: { showCta?: boolean }) {
 
         <div className="grid gap-12 py-16 md:grid-cols-12">
           <div className="md:col-span-4">
-            <Link href="/" aria-label="Devntom Solutions home" className="inline-flex items-center gap-2.5">
-              <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><path d="M4 4h12a12 12 0 0 1 0 24H4l6-8h6a4 4 0 0 0 0-8H4z" fill="#00B4FF" /></svg>
-              <span className={`${pop.className} text-xl font-semibold tracking-[-0.02em]`}>Devntom<span className="ml-1 font-light text-[#93C5FD]">Solutions</span></span>
-            </Link>
+<Link
+  href="/"
+  aria-label="Devntom Solutions home"
+  className="inline-flex items-center gap-2.5"
+>
+  <Image
+    src="/sign.png"
+    alt="Devntom Solutions"
+    width={40}
+    height={40}
+    priority
+    className="h-10 w-10 object-contain"
+  />
+
+  <span
+    className={`${pop.className} text-xl font-semibold tracking-[-0.02em]`}
+  >
+    Devntom
+    <span className="ml-1 font-light text-[#93C5FD]">
+      Solutions
+    </span>
+  </span>
+</Link>
             <p className={`${pop.className} mt-5 text-lg font-light text-white`}>Where systems become strategy.</p>
             <p className="mt-3 max-w-sm text-[15px] font-light leading-relaxed text-[#B8C9DE]">We engineer websites, software, apps and AI automation that scale with your business.</p>
             <ul className="mt-6 space-y-2.5 text-[15px]">
