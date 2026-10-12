@@ -1,1413 +1,447 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-/**
- * /services/website-development
- *
- * One self-contained file: no imports from your own files, no Nav, no Footer
- * (both live in app/layout.tsx).
- *
- * The opening is a scroll-scrubbed WebGL scene (adapted from the Lycoris specimen):
- * a procedural cobalt chrome DNA helix: code as DNA, with glowing base pairs. Scroll is the timeline. Six frames,
- * and between each one the camera orbits, the helix shrinks, flies and turns while
- * the type morphs from one layout into the next. Below it sit the usual service-page
- * sections (what is included, process, related services, FAQ, contact form).
- *
- * Palette: cobalt, navy, white, black.
- * Before launch, search this file for "TESTIMONIALS" to see where to drop your component.
- */
-
-import * as React from "react";
 import Link from "next/link";
-import { Poppins, Roboto, Roboto_Mono, Playwrite_CA } from "next/font/google";
-import { ArrowRight, ArrowUpRight, Check, Code2, Gauge, LayoutDashboard, Plus, Search, ShieldCheck, Smartphone } from "lucide-react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { Poppins, Roboto, Playwrite_CA } from "next/font/google";
+import { ArrowRight, ArrowUpRight, BarChart3, Check, ChevronDown, ChevronRight, Code2, Gauge, Headphones, Palette, Plus, Search, ShieldCheck, Smartphone } from "lucide-react";
+import { SiDocker, SiFigma, SiGit, SiJavascript, SiNextdotjs, SiNodedotjs, SiPostgresql, SiPython, SiReact, SiShopify, SiTailwindcss, SiTypescript, SiVercel, SiWordpress } from "react-icons/si";
+import ClientLogos from "@/components/ClientLogos";
+import Testimonials from "@/components/Testimonials";
+import Industries from "@/components/Industries";
+import Blog from "@/components/BlogInsights";
+import ContactForm from "@/components/ContactForm";
 
 const pop = Poppins({ subsets: ["latin"], weight: ["200", "300", "400", "600", "700"], display: "swap" });
 const rob = Roboto({ subsets: ["latin"], weight: ["300", "400", "500", "700"], display: "swap" });
 const pw = Playwrite_CA({ weight: "400", display: "swap" });
 
-/* ------------------------------ BRAND ------------------------------ */
+const css = `
+.rv{opacity:0;transform:translateY(40px);transition:opacity .9s ease,transform 1.1s cubic-bezier(.16,1,.3,1)}
+.rv.in{opacity:1;transform:none}
+.dr{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 2.2s cubic-bezier(.16,1,.3,1) var(--dl,0s)}
+.in .dr{stroke-dashoffset:0}
+.dr0{stroke-dasharray:1;stroke-dashoffset:1;animation:dr0 2.6s cubic-bezier(.16,1,.3,1) .3s forwards}
+@keyframes dr0{to{stroke-dashoffset:0}}
+@keyframes sw{from{transform:translate3d(-4%,0,0) rotate(-12deg)}to{transform:translate3d(4%,-3%,0) rotate(-9deg)}}
+.sw{animation:sw 12s ease-in-out infinite alternate}
+.grain{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.5'/></svg>");opacity:.07;mix-blend-mode:overlay}
+.spn{transition:opacity .3s linear var(--d)}.in .spn{opacity:0}
+.chk{opacity:0;transform:scale(.3);transition:opacity .4s ease var(--d),transform .5s cubic-bezier(.34,1.56,.64,1) var(--d)}.in .chk{opacity:1;transform:none}
+.xc{display:grid;transition:grid-template-columns .8s cubic-bezier(.22,1,.36,1)}
+.wr{animation:wr 10s cubic-bezier(.76,0,.24,1) infinite}
+@keyframes wr{0%,20%{transform:translateY(0)}25%,45%{transform:translateY(-20%)}50%,70%{transform:translateY(-40%)}75%,95%{transform:translateY(-60%)}100%{transform:translateY(-80%)}}
+.bl{animation:bl 18s ease-in-out infinite alternate}
+@keyframes bl{to{transform:translate3d(6vw,-5vh,0) scale(1.2)}}
+.fl{animation:fl 6s ease-in-out infinite}
+@keyframes fl{50%{transform:translateY(-12px)}}
+@keyframes md{0%{transform:translateY(0);opacity:1}100%{transform:translateY(12px);opacity:0}}
+.mq2{animation:mq2 40s linear infinite}.mq2.rev{animation-direction:reverse}.mqw:hover .mq2,.mqw:focus-within .mq2{animation-play-state:paused}
+@keyframes mq2{to{transform:translate3d(-50%,0,0)}}
+.sp{background:radial-gradient(360px circle at var(--mx,50%) var(--my,50%),rgba(0,123,255,.14),transparent 65%)}
+.t0{font-size:clamp(2.4rem,5.4vw,5rem);line-height:1.04;letter-spacing:-.035em}
+.t2{font-size:clamp(2rem,4vw,3.6rem);line-height:1.05;letter-spacing:-.03em}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1!important;transform:none!important;transition:none!important}.dr,.dr0{animation:none;stroke-dashoffset:0;transition:none}.sw,.wr,.bl,.fl,.mq2{animation:none}.xc{transition:none}}
+`;
 
-const COBALT = "#0047AB"; // true cobalt: borders, buttons, accents on light backgrounds
-const COBALT_HI = "#2F7BFF"; // lighter cobalt tint: the 3D object and glow on dark
-const COBALT_TEXT = "#6EA1FF"; // small text on dark (passes contrast on navy and black)
-const NAVY = "#0B1F3B";
-const NAVY_DEEP = "#071A33";
-const BLACK = "#02050B";
-const WHITE = "#FFFFFF";
+const img = (id: string, w = 900) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=70`;
+const P = { team: "photo-1519389950473-47ba0277781c", dash: "photo-1551288049-bebda4e38f71", desk: "photo-1460925895917-afdab827c52f", lap: "photo-1531297484001-80022131f5a1", code: "photo-1498050108023-c5249f4df085", app: "photo-1512941937669-90a1b58e7e9c" };
 
-const SITE = "https://www.devntomsolutions.com";
-const PATH = "/services/website-development";
-const TITLE = "Website Development Services | DEVNTOM Solutions";
-const DESC = "Fast, secure, responsive websites built with Next.js and React: company sites, e-commerce and web apps with SEO built in. DEVNTOM Solutions, Lahore, Riyadh and London.";
-
-/* ------------------------------ CONTENT ------------------------------ */
-
-const NAME = "Build";
-const SPECS = ["Design to launch", "Next.js and React", "SEO built in", "Fast and secure", "CMS and lead forms"];
-const TAGLINE = [{ text: "Websites" }, { text: "built to", small: true }, { text: "convert" }, { text: "every visit", small: true }];
-
-// Hover or focus a type in frame 3 to read what it covers.
-const TYPES: [string, string][] = [
-  ["Company sites", "Clear, credible sites that explain what you do and earn enquiries."],
-  ["E-commerce", "Fast stores with secure checkout and simple product management."],
-  ["Web apps", "Dashboards, portals and tools that run in the browser."],
-  ["Landing pages", "Focused pages built to lift conversions from campaigns."],
-  ["CMS sites", "Edit your own content without calling a developer."],
-  ["Portals", "Secure logins, accounts and member areas."],
-  ["Redesigns", "A new look and faster code on top of what already works."],
-  ["Performance", "Speed, accessibility and Core Web Vitals work on existing sites."],
+const tabs = [
+  { key: "Business websites", title: "Websites that work for your business", blurb: "Everything a company site needs to look credible and convert, with content you control.", items: [["Fast, responsive pages", "Pages that load quickly and look right on every phone, tablet and desktop."], ["Content you can edit", "A CMS or admin panel so your team updates the site without a developer."], ["SEO built in", "Clean structure, metadata and schema from the first wireframe."], ["Secure and monitored", "SSL, protected forms, backups and uptime monitoring."]] },
+  { key: "E-commerce stores", title: "Stores that sell around the clock", blurb: "Fast catalogues and smooth checkouts designed to turn browsers into buyers.", items: [["Catalogue and search", "Product pages, filters and search that help people find what they want."], ["Smooth checkout", "Payments, shipping and tax set up to reduce abandoned carts."], ["Order management", "Track orders, stock and customers from one admin area."], ["Marketplace and platform options", "Custom builds or Shopify and WooCommerce, whichever fits your goals."]] },
+  { key: "Web apps and portals", title: "Platforms that scale with you", blurb: "Customer portals, booking systems and dashboards on the same fast foundation.", items: [["Secure customer portals", "Logins, roles and private account areas for your clients."], ["Bookings and payments", "Schedules, reservations and online payments in one flow."], ["Dashboards and reports", "Live data presented clearly for your team."], ["Integrations", "Connect payments, CRM, email and the tools you already use."]] },
+  { key: "Landing pages", title: "Pages built for one goal", blurb: "Focused pages for campaigns, launches and lead capture.", items: [["Conversion-focused design", "One message, one action, nothing that distracts."], ["Fast to launch", "A clear plan and a short build so campaigns go live on time."], ["A/B testing ready", "Variants and analytics so you can learn what converts."], ["Ad and SEO friendly", "Quick loading and clean tracking for paid and organic traffic."]] },
+  { key: "Redesign and migration", title: "Modernise without losing rankings", blurb: "Replace a slow or outdated site while protecting your search visibility.", items: [["Audit first", "We review speed, structure, content and rankings before changing anything."], ["Redirect and SEO plan", "Every old page mapped so you keep the traffic you have earned."], ["Fresh design and code", "A faster, cleaner site built on a modern stack."], ["Safe go-live", "Staging, testing and a rollback plan on launch day."]] },
 ];
-
-const STATS = [["150+", "Projects delivered"], ["80+", "Clients worldwide"], ["98%", "Client satisfaction"]];
-
-const included = [
-  [Gauge, "Speed built in", "Optimised images, clean code and fast hosting so pages load quickly everywhere."],
-  [Smartphone, "Responsive by default", "Every page designed and tested from small phones to wide desktops."],
-  [Search, "SEO foundations", "Clean structure, metadata and structured data so search engines understand you."],
-  [ShieldCheck, "Secure and reliable", "Hardened forms, safe dependencies and sensible hosting from day one."],
-  [LayoutDashboard, "Easy to manage", "A CMS or admin panel so your team can update content without help."],
-  [Code2, "Clean, scalable code", "Next.js, React and TypeScript, written to be easy to extend later."],
-] as const;
-
-const steps = [
-  ["Discovery and strategy", "Goals, audience, pages and a plan we both sign off on."],
-  ["UI/UX and wireframes", "Layouts and visual design you approve before any code."],
-  ["Development", "Pages, components and integrations built and reviewed."],
-  ["Testing and QA", "Devices, browsers, forms and speed checked before launch."],
-  ["Launch", "Deployment, redirects and monitoring handled for you."],
-  ["Support and growth", "Fixes, improvements and search growth after launch."],
-] as const;
-
-const related = [
-  ["Digital Marketing", "/services/digital-marketing", "Campaigns that send the right visitors to your new site."],
-  ["SEO", "/services/seo-optimization", "Technical and content SEO for steady organic growth."],
-  ["UI/UX Design", "/services/ui-ux-design", "Interfaces people understand on the first visit."],
-  ["Mobile Apps", "/services/mobile-app-development", "Native and cross-platform apps to go with your site."],
-] as const;
-
+const mocks = [
+  <><i className="block h-24 rounded-[4px] bg-gradient-to-br from-[#0052CC] to-[#00B4FF]" /><i className="block h-3 w-2/3 rounded-full bg-[#CFE2FF]" /><i className="block h-3 w-1/2 rounded-full bg-[#E6F0FF]" /></>,
+  <><div className="grid grid-cols-3 gap-2"><i className="h-16 rounded-[4px] bg-[#CFE2FF]" /><i className="h-16 rounded-[4px] bg-[#CFE2FF]" /><i className="h-16 rounded-[4px] bg-[#CFE2FF]" /></div><i className="block h-9 w-28 rounded-full bg-[#007BFF]" /><i className="block h-3 w-3/4 rounded-full bg-[#E6F0FF]" /></>,
+  <><div className="flex h-24 items-end gap-2">{[40, 60, 45, 80, 65, 95, 85].map((h, k) => <i key={k} className="flex-1 rounded-t-[3px] bg-gradient-to-t from-[#0052CC] to-[#00B4FF]" style={{ height: `${h}%` }} />)}</div><i className="block h-3 w-1/2 rounded-full bg-[#CFE2FF]" /></>,
+  <><div className="space-y-2">{[0, 1, 2].map((k) => <div key={k} className="flex items-center gap-2 rounded-[4px] border border-[#CFE2FF] p-2"><i className="h-6 w-6 rounded bg-[#E6F0FF]" /><i className="h-2 flex-1 rounded-full bg-[#CFE2FF]" /><Check size={14} className="text-[#10B981]" /></div>)}</div></>,
+];
+const about = [
+  ["Experience", P.team, "150+ projects delivered for 80+ clients across 12+ countries. Figures reflect our growth trajectory and are updated quarterly."],
+  ["Expertise", P.code, "Next.js, React, Node.js and Python, chosen to fit your goals rather than forced on every project."],
+  ["Innovation", P.lap, "Motion, performance and search practices that keep your site ahead of the competition."],
+  ["Technology", P.dash, "Cloud hosting, CDNs and monitoring so your site stays fast and online."],
+];
+const why = [["Fast by default", "Optimised images, lean code and edge hosting for pages that feel instant."], ["Mobile first", "Designed on the smallest screen first, then expanded."], ["Search ready", "Metadata, structured data and logical content structure."], ["Secure and scalable", "Safe forms and an architecture that grows with you."]];
+const steps = [["Discovery", "Goals, users and scope."], ["Wireframes", "Structure and flows."], ["Design", "Brand-led visuals."], ["Build", "Clean code, weekly demos."], ["Launch", "Tested and monitored."], ["Support", "Updates and growth."]];
 const faqs = [
-  ["What types of websites do you build?", "Company sites, e-commerce stores, landing pages, CMS-driven sites, portals and web apps. If it runs in a browser, we can build it."],
-  ["Which technologies do you use?", "Mainly Next.js, React, TypeScript and Tailwind CSS, with a CMS or backend chosen to suit the project."],
-  ["Will my website be fast and mobile friendly?", "Yes. Speed and responsive design are part of every build, and we test on real devices and browsers before launch."],
-  ["Is SEO included?", "The technical foundations are: clean structure, metadata, structured data and speed. Ongoing content and ranking work is available as our SEO service."],
-  ["Can I edit the content myself?", "Yes. We add a CMS or admin panel where it makes sense, so your team can update pages without a developer."],
-  ["Can you redesign my existing website?", "Yes. We audit what you have, keep what works and rebuild what holds you back."],
-  ["How long does a website take?", "It depends on scope. After a short discovery step we send a clear quote with deliverables and a timeline."],
-  ["Do you support the site after launch?", "Yes. Support and growth is the last step of our process, covering fixes, improvements and monitoring."],
+  ["How much does a website cost?", "It depends on pages, features and integrations. After a short discovery call we send a fixed quote with deliverables and a timeline."],
+  ["How long does a website take?", "A focused business site usually takes a few weeks. Larger stores and web apps take longer. You get a dated plan before we start."],
+  ["Will my website rank on Google?", "We build search foundations in from day one: speed, structure, metadata and schema. Rankings also depend on content and competition, so we can add ongoing SEO."],
+  ["Can I update the website myself?", "Yes. We connect a CMS or admin panel that suits your team and show you how to use it."],
+  ["Do you support the site after launch?", "Yes. We offer maintenance, monitoring, security updates and new features."],
+];
+const faqLd = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) };
+
+const included = [[Gauge, "Speed optimisation", "Image, code and hosting tuning for fast loading."], [Smartphone, "Responsive design", "Pixel-perfect on phones, tablets and desktops."], [Search, "Technical SEO", "Metadata, schema, sitemap and clean URLs."], [ShieldCheck, "SSL and security", "HTTPS, protected forms and regular backups."], [Palette, "Custom UI design", "A look built around your brand, not a template."], [Code2, "Clean, scalable code", "Component-based code any developer can extend."], [BarChart3, "Analytics setup", "Tracking so you can see what is working."], [Headphones, "Post-launch support", "Fixes, updates and a team you can reach."]] as const;
+const techRows = [[[SiNextdotjs, "Next.js"], [SiReact, "React"], [SiTypescript, "TypeScript"], [SiJavascript, "JavaScript"], [SiTailwindcss, "Tailwind CSS"], [SiVercel, "Vercel"], [SiGit, "Git"]], [[SiNodedotjs, "Node.js"], [SiPython, "Python"], [SiPostgresql, "PostgreSQL"], [SiDocker, "Docker"], [SiFigma, "Figma"], [SiWordpress, "WordPress"], [SiShopify, "Shopify"]]] as const;
+// SAMPLE engagement options: confirm scope and wording before launch. Pricing is agreed after discovery.
+const packs = [
+  ["Launch", "For new businesses and campaigns", ["Up to 5 pages", "Responsive custom design", "Basic SEO setup", "Contact form and analytics"], false],
+  ["Growth", "For established companies", ["Custom multi-page website", "CMS you control", "Technical SEO and schema", "Speed and security hardening", "Post-launch support"], true],
+  ["Platform", "For stores, portals and web apps", ["Custom features and integrations", "User accounts and payments", "Dashboards and reporting", "Scalable cloud architecture", "Ongoing development"], false],
 ] as const;
 
-const serviceOptions = ["Website Development", "Digital Marketing", "Custom Software", "Mobile Apps", "AI Automation", "UI/UX Design", "SEO", "Something else"];
-
-const jsonLd = [
-  {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    name: "Website Development",
-    serviceType: "Website development",
-    description: DESC,
-    url: SITE + PATH,
-    provider: { "@type": "Organization", name: "DEVNTOM Solutions", url: SITE },
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: SITE },
-      { "@type": "ListItem", position: 2, name: "Services", item: SITE + "/services" },
-      { "@type": "ListItem", position: 3, name: "Website Development", item: SITE + PATH },
-    ],
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqs.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
-  },
-];
-
-/* ------------------------------ 3D: THE FUNNEL ------------------------------ */
-
-type V3 = [number, number, number];
-type Curve = {
-  pts: V3[];
-  /** 0 backbone ribbon, 1 base-pair rung (tube), 2 reserved */
-  kind: 0 | 1 | 2;
-  /** half-width of a ribbon, radius of a tube */
-  w: number;
-  /** half-thickness of a ribbon */
-  t: number;
-  /** ribbon width direction (used when `lats` is absent) */
-  lat: V3;
-  /** per-point ribbon width direction, so a ribbon can hug a wall */
-  lats?: V3[];
-  /** widen towards the end instead of tapering to a point */
-  flare?: boolean;
-  /** constant width, square ends: a hoop or panel strip */
-  flat?: boolean;
-  twist: number;
-  bulb: boolean;
-  phase: number;
-  stagger: number;
-  base: V3;
-};
-
-const add = (a: V3, b: V3): V3 => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
-const sub = (a: V3, b: V3): V3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
-const mul = (a: V3, s: number): V3 => [a[0] * s, a[1] * s, a[2] * s];
-const dot = (a: V3, b: V3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-const cross = (a: V3, b: V3): V3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
-const norm = (a: V3): V3 => {
-  const l = Math.hypot(a[0], a[1], a[2]) || 1;
-  return [a[0] / l, a[1] / l, a[2] / l];
-};
-
-const rng = (seed: number) => {
-  let s = seed >>> 0;
-  return () => {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-};
-
-/** Where the camera looks: the middle of the helix. */
-const HEART: V3 = [0, 0, 0];
-/** Fit radius for the camera: the helix runs from -1.9 to 1.9 in height. */
-const FIT_RADIUS = 2.15;
-/** Radius of the helix seen from above, used to place the cover letters beside it. */
-const TOP_R = 1.05;
-
-const HELIX_R = 0.9;
-const HELIX_H = 1.9;
-const HELIX_TURNS = 3.2;
-
-/**
- * Code as DNA. Two chrome backbone ribbons wind around each other and are built segment
- * by segment, bottom to top. Between them, 26 base pairs: two chrome rungs that meet in
- * the middle, each ending in a glowing bead on the backbone. The beads glow through a
- * soft additive halo drawn on a second canvas (see `glowPts`).
- */
-const buildCurves = (_unused: number, seed: number) => {
-  const r = rng(seed);
-  const curves: Curve[] = [];
-  const angleAt = (y: number) => HELIX_TURNS * Math.PI * 2 * ((y + HELIX_H) / (2 * HELIX_H));
-  const onStrand = (y: number, phase: number, rad: number): V3 => {
-    const a = angleAt(y) + phase;
-    return [Math.cos(a) * rad, y, Math.sin(a) * rad];
-  };
-
-  // backbones, in eight segments each so the helix can build upward
-  const SEG = 8;
-  for (const phase of [0, Math.PI]) {
-    for (let sgm = 0; sgm < SEG; sgm++) {
-      const y0 = -HELIX_H + (2 * HELIX_H * sgm) / SEG;
-      const y1 = -HELIX_H + (2 * HELIX_H * (sgm + 1)) / SEG;
-      const pts: V3[] = [];
-      // a small overlap tucks each segment's end cap inside its neighbour
-      const a0 = sgm === 0 ? y0 : y0 - 0.05;
-      const a1 = sgm === SEG - 1 ? y1 : y1 + 0.05;
-      for (let k = 0; k <= 14; k++) pts.push(onStrand(a0 + ((a1 - a0) * k) / 14, phase, HELIX_R));
-      const mid = pts[7];
-      curves.push({
-        pts, kind: 0, w: 0.05, t: 0.03, lat: [0, 1, 0], flat: true, twist: 0, bulb: false,
-        phase: r() * 6.28, stagger: (sgm / SEG) * 0.6 + (phase ? 0.03 : 0), base: mid,
-      });
-    }
-  }
-
-  // base pairs
-  const PAIRS = 26;
-  for (let i = 0; i < PAIRS; i++) {
-    const y = -HELIX_H + 0.08 + ((2 * HELIX_H - 0.16) * i) / (PAIRS - 1);
-    for (const phase of [0, Math.PI]) {
-      const outer = onStrand(y, phase, HELIX_R * 0.98);
-      const inner = onStrand(y, phase, 0.04);
-      const pts: V3[] = [];
-      // from the middle out, so the bead sits on the backbone
-      for (let k = 0; k <= 10; k++) {
-        const s = k / 10;
-        pts.push([inner[0] + (outer[0] - inner[0]) * s, y, inner[2] + (outer[2] - inner[2]) * s]);
-      }
-      curves.push({
-        pts, kind: 1, w: 0.016, t: 0, lat: [0, 1, 0], twist: 0, bulb: true,
-        phase: r() * 6.28, stagger: 0.1 + (i / PAIRS) * 0.6, base: pts[0],
-      });
-    }
-  }
-  return { curves, radius: FIT_RADIUS };
-};
-
-/** Interleaved vertex layout: pos 3, normal 3, aux 4 (s, phase, kind, stagger), base 3. */
-const STRIDE = 13;
-
-const buildMesh = (curves: Curve[]) => {
-  const v: number[] = [];
-  const idx: number[] = [];
-  let count = 0;
-  const push = (p: V3, n: V3, s: number, c: Curve) => {
-    v.push(p[0], p[1], p[2], n[0], n[1], n[2], s, c.phase, c.kind, c.stagger, c.base[0], c.base[1], c.base[2]);
-    return count++;
-  };
-  const tangent = (pts: V3[], i: number) => norm(sub(pts[Math.min(i + 1, pts.length - 1)], pts[Math.max(i - 1, 0)]));
-
-  for (const c of curves) {
-    const n = c.pts.length;
-    if (c.kind === 0) {
-      // A flat band with real thickness: four faces, hard-edged, so the chrome
-      // picks up a bright line along each rim like a pressed strip of metal.
-      const rings: number[][] = [];
-      let first: V3[] = [];
-      let last: V3[] = [];
-      let T0: V3 = [0, 1, 0];
-      let T1: V3 = [0, 1, 0];
-      for (let i = 0; i < n; i++) {
-        const s = i / (n - 1);
-        const T = tangent(c.pts, i);
-        const lat = c.lats ? c.lats[i] : c.lat;
-        let N = norm(cross(T, lat));
-        let W = cross(N, T);
-        const a = c.twist * Math.sin(Math.PI * s);
-        const ca = Math.cos(a);
-        const sa = Math.sin(a);
-        const W2 = add(mul(W, ca), mul(N, sa));
-        N = sub(mul(N, ca), mul(W, sa));
-        W = W2;
-        const hw = c.flat
-          ? c.w
-          : c.flare
-          ? c.w * (0.3 + 1.0 * s) * (1 + 0.08 * Math.sin(s * 34 + c.phase))
-          : c.w * (0.42 + 0.58 * Math.pow(Math.sin(Math.PI * Math.min(1, 0.12 + s * 0.9)), 0.6)) * (1 + 0.1 * Math.sin(s * 34 + c.phase));
-        const p = c.pts[i];
-        const k0 = add(add(p, mul(W, hw)), mul(N, c.t));
-        const k1 = add(sub(p, mul(W, hw)), mul(N, c.t));
-        const k2 = sub(sub(p, mul(W, hw)), mul(N, c.t));
-        const k3 = sub(add(p, mul(W, hw)), mul(N, c.t));
-        const mW = mul(W, -1);
-        const mN = mul(N, -1);
-        rings.push([
-          push(k0, N, s, c), push(k1, N, s, c),
-          push(k1, mW, s, c), push(k2, mW, s, c),
-          push(k2, mN, s, c), push(k3, mN, s, c),
-          push(k3, W, s, c), push(k0, W, s, c),
-        ]);
-        if (i === 0) { first = [k0, k1, k2, k3]; T0 = T; }
-        if (i === n - 1) { last = [k0, k1, k2, k3]; T1 = T; }
-      }
-      for (let i = 0; i < n - 1; i++) {
-        const a = rings[i];
-        const b = rings[i + 1];
-        for (let f = 0; f < 4; f++) {
-          const x = f * 2;
-          idx.push(a[x], a[x + 1], b[x], a[x + 1], b[x + 1], b[x]);
-        }
-      }
-      const cap = (q: V3[], nrm: V3, s: number) => {
-        const o = q.map((p) => push(p, nrm, s, c));
-        idx.push(o[0], o[1], o[2], o[0], o[2], o[3]);
-      };
-      cap(first, mul(T0, -1), 0);
-      cap(last, T1, 1);
-    } else {
-      // Round tube on a parallel-transport frame, so it never corkscrews.
-      const seg = c.kind === 2 ? 10 : 6;
-      let N = norm(cross(tangent(c.pts, 0), c.kind === 2 ? [0, 0, 1] : c.lat));
-      const rings: number[] = [];
-      for (let i = 0; i < n; i++) {
-        const s = i / (n - 1);
-        const T = tangent(c.pts, i);
-        N = norm(sub(N, mul(T, dot(N, T))));
-        const B = cross(T, N);
-        let rad = c.w * (c.kind === 1 ? 1 - 0.35 * s : 1);
-        if (c.bulb && s > 0.9) rad = c.w * (0.65 + 2.1 * Math.sin(((s - 0.9) / 0.1) * Math.PI * 0.92));
-        if (c.kind === 1 && i === n - 1) rad *= 0.3;
-        rings.push(count);
-        for (let k = 0; k <= seg; k++) {
-          const a = (k / seg) * Math.PI * 2;
-          const nr = add(mul(N, Math.cos(a)), mul(B, Math.sin(a)));
-          push(add(c.pts[i], mul(nr, rad)), nr, s, c);
-        }
-      }
-      for (let i = 0; i < n - 1; i++) {
-        for (let k = 0; k < seg; k++) {
-          const a = rings[i] + k;
-          const b = rings[i + 1] + k;
-          idx.push(a, a + 1, b, a + 1, b + 1, b);
-        }
-      }
-    }
-  }
-  return { data: new Float32Array(v), index: new Uint16Array(idx), vertices: count };
-};
-
-/* ------------------------------ 3D: SCROLL TIMELINE ------------------------------ */
-
-const clamp01 = (x: number) => (x <= 0 ? 0 : x > 1 ? 1 : x);
-const smoothstep = (a: number, b: number, x: number) => {
-  const t = clamp01((x - a) / (b - a));
-  return t * t * (3 - 2 * t);
-};
-const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-
-/** 0 while the root's top sits at the stage's top, 1 when its bottom does. */
-const progressFrom = (top: number, height: number, viewport: number) => {
-  const travel = height - viewport;
-  if (travel <= 0) return 0;
-  return clamp01(-top / travel);
-};
-
-/** Scroll progress to a continuous frame coordinate in 0..n-1. Each frame holds for `hold` of its slot. */
-const sceneCoord = (p: number, n: number, hold: number) => {
-  if (n <= 1) return 0;
-  const t = clamp01(p) * (n - 1);
-  const i = Math.min(Math.floor(t), n - 2);
-  const h = hold / 2;
-  return i + easeInOut(clamp01((t - i - h) / (1 - 2 * h)));
-};
-
-/** How present one element of frame `scene` is at `coord`. `delay` staggers it, mirrored on the way out. */
-const reveal = (coord: number, scene: number, delay: number) => {
-  const d = coord - scene;
-  const lag = d < 0 ? delay : 1 - delay;
-  return clamp01((0.6 - Math.abs(d) - lag * 0.2) / 0.25);
-};
-
-type Key = {
-  /** turn of the funnel about its axis, radians */
-  spin: number;
-  /** camera elevation, degrees; +90 looks straight down into the helix */
-  el: number;
-  /** helix radius as a fraction of the stage's short side */
-  size: number;
-  /** where the heart lands, in clip space (-1..1, +y up) */
-  ox: number;
-  oy: number;
-  /** how much of the pipeline is drawn */
-  stem: number;
-};
-
-const KEYS: Key[] = [
-  { spin: 0.5, el: 26, size: 0.82, ox: 0, oy: 0.28, stem: 1 },
-  { spin: 1.4, el: 88, size: 0.95, ox: 0, oy: 0, stem: 0 },
-  { spin: 2.4, el: 20, size: 0.27, ox: 0, oy: 0.4, stem: 0.3 },
-  { spin: 3.7, el: -26, size: 0.86, ox: 0, oy: -0.3, stem: 0.06 },
-  { spin: 4.6, el: 22, size: 1.0, ox: 0.66, oy: 0.2, stem: 1 },
-  { spin: 5.0, el: -74, size: 0.86, ox: 0, oy: 1.02, stem: 0.04 },
-];
-// Portrait stages move the funnel rather than squeezing the type.
-const KEYS_TALL: Partial<Key>[] = [
-  { size: 0.9, oy: 0.36 },
-  { size: 0.8 },
-  { size: 0.34, oy: 0.44 },
-  { size: 0.95, oy: -0.2 },
-  { size: 0.86, ox: 0.5, oy: 0.46 },
-  { size: 0.96, oy: 1.0 },
-];
-const SCENES = KEYS.length;
-const HOLD = 0.34;
-const NAV = ["Cover", "Helix", "Types", "Stages", "Promise", "Contact"];
-
-const keyAt = (coord: number, tall: boolean): Key => {
-  const i = Math.max(0, Math.min(SCENES - 1, Math.floor(coord)));
-  const j = Math.min(SCENES - 1, i + 1);
-  const f = coord - i;
-  const a = { ...KEYS[i], ...(tall ? KEYS_TALL[i] : {}) };
-  const b = { ...KEYS[j], ...(tall ? KEYS_TALL[j] : {}) };
-  const l = (x: number, y: number) => x + (y - x) * f;
-  return { spin: l(a.spin, b.spin), el: l(a.el, b.el), size: l(a.size, b.size), ox: l(a.ox, b.ox), oy: l(a.oy, b.oy), stem: l(a.stem, b.stem) };
-};
-
-type M4 = Float32Array;
-const perspective = (fovy: number, aspect: number, near: number, far: number): M4 => {
-  const f = 1 / Math.tan(fovy / 2);
-  const m = new Float32Array(16);
-  m[0] = f / aspect;
-  m[5] = f;
-  m[10] = (far + near) / (near - far);
-  m[11] = -1;
-  m[14] = (2 * far * near) / (near - far);
-  return m;
-};
-const lookAt = (eye: V3, at: V3): M4 => {
-  const z = norm(sub(eye, at));
-  const x = norm(cross([0, 1, 0], z));
-  const y = cross(z, x);
-  const m = new Float32Array(16);
-  m[0] = x[0]; m[4] = x[1]; m[8] = x[2];
-  m[1] = y[0]; m[5] = y[1]; m[9] = y[2];
-  m[2] = z[0]; m[6] = z[1]; m[10] = z[2];
-  m[12] = -dot(x, eye); m[13] = -dot(y, eye); m[14] = -dot(z, eye); m[15] = 1;
-  return m;
-};
-const multiply = (a: M4, b: M4): M4 => {
-  const o = new Float32Array(16);
-  for (let c = 0; c < 4; c++)
-    for (let r = 0; r < 4; r++)
-      o[c * 4 + r] = a[r] * b[c * 4] + a[4 + r] * b[c * 4 + 1] + a[8 + r] * b[c * 4 + 2] + a[12 + r] * b[c * 4 + 3];
-  return o;
-};
-const rotY = (t: number): M4 => {
-  const c = Math.cos(t);
-  const s = Math.sin(t);
-  return new Float32Array([c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1]);
-};
-const rotX = (t: number): M4 => {
-  const c = Math.cos(t);
-  const s = Math.sin(t);
-  return new Float32Array([1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1]);
-};
-
-const hexToLinear = (hex: string): V3 => {
-  let h = hex.replace("#", "").trim();
-  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
-  const n = parseInt(h.slice(0, 6), 16);
-  if (Number.isNaN(n)) return [0.05, 0.2, 1];
-  const ch = (x: number) => Math.pow(x / 255, 2.2);
-  return [ch((n >> 16) & 255), ch((n >> 8) & 255), ch(n & 255)];
-};
-
-const VERT = `
-attribute vec3 a_pos;
-attribute vec3 a_nrm;
-attribute vec4 a_aux;
-attribute vec3 a_base;
-uniform mat4 u_vp;
-uniform mat4 u_model;
-uniform vec2 u_offset;
-uniform float u_time;
-uniform float u_bloom;
-uniform float u_sway;
-uniform float u_stem;
-varying vec3 v_n;
-varying vec3 v_w;
-varying float v_s;
-varying float v_k;
-void main() {
-  vec3 p = a_pos;
-  float k = a_aux.z;
-  if (k < 1.5) {
-    float g = clamp(u_bloom * 1.6 - a_aux.w * 0.6, 0.0, 1.0);
-    g = 1.0 - pow(1.0 - g, 3.0);
-    p = a_base + (p - a_base) * g;
-    float amp = (k < 0.5 ? 0.0 : 0.05) * u_sway * a_aux.x * a_aux.x;
-    p += amp * vec3(sin(u_time * 0.9 + a_aux.y), 0.5 * sin(u_time * 1.3 + a_aux.y * 1.7), cos(u_time * 0.7 + a_aux.y * 1.3));
-  } else if (p.y < 0.0) {
-    p.y *= u_stem;
-  }
-  vec4 w = u_model * vec4(p, 1.0);
-  v_w = w.xyz;
-  v_n = (u_model * vec4(a_nrm, 0.0)).xyz;
-  v_s = a_aux.x;
-  v_k = a_aux.z;
-  gl_Position = u_vp * w;
-  gl_Position.xy += u_offset * gl_Position.w;
-}
-`;
-
-// Cobalt chrome: almost no diffuse, everything is the reflection of a dark studio
-// with one overhead softbox, a tall side strip and a back rim, tinted cobalt and
-// running to icy white only where the highlight is hottest.
-const FRAG = `
-precision highp float;
-uniform vec3 u_eye;
-uniform vec3 u_tint;
-uniform vec3 u_hot;
-uniform float u_alpha;
-varying vec3 v_n;
-varying vec3 v_w;
-varying float v_s;
-varying float v_k;
-float studio(vec3 r) {
-  float key = pow(max(dot(r, normalize(vec3(-0.45, 0.85, 0.35))), 0.0), 14.0) * 2.6;
-  float strip = smoothstep(0.55, 0.8, r.x) * smoothstep(-0.7, 0.3, r.y) * 1.4;
-  float rim = smoothstep(0.55, 0.95, -r.z) * smoothstep(-0.2, 0.5, r.y) * 0.9;
-  float hz = exp(-abs(r.y - 0.05) * 7.0) * 0.4;
-  return key + strip + rim + hz;
-}
-void main() {
-  vec3 n = normalize(v_n);
-  vec3 v = normalize(u_eye - v_w);
-  if (dot(n, v) < 0.0) n = -n;
-  vec3 r = reflect(-v, n);
-  float e = studio(r);
-  float fr = pow(1.0 - max(dot(n, v), 0.0), 3.0);
-  float dif = max(dot(n, normalize(vec3(-0.3, 0.8, 0.6))), 0.0);
-  vec3 col = u_tint * (0.04 + 0.22 * dif);
-  col += u_tint * e * 1.15;
-  col += u_hot * pow(e, 3.0) * 0.3;
-  col += u_tint * fr * 1.1;
-  col *= 0.8 + 0.2 * smoothstep(0.0, 0.25, v_s);
-  if (v_k > 0.5 && v_k < 1.5) col += u_hot * smoothstep(0.86, 0.97, v_s) * 1.4;
-  col = col / (1.0 + col);
-  col = pow(col, vec3(1.0 / 2.2));
-  gl_FragColor = vec4(col * u_alpha, u_alpha);
-}
-`;
-
-/* ------------------------------ SCENE STYLES ------------------------------ */
-
-const DISPLAY = pop.style.fontFamily;
-const SANS = rob.style.fontFamily;
-
-const SCENE_CSS =
-  ".wd-stage{container-type:size;container-name:wd}" +
-  ".wd-char{display:inline-block;animation:wd-in 1.3s cubic-bezier(.2,.8,.2,1) both}" +
-  "@keyframes wd-in{from{opacity:0;transform:translateY(0.35em) rotate(4deg);filter:blur(10px)}to{opacity:1;transform:none;filter:blur(0)}}" +
-  ".wd-ch{display:block;width:100%;background:none;border:0;padding:0;color:inherit;font:inherit;text-align:inherit;cursor:pointer;transition:color .25s,transform .35s cubic-bezier(.2,.8,.2,1)}" +
-  ".wd-ch:hover,.wd-ch:focus-visible,.wd-ch[aria-pressed=true]{color:var(--wd-hi);transform:translateX(0.18em)}" +
-  ".wd-r .wd-ch:hover,.wd-r .wd-ch:focus-visible,.wd-r .wd-ch[aria-pressed=true]{transform:translateX(-0.18em)}" +
-  ".wd-ch:focus-visible{outline:2px solid var(--wd-hi);outline-offset:4px}" +
-  ".wd-nav{display:flex;flex-direction:column;gap:18px;align-items:flex-end;padding:14px 12px;border-radius:999px;background:rgba(5,14,31,.55);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(10px)}" +
-  ".wd-rail,.wd-rail-fill{position:absolute;right:16px;top:24px;bottom:24px;width:1px;background:rgba(255,255,255,.18)}" +
-  ".wd-rail-fill{background:var(--wd-hi);transform-origin:top;transform:scaleY(var(--wp,0))}" +
-  ".wd-nav button{position:relative;display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;cursor:pointer;color:rgba(255,255,255,.55);font:inherit;transition:color .3s}" +
-  ".wd-nav button:hover,.wd-nav button[aria-current=step]{color:#fff}" +
-  ".wd-lab{max-width:0;overflow:hidden;white-space:nowrap;opacity:0;transition:max-width .45s cubic-bezier(.2,.8,.2,1),opacity .3s}" +
-  ".wd-nav button:hover .wd-lab,.wd-nav button:focus-visible .wd-lab,.wd-nav button[aria-current=step] .wd-lab{max-width:90px;opacity:1}" +
-  ".wd-num{font-variant-numeric:tabular-nums;opacity:.7}" +
-  ".wd-dot{position:relative;z-index:1;width:7px;height:7px;border-radius:50%;border:1px solid currentColor;background:#05080f;transition:background-color .3s,box-shadow .3s,border-color .3s}" +
-  ".wd-nav button[aria-current=step] .wd-dot{background:var(--wd-hi);border-color:var(--wd-hi);box-shadow:0 0 0 4px rgba(47,123,255,.25),0 0 14px var(--wd-hi)}" +
-  ".wd-nav button:focus-visible{outline:2px solid var(--wd-hi);outline-offset:4px;border-radius:6px}" +
-  ".wd-cue{display:block;width:1px;height:34px;background:linear-gradient(var(--wd-hi),transparent);transform-origin:top;animation:wd-cue 1.9s ease-in-out infinite}" +
-  "@keyframes wd-cue{0%{transform:scaleY(0);opacity:1}55%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1);opacity:0}}" +
-  "@container wd (orientation: portrait){.wd-bloom{left:7cqw!important;top:auto!important;bottom:13cqh}" +
-  ".wd-fin{flex-direction:column!important;gap:4cqh!important;top:44cqh!important}" +
-  ".wd-spec{grid-template-columns:1fr 1fr!important}.wd-spec-mid{display:none!important}}" +
-  "@container wd (max-width: 720px){.wd-hide-sm{display:none!important}}" +
-  "@container wd (max-width: 1020px){.wd-hide-md{display:none!important}}" +
-  "@media (prefers-reduced-motion: reduce){.wd-char{animation:none}.wd-cue{animation:none}.wd-ch{transition:none}}";
-
-type Fx = "rise" | "clip" | "line" | "fade" | "draw";
-
-/** Everything that belongs to one frame registers itself through this. */
-const sc = (scene: number, fx: Fx = "rise", delay = 0) => ({ "data-sc": scene, "data-fx": fx, "data-d": delay });
-
-/** The five rising bars from the Devntom logo, drawn as the studio mark. */
-function Mark({ color, accent }: { color: string; accent: string }) {
-  const bars = [10, 18, 26, 16, 22];
-  return (
-    <svg width="30" height="32" viewBox="0 0 26 28" aria-hidden style={{ flex: "none" }}>
-      {bars.map((h, i) => (
-        <rect key={i} x={i * 5.6} y={28 - h} width="3.6" height={h} rx="1.2" fill={i === 2 ? accent : color} />
-      ))}
-    </svg>
-  );
-}
-
-
-
-/* ------------------------------ THE BUILD: A LINE TO A WEBSITE ------------------------------ */
-
-/**
- * A pinned, scroll-driven walkthrough of how a site gets made: a line, a grid, a layout,
- * a typeface, a colour, a line of code, a button, a launch. Scroll sets one CSS variable,
- * --p (0 to 1), on the stage. Every element reads it through ramp() and fades, draws or
- * slides on its own interval, so the animation is plain CSS maths with no per-element JS.
- */
-
-const mono = Roboto_Mono({ subsets: ["latin"], weight: ["400", "500"], display: "swap" });
-
-const INK = "#0B1F3B";
-const BODY = "#3B4A63";
-const GUIDE = "rgba(11,31,59,.55)";
-
-/** CSS 0..1 ramp of --p between a and b */
-const ramp = (a: number, b: number) => `clamp(0, calc((var(--p) - ${a}) / ${(b - a).toFixed(4)}), 1)`;
-/** CSS 1..0 ramp */
-const away = (a: number, b: number) => `calc(1 - ${ramp(a, b)})`;
-/** visible between two ramps */
-const between = (a: number, b: number, c: number, d: number) => `calc(${ramp(a, b)} * ${away(c, d)})`;
-
-const BUILD_STEPS = [
-  ["A line.", "Every website starts as a measurement: a size, a frame, a line."],
-  ["A grid.", "Columns, gaps and a surface. The scaffolding everything lines up with later."],
-  ["A layout.", "Lines become surfaces: navigation, headline, image, button. Order first, ornament later."],
-  ["A typeface.", "Type is attitude. Size, weight and line breaks are tuned to every single line."],
-  ["A colour.", "Navy, cobalt, black and white. A small palette, used with discipline."],
-  ["A line of code.", "What we design, we also build. Clean, readable, no page builder."],
-  ["A button.", "States, motion and focus: the details people feel without noticing."],
-  ["A launch.", "Tested, deployed and monitored. Your site goes live, ready to grow."],
-] as const;
-
-type Seg = [string, "p" | "t" | "a" | "s" | "x"];
-const CODE_A: Seg[][] = [
-  [["<", "p"], ["Button", "t"], [" href", "a"], ["=", "p"], ['"/contact"', "s"], [">", "p"]],
-  [["  Start a project", "x"]],
-  [["</", "p"], ["Button", "t"], [">", "p"]],
-  [],
-  [[".btn", "t"], [" {", "p"]],
-  [["  height", "a"], [": ", "p"], ["52px", "s"], [";", "p"]],
-  [["  background", "a"], [": ", "p"], ["#0047AB", "s"], [";", "p"]],
-  [["  border-radius", "a"], [": ", "p"], ["999px", "s"], [";", "p"]],
-  [["}", "p"]],
-];
-const CODE_B: Seg[][] = [
-  [],
-  [[".btn:hover", "t"], [" {", "p"]],
-  [["  background", "a"], [": ", "p"], ["#0B1F3B", "s"], [";", "p"]],
-  [["}", "p"]],
-];
-const lineLen = (l: Seg[]) => l.reduce((n, s) => n + s[0].length, 0) + 1;
-const LEN_A = CODE_A.reduce((n, l) => n + lineLen(l), 0);
-const LEN_B = CODE_B.reduce((n, l) => n + lineLen(l), 0);
-const codeColor: Record<Seg[1], string> = { p: "#7F93B5", t: "#6EA1FF", a: "#9DB8E8", s: "#FFFFFF", x: "#DCE7FB" };
-
-function CodeLines({ lines, chars, start }: { lines: Seg[][]; chars: number; start: number }) {
-  let left = chars;
-  return (
-    <>
-      {lines.map((l, i) => {
-        const shown: React.ReactNode[] = [];
-        let used = 0;
-        for (let k = 0; k < l.length && left > 0; k++) {
-          const t = l[k][0].slice(0, left);
-          shown.push(<span key={k} style={{ color: codeColor[l[k][1]] }}>{t}</span>);
-          left -= t.length;
-          used += t.length;
-        }
-        const full = used === l.reduce((n, s) => n + s[0].length, 0);
-        if (full && left > 0) left -= 1;
-        const visible = used > 0 || left > 0 || l.length === 0;
-        return (
-          <div key={i} className="flex" style={{ opacity: visible ? 1 : 0, minHeight: 24 }}>
-            <span className="w-8 shrink-0 select-none text-right text-[#5F7396]">{start + i + 1}</span>
-            <span className="ml-4 whitespace-pre">{shown}</span>
-          </div>
-        );
-      })}
-    </>
-  );
-}
-
-const box = (x: number, y: number, w: number, h: number): React.CSSProperties => ({ position: "absolute", left: x, top: y, width: w, height: h });
-const outline = `1.5px solid rgba(11,31,59,.78)`;
-
-function BuildStage() {
-  const rootRef = React.useRef<HTMLElement | null>(null);
-  const stageRef = React.useRef<HTMLDivElement | null>(null);
-  const canvasRef = React.useRef<HTMLDivElement | null>(null);
-  const [reduced, setReduced] = React.useState(false);
-  const [view, setView] = React.useState({ step: 0, pct: 0, a: 0, b: 0 });
-
-  React.useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReduced(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  // fit the 1080 x 675 canvas to the stage
-  React.useEffect(() => {
-    const stage = stageRef.current;
-    const canvas = canvasRef.current;
-    if (!stage || !canvas) return;
-    const fit = () => {
-      const W = stage.clientWidth;
-      const H = stage.clientHeight;
-      const top = W < 768 ? 120 : 108;
-      const bottom = W < 768 ? 190 : 170;
-      const k = Math.max(0.2, Math.min((W - (W < 768 ? 28 : 120)) / 1080, (H - top - bottom) / 745));
-      canvas.style.transform = `translate(${((W - 1080 * k) / 2).toFixed(1)}px, ${(top + 32 * k).toFixed(1)}px) scale(${k.toFixed(4)})`;
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(stage);
-    return () => ro.disconnect();
-  }, []);
-
-  React.useEffect(() => {
-    const root = rootRef.current;
-    const stage = stageRef.current;
-    if (!root || !stage) return;
-    if (reduced) {
-      stage.style.setProperty("--p", "1");
-      setView({ step: 7, pct: 100, a: LEN_A, b: LEN_B });
-      return;
-    }
-    let raf = 0;
-    let running = false;
-    let visible = true;
-    let last = performance.now();
-    let prog = -1;
-    const r01 = (p: number, a: number, b: number) => clamp01((p - a) / (b - a));
-    const frame = (now: number) => {
-      raf = requestAnimationFrame(frame);
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
-      const r = root.getBoundingClientRect();
-      const p = progressFrom(r.top, r.height, stage.clientHeight);
-      prog = prog < 0 ? p : prog + (p - prog) * (1 - Math.exp(-dt * 10));
-      stage.style.setProperty("--p", prog.toFixed(4));
-      const next = {
-        step: Math.min(BUILD_STEPS.length - 1, Math.floor(prog * BUILD_STEPS.length)),
-        pct: Math.round(prog * 100),
-        a: Math.floor(r01(prog, 0.635, 0.74) * LEN_A),
-        b: Math.floor(r01(prog, 0.78, 0.84) * LEN_B),
-      };
-      setView((v) => (v.step === next.step && v.pct === next.pct && v.a === next.a && v.b === next.b ? v : next));
-    };
-    const start = () => {
-      if (running || !visible || document.hidden) return;
-      running = true;
-      last = performance.now();
-      raf = requestAnimationFrame(frame);
-    };
-    const stop = () => {
-      running = false;
-      cancelAnimationFrame(raf);
-    };
+function Count({ to, suffix = "" }: { to: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = ref.current!;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const io = new IntersectionObserver(([e]) => {
-      visible = e.isIntersecting;
-      if (visible) start();
-      else stop();
-    });
-    io.observe(root);
-    const onVis = () => (document.hidden ? stop() : start());
-    document.addEventListener("visibilitychange", onVis);
-    start();
-    return () => {
-      stop();
+      if (!e.isIntersecting) return;
       io.disconnect();
-      document.removeEventListener("visibilitychange", onVis);
-    };
-  }, [reduced]);
-
-  const [title, text] = BUILD_STEPS[view.step];
-  const colW = (972 - 11 * 16) / 12;
-  const pad = String(view.pct).padStart(3, "0");
-  const swatches: [string, string][] = [[BLACK, "#02050B"], [NAVY, "#0B1F3B"], [COBALT, "#0047AB"], [WHITE, "#FFFFFF"]];
-
-  return (
-    <section ref={rootRef} className="relative w-full" style={{ height: reduced ? "auto" : "calc(100svh * 7.5)", background: "#F4F8FE" }} aria-label="How a website gets built, step by step">
-      <div
-        ref={stageRef}
-        className="sticky top-0 w-full overflow-hidden select-none"
-        style={{ height: "100svh", ["--p" as string]: reduced ? 1 : 0, backgroundColor: "#F4F8FE", backgroundImage: "radial-gradient(rgba(11,31,59,.16) 1px, transparent 1px)", backgroundSize: "22px 22px", color: INK } as React.CSSProperties}
-      >
-        {/* HUD */}
-        <div className={`${mono.className} absolute left-5 top-24 text-[11px] leading-[1.6] md:left-8 md:top-28`}>
-          <div className="text-[#5B6B84]">The build</div>
-          <div>From a line to a website.</div>
-        </div>
-        <div className={`${mono.className} absolute right-5 top-24 text-right md:right-8 md:top-28`}>
-          <div className="text-[11px] text-[#5B6B84]">Build progress</div>
-          <div className={`${pop.className} text-[clamp(2.6rem,6vw,5.5rem)] font-extralight leading-none tracking-[-0.04em] text-[#0B1F3B]/15`} aria-hidden="true">
-            {pad}<span className="text-[0.4em]">%</span>
-          </div>
-        </div>
-
-        {/* the canvas: a 1080 x 675 browser, scaled to fit */}
-        <div ref={canvasRef} className="absolute left-0 top-0" style={{ width: 1080, height: 675, transformOrigin: "0 0" }} aria-hidden="true">
-          {/* dashed centre guide and the width measure */}
-          <div style={{ ...box(540, -70, 0, 815), borderLeft: `1px dashed ${GUIDE}`, opacity: between(0.03, 0.08, 0.3, 0.38) }} />
-          <div className={mono.className} style={{ ...box(0, -34, 1080, 20), opacity: between(0.02, 0.07, 0.3, 0.38), fontSize: 12, color: COBALT, textAlign: "center" }}>
-            <div style={{ position: "absolute", left: 0, right: 0, top: 4, height: 1, background: COBALT, transformOrigin: "0 50%", transform: `scaleX(${ramp(0.02, 0.09)})` }} />
-            <div style={{ position: "absolute", left: 0, top: 0, height: 9, width: 1, background: COBALT }} />
-            <div style={{ position: "absolute", right: 0, top: 0, height: 9, width: 1, background: COBALT }} />
-            <span style={{ position: "relative", top: -14, background: "#F4F8FE", padding: "0 8px" }}>1080 × 675</span>
-          </div>
-
-          {/* the frame draws itself */}
-          <div style={{ ...box(0, 0, 1080, 675), borderRadius: 14, background: WHITE, opacity: ramp(0.06, 0.12), boxShadow: "0 40px 120px rgba(0,71,171,.12)" }} />
-          <svg style={{ position: "absolute", left: 0, top: 0, width: 1080, height: 675, overflow: "visible" }}>
-            <rect x={0.75} y={0.75} width={1078.5} height={673.5} rx={14} fill="none" stroke={INK} strokeOpacity={0.8} strokeWidth={1.5} pathLength={1} strokeDasharray="1" style={{ strokeDashoffset: `calc(1 - ${ramp(0, 0.075)})` }} />
-            <line x1={0} y1={40} x2={1080} y2={40} stroke={INK} strokeOpacity={0.8} strokeWidth={1.5} pathLength={1} strokeDasharray="1" style={{ strokeDashoffset: `calc(1 - ${ramp(0.05, 0.1)})` }} />
-          </svg>
-          {[0, 1, 2].map((i) => <span key={i} style={{ position: "absolute", left: 20 + i * 18, top: 15, width: 10, height: 10, borderRadius: 99, background: i === 2 ? COBALT_HI : "#B9C6DC", opacity: ramp(0.08, 0.11) }} />)}
-          <div className={mono.className} style={{ position: "absolute", right: 22, top: 10, fontSize: 12, color: COBALT, opacity: ramp(0.9, 0.94), display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ width: 8, height: 8, borderRadius: 99, background: COBALT_HI, boxShadow: `0 0 10px ${COBALT_HI}` }} /> Live
-          </div>
-
-          {/* a grid */}
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} style={{ ...box(54 + i * (colW + 16), 40, colW, 635), background: "rgba(0,71,171,.07)", transformOrigin: "50% 0", transform: `scaleY(${ramp(0.13 + i * 0.004, 0.19 + i * 0.004)})`, opacity: away(0.38, 0.45) }} />
-          ))}
-          {[150, 300, 560].map((y, i) => (
-            <div key={y} style={{ ...box(-340, y, 1760, 1), background: i === 1 ? COBALT : GUIDE, opacity: between(0.14 + i * 0.01, 0.2 + i * 0.01, 0.27, 0.33), transformOrigin: "0 50%", transform: `scaleX(${ramp(0.14 + i * 0.01, 0.21 + i * 0.01)})` }} />
-          ))}
-          <div style={{ ...box(82, 362, 236, 236), border: `1.5px solid ${COBALT}`, borderRadius: 999, opacity: between(0.17, 0.21, 0.25, 0.3), transform: `scale(${ramp(0.17, 0.22)})` }}>
-            <span style={{ position: "absolute", left: 111, top: 111, width: 12, height: 12, borderRadius: 99, background: COBALT }} />
-            <span className={mono.className} style={{ position: "absolute", left: 244, top: 112, fontSize: 12, color: COBALT }}>r 118</span>
-          </div>
-
-          {/* a layout: logo, nav, headline, paragraph, buttons, image */}
-          <div style={{ ...box(54, 78, 120, 34), border: outline, borderRadius: 4, opacity: between(0.25, 0.3, 0.38, 0.43) }} />
-          {[0, 1, 2].map((i) => (
-            <div key={i} style={{ ...box(636 + i * 104, 80, 94, 32), border: outline, borderRadius: 99, opacity: ramp(0.26 + i * 0.01, 0.31 + i * 0.01), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: INK }}>
-              <span style={{ opacity: ramp(0.4, 0.45) }}>{["Work", "Services", "About"][i]}</span>
-            </div>
-          ))}
-          <div style={{ ...box(54, 186, 540, 160), border: outline, borderRadius: 6, opacity: between(0.27, 0.32, 0.38, 0.43) }}>
-            <span style={{ ...box(10, 12, 230, 44), background: "rgba(11,31,59,.14)" }} />
-            <span style={{ ...box(10, 70, 430, 60), background: "rgba(11,31,59,.14)" }} />
-          </div>
-          <div style={{ ...box(54, 392, 440, 72), border: outline, borderRadius: 6, opacity: between(0.29, 0.34, 0.43, 0.48) }}>
-            <span style={{ ...box(8, 14, 400, 10), background: "rgba(11,31,59,.14)" }} />
-            <span style={{ ...box(8, 36, 300, 10), background: "rgba(11,31,59,.14)" }} />
-          </div>
-          <div style={{ ...box(626, 140, 400, 450), border: outline, borderRadius: 8, opacity: ramp(0.3, 0.35) }}>
-            <svg width={400} height={450} style={{ position: "absolute", inset: 0, opacity: away(0.5, 0.56) }}>
-              <line x1={0} y1={0} x2={400} y2={450} stroke={INK} strokeOpacity={0.6} />
-              <line x1={400} y1={0} x2={0} y2={450} stroke={INK} strokeOpacity={0.6} />
-            </svg>
-          </div>
-
-          {/* a typeface */}
-          <div className={pop.className} style={{ ...box(54, 78, 160, 34), display: "flex", alignItems: "center", fontSize: 26, fontWeight: 600, letterSpacing: "-0.03em", opacity: ramp(0.4, 0.45) }}>
-            d<span style={{ color: COBALT, opacity: ramp(0.52, 0.56) }}>.</span><span style={{ color: INK, opacity: away(0.52, 0.56), position: "absolute", left: 117 }}>.</span>
-          </div>
-          <div className={pop.className} style={{ ...box(54, 188, 560, 140), fontSize: 64, lineHeight: "70px", letterSpacing: "-0.04em", fontWeight: 200 }}>
-            {["Websites built", "to perform."].map((t, i) => (
-              <div key={t} style={{ overflow: "hidden", height: 70 }}>
-                <div style={{ transform: `translateY(calc((1 - ${ramp(0.38 + i * 0.015, 0.44 + i * 0.015)}) * 110%))`, position: "relative" }}>
-                  {i === 1 ? (
-                    <>
-                      to <b style={{ fontWeight: 700, position: "relative" }}>perform.<b style={{ position: "absolute", left: 0, top: 0, fontWeight: 700, color: COBALT, opacity: ramp(0.52, 0.57) }}>perform.</b></b>
-                    </>
-                  ) : t}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className={mono.className} style={{ ...box(54, 356, 540, 20), fontSize: 12, color: COBALT, textAlign: "center", opacity: between(0.3, 0.35, 0.74, 0.8) }}>
-            <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 1, background: COBALT }} />
-            <span style={{ position: "relative", top: 6, background: WHITE, padding: "0 6px" }}>540</span>
-          </div>
-          <p style={{ ...box(54, 396, 430, 70), margin: 0, fontSize: 18, lineHeight: "28px", color: BODY, fontWeight: 300, opacity: ramp(0.44, 0.49) }}>
-            Fast, secure, responsive websites built with Next.js and React, from first sketch to launch.
-          </p>
-
-          {/* buttons: outline, then fill, then hover */}
-          <div style={{ ...box(54, 480, 196, 52), border: outline, borderRadius: 99, opacity: ramp(0.31, 0.36), overflow: "hidden" }}>
-            <span style={{ ...box(0, 0, 196, 52), background: COBALT, opacity: ramp(0.5, 0.55) }} />
-            <span style={{ ...box(0, 0, 196, 52), background: NAVY, opacity: ramp(0.8, 0.84) }} />
-            <span className={rob.className} style={{ position: "absolute", left: 24, top: 0, height: 52, display: "flex", alignItems: "center", fontSize: 16, fontWeight: 500, color: INK, opacity: calcMix(0.46, 0.5, 0.5, 0.55) }}>Start a project</span>
-            <span className={rob.className} style={{ position: "absolute", left: 24, top: 0, height: 52, display: "flex", alignItems: "center", fontSize: 16, fontWeight: 500, color: WHITE, opacity: ramp(0.5, 0.55) }}>Start a project</span>
-            <span style={{ position: "absolute", right: 7, top: 7, width: 38, height: 38, borderRadius: 99, background: WHITE, opacity: ramp(0.51, 0.56), display: "flex", alignItems: "center", justifyContent: "center", color: COBALT, transform: `translateX(calc(${ramp(0.82, 0.86)} * -4px))` }}>
-              <ArrowUpRight size={18} aria-hidden="true" />
-            </span>
-          </div>
-          <div style={{ ...box(54, 480, 196, 52), borderRadius: 99, border: `2px solid ${COBALT}`, opacity: `calc(${ramp(0.85, 0.88)} * (1 - ${ramp(0.85, 0.88)}) * 4)`, transform: `scale(calc(1 + ${ramp(0.85, 0.9)} * 0.3))` }} />
-          <div className={rob.className} style={{ ...box(264, 480, 170, 52), border: outline, borderRadius: 99, opacity: ramp(0.32, 0.37), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 500, color: INK }}>
-            <span style={{ opacity: ramp(0.46, 0.5) }}>See our work</span>
-          </div>
-          {/* button height measure */}
-          <div className={mono.className} style={{ ...box(22, 480, 28, 52), opacity: between(0.31, 0.36, 0.86, 0.9), fontSize: 12, color: COBALT }}>
-            <span style={{ position: "absolute", left: 18, top: 0, width: 1, height: 52, background: COBALT }} />
-            <span style={{ position: "absolute", left: 13, top: 0, width: 11, height: 1, background: COBALT }} />
-            <span style={{ position: "absolute", left: 13, bottom: 0, width: 11, height: 1, background: COBALT }} />
-            <span style={{ position: "absolute", left: -6, top: 18 }}>52</span>
-          </div>
-          {/* image height measure */}
-          <div className={mono.className} style={{ ...box(1040, 140, 40, 450), opacity: between(0.31, 0.36, 0.5, 0.56), fontSize: 12, color: COBALT }}>
-            <span style={{ position: "absolute", left: 6, top: 0, width: 1, height: 450, background: COBALT }} />
-            <span style={{ position: "absolute", left: 14, top: 215 }}>450</span>
-          </div>
-
-          {/* a colour: the image fills, the palette appears */}
-          <div style={{ ...box(626, 140, 400, 450), borderRadius: 8, overflow: "hidden", opacity: ramp(0.52, 0.6), background: `linear-gradient(140deg, ${NAVY} 0%, ${COBALT} 100%)` }}>
-            <div style={{ ...box(36, 40, 328, 190), borderRadius: 10, background: "rgba(255,255,255,.96)", transform: `translateY(calc((1 - ${ramp(0.56, 0.62)}) * 30px))`, opacity: ramp(0.56, 0.62), padding: 18 }}>
-              <span style={{ display: "block", height: 10, width: 120, borderRadius: 9, background: "#CFE0FA" }} />
-              <span style={{ display: "block", height: 8, width: 200, borderRadius: 9, background: "#E3ECFB", marginTop: 10 }} />
-              <div style={{ display: "flex", alignItems: "flex-end", gap: 10, height: 90, marginTop: 22 }}>
-                {[40, 62, 48, 80, 66, 90].map((h, i) => <span key={i} style={{ flex: 1, height: `${h}%`, background: i === 5 ? COBALT : "#9DBDF2", borderRadius: "4px 4px 0 0" }} />)}
-              </div>
-            </div>
-            <div style={{ ...box(36, 256, 154, 150), borderRadius: 10, background: "rgba(255,255,255,.14)", border: "1px solid rgba(255,255,255,.3)" }} />
-            <div style={{ ...box(210, 256, 154, 150), borderRadius: 10, background: "rgba(255,255,255,.14)", border: "1px solid rgba(255,255,255,.3)" }} />
-          </div>
-          <div className={mono.className} style={{ ...box(54, 704, 480, 34), display: "flex", gap: 22, fontSize: 12, color: BODY, opacity: between(0.52, 0.57, 0.62, 0.67) }}>
-            {swatches.map(([c, h]) => (
-              <span key={h} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ width: 22, height: 22, borderRadius: 99, background: c, border: "1px solid rgba(11,31,59,.25)" }} />
-                {h}
-              </span>
-            ))}
-          </div>
-
-          {/* a line of code */}
-          <div className={mono.className} style={{ ...box(596, 150, 470, 340), borderRadius: 10, background: "#071223", boxShadow: "0 30px 80px rgba(2,5,11,.35)", opacity: between(0.62, 0.67, 0.88, 0.93), transform: `translateX(calc((1 - ${ramp(0.62, 0.67)}) * 40px))`, color: "#DCE7FB", fontSize: 14, overflow: "hidden" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 18px", borderBottom: "1px solid rgba(255,255,255,.1)", fontSize: 11, letterSpacing: "0.12em", color: "#9DB8E8" }}>
-              <span style={{ width: 7, height: 7, borderRadius: 99, background: COBALT_HI }} /> BUTTON.TSX
-            </div>
-            <div style={{ padding: "18px 18px 0", lineHeight: "24px" }}>
-              <CodeLines lines={CODE_A} chars={view.a} start={0} />
-              <CodeLines lines={CODE_B} chars={view.a >= LEN_A - 1 ? view.b : 0} start={CODE_A.length} />
-            </div>
-          </div>
-
-          {/* a button: the pointer arrives, hovers and clicks */}
-          <svg width={26} height={26} viewBox="0 0 24 24" style={{ position: "absolute", left: 0, top: 0, opacity: between(0.74, 0.77, 0.9, 0.94), transform: `translate(calc(880px + ${ramp(0.74, 0.8)} * -740px), calc(300px + ${ramp(0.74, 0.8)} * 210px)) scale(calc(1 - ${ramp(0.84, 0.86)} * 0.15 + ${ramp(0.86, 0.88)} * 0.15))`, filter: "drop-shadow(0 4px 8px rgba(0,0,0,.25))" }}>
-            <path d="M5 3l14 8-6.2 1.6L9.5 19 5 3z" fill={INK} stroke={WHITE} strokeWidth={1.4} strokeLinejoin="round" />
-          </svg>
-
-          {/* a launch */}
-          <a href="#contact-form" className={`${rob.className} group inline-flex items-center gap-3 rounded-full bg-[#0047AB] text-white transition hover:bg-[#0B1F3B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F7BFF] focus-visible:ring-offset-2`} style={{ position: "absolute", right: 0, top: 698, height: 52, padding: "0 28px", fontSize: 16, fontWeight: 500, opacity: ramp(0.92, 0.97), pointerEvents: "auto" }}>
-            Start your website <ArrowRight size={18} className="transition group-hover:translate-x-1" aria-hidden="true" />
-          </a>
-        </div>
-
-        {/* step caption */}
-        <div className="pointer-events-none absolute bottom-6 left-5 max-w-[min(30rem,70vw)] md:bottom-8 md:left-8">
-          <div className={`${mono.className} flex items-center gap-3 text-[11px]`}>
-            <span className="text-[#0047AB]">{String(view.step + 1).padStart(2, "0")}</span>
-            <span className="h-px w-6 bg-[#0B1F3B]/40" />
-            <span className="text-[#5B6B84]">{String(BUILD_STEPS.length).padStart(2, "0")}</span>
-          </div>
-          <div key={view.step} style={{ animation: "bsin .5s cubic-bezier(.16,1,.3,1) both" }}>
-            <p className={`${pop.className} mt-3 text-[clamp(1.6rem,3.4vw,2.6rem)] font-semibold leading-none tracking-[-0.04em]`}>{title}</p>
-            <p className="mt-3 text-[0.95rem] font-light leading-relaxed text-[#3B4A63]">{text}</p>
-          </div>
-        </div>
-        <a href="#types" className={`${mono.className} absolute bottom-6 right-5 flex items-center gap-2 rounded-[3px] text-[11px] text-[#0B1F3B] hover:text-[#0047AB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F7BFF] md:bottom-8 md:right-8`}>
-          Skip the build <ArrowRight size={13} className="rotate-90" aria-hidden="true" />
-        </a>
-      </div>
-    </section>
-  );
+      const t0 = performance.now();
+      const f = (n: number) => { const q = Math.min(1, (n - t0) / 1800); el.textContent = Math.round(to * (1 - Math.pow(1 - q, 3))) + suffix; if (q < 1) requestAnimationFrame(f); };
+      requestAnimationFrame(f);
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [to, suffix]);
+  return <span ref={ref}>{to}{suffix}</span>;
 }
 
-/** opacity that is 1 until a..b ramps the element out, then 0: a text that fades before its twin fades in */
-function calcMix(inA: number, inB: number, outA: number, outB: number) {
-  return `calc(${ramp(inA, inB)} * ${away(outA, outB)})`;
-}
-
-/* ------------------------------ TYPES OF WEBSITES ------------------------------ */
-
-const WF = { fill: "#E3ECFB", stroke: "#8FB0E8", accent: COBALT };
-function R({ x, y, w, h, i = 0, a = false, r = 3 }: { x: number; y: number; w: number; h: number; i?: number; a?: boolean; r?: number }) {
-  return <rect className="wf-pop" x={x} y={y} width={w} height={h} rx={r} fill={a ? WF.accent : WF.fill} stroke={a ? WF.accent : WF.stroke} strokeWidth={1} style={{ ["--i" as string]: i } as React.CSSProperties} />;
-}
-
-const wireframes: React.ReactNode[] = [
-  // company
-  <>
-    <R x={16} y={14} w={60} h={12} /><R x={240} y={16} w={40} h={8} i={1} /><R x={290} y={16} w={40} h={8} i={1} /><R x={340} y={14} w={44} h={12} a i={1} />
-    <R x={16} y={52} w={190} h={22} i={2} /><R x={16} y={82} w={150} h={22} i={3} /><R x={16} y={118} w={100} h={26} a i={4} /><R x={230} y={46} w={154} h={110} i={3} />
-    <R x={16} y={176} w={112} h={60} i={5} /><R x={144} y={176} w={112} h={60} i={6} /><R x={272} y={176} w={112} h={60} i={7} />
-  </>,
-  // e-commerce
-  <>
-    <R x={16} y={12} w={60} h={12} /><R x={330} y={12} w={54} h={12} a i={1} />
-    {[0, 1, 2].map((c) => [0, 1].map((rw) => {
-      const x = 16 + c * 128;
-      const y = 40 + rw * 100;
-      const i = 2 + c + rw * 3;
-      return <g key={`${c}${rw}`}><R x={x} y={y} w={112} h={62} i={i} /><R x={x} y={y + 68} w={80} h={8} i={i} /><R x={x} y={y + 82} w={40} h={8} a i={i} /></g>;
-    }))}
-  </>,
-  // landing
-  <>
-    <R x={150} y={14} w={100} h={10} />
-    <R x={80} y={48} w={240} h={22} i={1} /><R x={110} y={78} w={180} h={22} i={2} /><R x={160} y={116} w={80} h={24} a i={3} />
-    {[0, 1, 2, 3].map((k) => <R key={k} x={40 + k * 84} y={162} w={64} h={14} i={4 + k} />)}
-    <R x={100} y={194} w={200} h={42} i={8} />
-  </>,
-  // web app
-  <>
-    <R x={10} y={10} w={70} h={230} /><R x={92} y={10} w={298} h={24} i={1} />
-    <R x={92} y={46} w={92} h={44} i={2} /><R x={194} y={46} w={92} h={44} i={3} /><R x={296} y={46} w={94} h={44} a i={4} />
-    <R x={92} y={102} w={180} h={84} i={5} /><R x={284} y={102} w={106} h={84} i={6} />
-    <R x={92} y={198} w={298} h={12} i={7} /><R x={92} y={218} w={298} h={12} i={8} />
-  </>,
-  // cms
-  <>
-    <R x={16} y={12} w={60} h={12} /><R x={330} y={12} w={54} h={12} a i={1} />
-    <R x={16} y={44} w={230} h={120} i={2} /><R x={16} y={174} w={160} h={12} i={3} /><R x={16} y={194} w={200} h={8} i={4} />
-    {[0, 1, 2].map((k) => <g key={k}><R x={262} y={44 + k * 54} w={40} h={38} i={3 + k} /><R x={310} y={48 + k * 54} w={74} h={8} i={3 + k} /><R x={310} y={64 + k * 54} w={50} h={8} i={3 + k} /></g>)}
-  </>,
-  // redesign
-  <>
-    <R x={14} y={20} w={170} h={210} r={6} />
-    <R x={22} y={30} w={60} h={16} i={1} /><R x={100} y={50} w={70} h={30} i={1} /><R x={26} y={96} w={120} h={14} i={2} /><R x={60} y={124} w={110} h={40} i={2} /><R x={20} y={176} w={90} h={28} i={3} />
-    <path className="wf-pop" d="M194 125h12m-5-5 5 5-5 5" fill="none" stroke={COBALT} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ ["--i" as string]: 4 } as React.CSSProperties} />
-    <R x={216} y={20} w={170} h={210} r={6} i={4} />
-    <R x={226} y={30} w={50} h={10} i={5} /><R x={226} y={56} w={150} h={18} i={5} /><R x={226} y={82} w={110} h={18} i={6} /><R x={226} y={112} w={50} h={20} a i={6} /><R x={226} y={148} w={150} h={70} i={7} />
-  </>,
-];
-
-const siteTypes = [
-  { name: "Company websites", text: "Clear, credible sites that explain what you do and earn enquiries.", best: "Agencies, clinics, firms and consultancies", has: ["Service pages", "Lead forms", "Blog and case studies"] },
-  { name: "E-commerce stores", text: "Fast stores with secure checkout and simple product management.", best: "Retail and direct-to-consumer brands", has: ["Catalogue and search", "Secure payments", "Order and stock tools"] },
-  { name: "Landing pages", text: "Focused pages built to lift conversions from your campaigns.", best: "Ads, product launches and events", has: ["Test-ready layouts", "Fast load times", "Tracking set up"] },
-  { name: "Web apps and portals", text: "Dashboards, logins and tools that run in the browser.", best: "SaaS products and member areas", has: ["Accounts and roles", "Dashboards", "API integrations"] },
-  { name: "CMS and blogs", text: "Edit your own content without calling a developer.", best: "Publishers and content marketing teams", has: ["Editor-friendly CMS", "SEO fields", "Scheduled posts"] },
-  { name: "Redesigns", text: "A new look and faster code on top of what already works.", best: "Sites that look dated or load slowly", has: ["Audit first", "Content migration", "Redirects that protect SEO"] },
-] as const;
-
-function TypesSection() {
-  const [sel, setSel] = React.useState(0);
-  const refs = React.useRef<(HTMLButtonElement | null)[]>([]);
-  const onKey = (e: React.KeyboardEvent, i: number) => {
-    const n = siteTypes.length;
-    let t = i;
-    if (e.key === "ArrowDown" || e.key === "ArrowRight") t = (i + 1) % n;
-    else if (e.key === "ArrowUp" || e.key === "ArrowLeft") t = (i - 1 + n) % n;
-    else if (e.key === "Home") t = 0;
-    else if (e.key === "End") t = n - 1;
-    else return;
-    e.preventDefault();
-    setSel(t);
-    refs.current[t]?.focus();
-  };
-  const s = siteTypes[sel];
-  return (
-    <section id="types" className="bg-white py-24 md:py-36" aria-label="Types of websites we build">
-      <div className={wrap}>
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <Lines className="t2 max-w-3xl" lines={[<>Every kind of <b className="font-bold">website</b>,</>, <>built <Acc dark={false}>properly</Acc></>]} />
-          <p className="rv max-w-sm font-light leading-relaxed text-[#3B4A63]">Choose a type to see the structure we start from. Every one is fast, responsive and ready for search.</p>
-        </div>
-
-        <div className="mt-14 grid gap-10 lg:grid-cols-12">
-          <div role="tablist" aria-label="Types of websites" aria-orientation="vertical" className="rv lg:col-span-5">
-            {siteTypes.map((t, i) => (
-              <button
-                key={t.name}
-                ref={(el) => { refs.current[i] = el; }}
-                role="tab"
-                id={`type-${i}`}
-                aria-selected={sel === i}
-                aria-controls="type-panel"
-                tabIndex={sel === i ? 0 : -1}
-                onClick={() => setSel(i)}
-                onMouseEnter={() => setSel(i)}
-                onKeyDown={(e) => onKey(e, i)}
-                className={`group flex w-full items-center justify-between gap-6 border-t border-[#CBD8EE] py-5 text-left transition last:border-b ${ring}`}
-              >
-                <span className="flex items-baseline gap-5">
-                  <span className="text-xs text-[#5B6B84]">{String(i + 1).padStart(2, "0")}</span>
-                  <span className={`${pop.className} text-2xl tracking-[-0.03em] transition md:text-3xl ${sel === i ? "font-semibold text-[#0047AB]" : "font-extralight text-[#0B1F3B] group-hover:text-[#0047AB]"}`}>{t.name}</span>
-                </span>
-                <ArrowUpRight size={22} className={`shrink-0 transition ${sel === i ? "text-[#0047AB]" : "text-[#8FB0E8] group-hover:text-[#0047AB]"}`} aria-hidden="true" />
-              </button>
-            ))}
-          </div>
-
-          <div role="tabpanel" id="type-panel" aria-labelledby={`type-${sel}`} className="lg:col-span-7">
-            <div className="overflow-hidden rounded-[6px] border border-[#CBD8EE] bg-[#F4F8FE]" aria-hidden="true">
-              <div className="flex items-center gap-2 border-b border-[#CBD8EE] bg-white px-4 py-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#B9C6DC]" /><span className="h-2.5 w-2.5 rounded-full bg-[#B9C6DC]" /><span className="h-2.5 w-2.5 rounded-full bg-[#2F7BFF]" />
-                <span className="ml-3 rounded-full bg-[#F4F8FE] px-4 py-1 text-xs text-[#5B6B84]">{s.name.toLowerCase().replace(/ /g, "-")}.com</span>
-              </div>
-              <svg key={sel} viewBox="0 0 400 250" className="block w-full bg-white p-3 md:p-6">{wireframes[sel]}</svg>
-            </div>
-            <div className="mt-8 grid gap-8 md:grid-cols-2">
-              <div>
-                <h3 className={`${pop.className} text-xl font-semibold tracking-[-0.01em]`}>{s.name}</h3>
-                <p className="mt-3 font-light leading-relaxed text-[#3B4A63]">{s.text}</p>
-                <p className="mt-4 text-sm text-[#5B6B84]">Best for: <span className="text-[#0B1F3B]">{s.best}</span></p>
-              </div>
-              <ul className="space-y-3">
-                {s.has.map((h) => (
-                  <li key={h} className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0047AB] text-white"><Check size={12} strokeWidth={3} aria-hidden="true" /></span>
-                    {h}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------ SELECTED WORK ------------------------------ */
-
-// REPLACE: put your real projects here (name, kind, tags, href, cover), or drop your
-// existing <Projects /> component into this section instead and delete WorkSection.
-const work = [
-  { name: "Client project 01", kind: "Company website", tags: ["Next.js", "SEO"], href: "/projects", from: NAVY, to: COBALT },
-  { name: "Client project 02", kind: "E-commerce store", tags: ["Shopify", "Payments"], href: "/projects", from: BLACK, to: "#123C7C" },
-  { name: "Client project 03", kind: "Web application", tags: ["React", "API"], href: "/projects", from: "#0A2A5C", to: COBALT_HI },
-  { name: "Client project 04", kind: "Landing page", tags: ["Conversion", "Speed"], href: "/projects", from: NAVY_DEEP, to: "#1E5BC6" },
-] as const;
-
-function WorkCover({ from, to, i }: { from: string; to: string; i: number }) {
-  return (
-    <div aria-hidden="true" className="relative h-full w-full overflow-hidden" style={{ background: `linear-gradient(140deg, ${from} 0%, ${to} 100%)` }}>
-      <div className="absolute left-[10%] top-[14%] w-[80%] rounded-[8px] bg-white/95 p-4 shadow-[0_30px_80px_rgba(2,5,11,.35)] transition duration-700 group-hover:-translate-y-2">
-        <div className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#B9C6DC]" /><span className="h-2 w-2 rounded-full bg-[#B9C6DC]" /><span className="h-2 w-2 rounded-full bg-[#2F7BFF]" /></div>
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          <span className="col-span-2 block h-3 rounded-full bg-[#CFE0FA]" />
-          <span className="block h-3 rounded-full bg-[#0047AB]" />
-          <span className="col-span-2 row-span-3 block rounded bg-[#E3ECFB]" style={{ height: 70 + (i % 2) * 20 }} />
-          <span className="block h-8 rounded bg-[#E3ECFB]" />
-          <span className="block h-8 rounded bg-[#E3ECFB]" />
-          <span className="block h-8 rounded bg-[#CFE0FA]" />
-        </div>
-      </div>
+function Site({ good }: { good?: boolean }) {
+  return good ? (
+    <div className="absolute inset-0 bg-[#0B1F3B] p-6 text-white">
+      <div className="flex items-center justify-between"><i className="h-5 w-5 rounded-full bg-[#00B4FF]" /><span className="flex gap-3"><i className="h-2 w-10 rounded-full bg-white/40" /><i className="h-2 w-10 rounded-full bg-white/40" /><i className="h-6 w-20 rounded-full bg-[#007BFF]" /></span></div>
+      <div className="mt-8 grid items-center gap-6 md:grid-cols-2"><div><p className={`${pop.className} text-3xl font-semibold leading-tight md:text-4xl`}>Grow faster online.</p><i className="mt-4 block h-2 w-3/4 rounded-full bg-white/30" /><i className="mt-3 block h-9 w-32 rounded-full bg-white" /></div><div className="h-36 rounded-[10px] bg-gradient-to-br from-[#0052CC] to-[#00B4FF]" /></div>
+      <div className="absolute bottom-5 right-5 rounded-full bg-[#10B981] px-4 py-1.5 text-sm font-semibold text-black">1.2 s load · Score 98</div>
+    </div>
+  ) : (
+    <div className="absolute inset-0 bg-[#E5E7EB] p-6 text-[#4B5563]">
+      <div className="flex flex-wrap gap-2">{[0, 1, 2, 3, 4, 5, 6, 7].map((k) => <i key={k} className="h-3 w-12 rounded bg-[#9CA3AF]" />)}</div>
+      <div className="mt-5 h-24 rounded bg-[#9CA3AF]" /><div className="mt-4 grid grid-cols-3 gap-3">{[0, 1, 2].map((k) => <div key={k} className="space-y-2"><i className="block h-12 rounded bg-[#D1D5DB]" /><i className="block h-2 w-full rounded bg-[#9CA3AF]" /><i className="block h-2 w-2/3 rounded bg-[#9CA3AF]" /></div>)}</div>
+      <p className="mt-4 text-[11px]">Welcome to our company website. We are a company that offers many services and products for all customers…</p>
+      <div className="absolute bottom-5 left-5 rounded-full bg-[#EF4444] px-4 py-1.5 text-sm font-semibold text-white">4.2 s load · Score 54</div>
     </div>
   );
 }
 
-function WorkSection() {
+function Compare() {
+  const [pos, setPos] = useState(50);
   return (
-    <section className="relative overflow-hidden py-24 text-white md:py-32" aria-label="Selected work" style={{ background: `linear-gradient(180deg, ${BLACK} 0%, ${NAVY} 100%)` }}>
-      <div className={wrap}>
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <Lines className="t2 max-w-3xl" lines={[<>Selected <b className="font-bold">work</b></>]} />
-          <Link href="/projects" className={`group inline-flex items-center gap-3 rounded-full border border-white/30 px-7 py-3.5 text-sm font-medium transition hover:border-white ${ringDark}`}>
-            View all projects <ArrowRight size={16} className="transition group-hover:translate-x-1" aria-hidden="true" />
-          </Link>
-        </div>
-        <ul className="mt-14 grid gap-5 md:grid-cols-12">
-          {work.map((w, i) => (
-            <li key={w.name} className={`rv ${i === 0 ? "md:col-span-7" : i === 1 ? "md:col-span-5" : "md:col-span-6"}`} style={{ transitionDelay: `${(i % 2) * 100}ms` }}>
-              <Link href={w.href} className={`group block ${ringDark}`}>
-                <div className={`overflow-hidden rounded-[4px] ${i < 2 ? "aspect-[4/3] md:aspect-auto md:h-[440px]" : "aspect-[16/10]"}`}>
-                  <div className="h-full w-full transition duration-700 group-hover:scale-[1.04]"><WorkCover from={w.from} to={w.to} i={i} /></div>
-                </div>
-                <div className="mt-5 flex items-start justify-between gap-6">
-                  <div>
-                    <h3 className={`${pop.className} text-2xl font-extralight tracking-[-0.03em]`}>{w.name}</h3>
-                    <p className="mt-1 text-sm text-white/70">{w.kind}</p>
-                    <ul className="mt-3 flex flex-wrap gap-2">
-                      {w.tags.map((t) => <li key={t} className="rounded-full border border-white/25 px-3 py-1 text-xs text-white/80">{t}</li>)}
-                    </ul>
-                  </div>
-                  <ArrowUpRight size={26} className="mt-1 shrink-0 text-[#6EA1FF] transition group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true" />
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
+    <div className="relative mx-auto h-[26rem] max-w-5xl select-none overflow-hidden rounded-[22px] border border-[#CFE2FF] shadow-[0_30px_80px_rgba(0,82,204,.18)]">
+      <Site good />
+      <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}><Site /></div>
+      <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[#0B1F3B]">Before: typical site</span>
+      <span className="absolute right-4 top-4 rounded-full bg-[#007BFF] px-3 py-1 text-xs font-semibold text-white">After: Devntom build</span>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 w-0.5 bg-white shadow-[0_0_20px_#00B4FF]" style={{ left: `${pos}%` }}><span className="absolute left-1/2 top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[#0052CC] shadow-xl"><ChevronRight size={16} className="rotate-180" /><ChevronRight size={16} /></span></div>
+      <input type="range" min={4} max={96} value={pos} onChange={(e) => setPos(Number(e.target.value))} aria-label="Drag to compare a typical website with a Devntom build" className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0" style={{ touchAction: "pan-y" }} />
+    </div>
   );
 }
 
-/* ------------------------------ PAGE STYLES ------------------------------ */
+const Acc = ({ children, dark = true }: { children: ReactNode; dark?: boolean }) => <span className={`${pw.className} text-[.55em] font-normal tracking-normal ${dark ? "text-[#93C5FD]" : "text-[#0052CC]"}`}>{children}</span>;
 
-const PAGE_CSS = `
-.ln{overflow:hidden;padding-bottom:.16em;margin-bottom:-.16em}
-.ln>span{display:block;transform:translateY(112%);transition:transform 1.2s cubic-bezier(.16,1,.3,1)}
-.in .ln>span{transform:none}
-.rv{opacity:0;transform:translateY(48px);transition:opacity .9s ease,transform 1.1s cubic-bezier(.16,1,.3,1)}
-.rv.in{opacity:1;transform:none}
-.t1{font-size:clamp(2.8rem,7.4vw,7rem);line-height:.95;letter-spacing:-.04em;text-shadow:0 2px 40px rgba(2,5,11,.5)}
-.t2{font-size:clamp(2.2rem,4.5vw,4.2rem);line-height:1.02;letter-spacing:-.035em}
-.spn{transition:opacity .3s linear var(--d)}.in .spn{opacity:0}
-.chk{opacity:0;transform:scale(.3);transition:opacity .4s ease var(--d),transform .5s cubic-bezier(.34,1.56,.64,1) var(--d)}.in .chk{opacity:1;transform:none}
-@keyframes bsin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes wfpop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.wf-pop{animation:wfpop .5s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i,0) * 55ms)}
-@media (prefers-reduced-motion:reduce){.ln>span,.rv{transform:none!important;opacity:1!important;transition:none!important}.spn{display:none}.chk{opacity:1;transform:none;transition:none}.wf-pop{animation:none}}
-`;
-
-const wrap = "mx-auto w-full max-w-[1400px] px-6 md:px-12";
-const ring = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F7BFF] focus-visible:ring-offset-2";
-const ringDark = `${ring} focus-visible:ring-offset-[#0B1F3B]`;
-const field = "mt-2 w-full rounded-[3px] border border-[#CBD8EE] bg-[#F4F8FE] px-4 py-3 text-[#0B1F3B] placeholder:text-[#5B6B84] focus:border-[#0047AB] focus:outline-none focus:ring-2 focus:ring-[#0047AB]/30";
-const label = "text-sm font-medium text-[#0B1F3B]";
-
-function Lines({ lines, className = "", h1 = false }: { lines: React.ReactNode[]; className?: string; h1?: boolean }) {
-  const Tag = (h1 ? "h1" : "h2") as "h2";
+/** A rounded border that draws itself. Parent needs data-r (or the hero animation). */
+function Frame({ r = 20, light = false, delay = 0, hero = false }: { r?: number; light?: boolean; delay?: number; hero?: boolean }) {
   return (
-    <Tag data-r className={`${pop.className} font-extralight ${className}`}>
-      {lines.map((l, i) => (
-        <span key={i} className="ln block">
-          <span style={{ transitionDelay: `${i * 110}ms` }}>{l}</span>
-        </span>
-      ))}
-    </Tag>
+    <svg aria-hidden="true" className="pointer-events-none absolute inset-px h-[calc(100%-2px)] w-[calc(100%-2px)] overflow-visible">
+      <rect width="100%" height="100%" rx={r} fill="none" pathLength={1} className={hero ? "dr0" : "dr"} stroke={light ? "rgba(255,255,255,.55)" : "url(#gl)"} strokeWidth="1.8" style={{ "--dl": `${delay}s`, animationDelay: `${0.5 + delay}s` } as CSSProperties} />
+    </svg>
   );
 }
 
-const Acc = ({ children, dark = true }: { children: React.ReactNode; dark?: boolean }) => (
-  <span className={`${pw.className} text-[.58em] font-normal tracking-normal ${dark ? "text-[#6EA1FF]" : "text-[#0047AB]"}`}>{children}</span>
-);
+export default function WebsiteDevelopmentClient() {
+  const root = useRef<HTMLElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+  const [tab, setTab] = useState(0);
+  const [open, setOpen] = useState(0);
+  const [card, setCard] = useState(0);
 
-/* ------------------------------ PAGE ------------------------------ */
-
-export default function WebsiteDevelopmentPage() {
-  const main = React.useRef<HTMLElement>(null);
-  const [state, setState] = React.useState<"idle" | "sending" | "sent" | "error">("idle");
-
-  // Reveal-on-scroll for the sections below the scene.
-  React.useEffect(() => {
-    const el = main.current!;
-    const io = new IntersectionObserver(
-      (es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }),
-      { threshold: 0.15, rootMargin: "0px 0px -6% 0px" }
-    );
-    el.querySelectorAll("[data-r],.rv").forEach((n) => io.observe(n));
-    return () => io.disconnect();
+  useEffect(() => {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.15, rootMargin: "0px 0px -6% 0px" });
+    root.current!.querySelectorAll("[data-r],.rv").forEach((n) => io.observe(n));
+    const h = heroRef.current!;
+    const mv = (e: PointerEvent) => { const r = h.getBoundingClientRect(); h.style.setProperty("--px", String(((e.clientX - r.left) / r.width - 0.5) * 2)); h.style.setProperty("--py", String(((e.clientY - r.top) / r.height - 0.5) * 2)); };
+    h.addEventListener("pointermove", mv);
+    let raf = 0;
+    const prog = () => { raf = 0; const d = document.documentElement.scrollHeight - innerHeight; barRef.current!.style.transform = `scaleX(${d > 0 ? scrollY / d : 0})`; };
+    const onS = () => { if (!raf) raf = requestAnimationFrame(prog); };
+    addEventListener("scroll", onS, { passive: true });
+    return () => { io.disconnect(); h.removeEventListener("pointermove", mv); removeEventListener("scroll", onS); cancelAnimationFrame(raf); };
   }, []);
 
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const data = Object.fromEntries(new FormData(form));
-    if (data.company) return; // honeypot
-    setState("sending");
-    try {
-      const r = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-      if (!r.ok) throw new Error();
-      setState("sent");
-      form.reset();
-    } catch {
-      setState("error");
-    }
-  }
+  const wrap = "mx-auto w-full max-w-[1400px] px-6 md:px-12";
+  const ring = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B4FF] focus-visible:ring-offset-2";
+  const btn = `rounded-full bg-[#007BFF] px-6 py-3 text-sm font-medium text-white transition-colors duration-300 hover:bg-[#0B1F3B] ${ring}`;
+  const t = tabs[tab];
 
   return (
-    <main ref={main} id="main" className={`${rob.className} overflow-x-clip bg-white text-[#0B1F3B]`}>
-      {/* Page metadata. React 19 / Next 15 move these into <head>. */}
-      <title>{TITLE}</title>
-      <meta name="description" content={DESC} />
-      <link rel="canonical" href={SITE + PATH} />
-      <meta property="og:title" content={TITLE} />
-      <meta property="og:description" content={DESC} />
-      <meta property="og:url" content={SITE + PATH} />
-      <meta property="og:type" content="website" />
-      <meta name="twitter:card" content="summary_large_image" />
-      {jsonLd.map((d, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(d) }} />)}
-      <style>{PAGE_CSS}</style>
+    <main ref={root} id="main" className={`${rob.className} overflow-x-clip bg-white text-[#1F2937]`}>
+      <style>{css}</style>
+      <div ref={barRef} aria-hidden="true" className="fixed inset-x-0 top-0 z-[60] h-[3px] origin-left scale-x-0 bg-gradient-to-r from-[#00B4FF] to-[#007BFF]" />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      <svg width="0" height="0" className="absolute" aria-hidden="true"><defs><linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#00B4FF" /><stop offset=".55" stopColor="#007BFF" /><stop offset="1" stopColor="#93C5FD" /></linearGradient></defs></svg>
 
-      <h1 className="sr-only">Website Development Services by DEVNTOM Solutions</h1>
-
-      {/* 1. SCROLL-SCRUBBED SCENE */}
-      {/* <WebsiteScene /> */}
-
-      {/* 1b. THE BUILD: a line to a website */}
-      <BuildStage />
-
-      {/* 1c. TYPES OF WEBSITES */}
-      <TypesSection />
-
-      {/* 1d. SELECTED WORK */}
-      <WorkSection />
-
-      {/* 2. WHAT IS INCLUDED */}
-      <section className="bg-white py-24 md:py-36" aria-label="What is included">
-        <div className={wrap}>
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <Lines className="max-w-3xl t2" lines={[<>Built <b className="font-bold">fast</b>,</>, <>built to <Acc dark={false}>last</Acc></>]} />
-            <p className="rv max-w-sm font-light leading-relaxed text-[#3B4A63]">Every site we build is fast, secure and ready to grow with your business.</p>
+      {/* 1. HERO */}
+      <section ref={heroRef} className="relative isolate overflow-hidden px-6 pb-48 pt-32 text-white md:px-12 md:pt-40" style={{ background: "#050E1F", "--px": 0, "--py": 0 } as CSSProperties}>
+        <div aria-hidden="true" className="absolute inset-0 -z-10">
+          <div className="absolute inset-0" style={{ background: "linear-gradient(120deg,#050E1F 0%,#08214A 38%,#0A3F9E 80%,#0052CC 100%)" }} />
+          <div className="absolute inset-0 transition-transform duration-700 ease-out" style={{ transform: "translate3d(calc(var(--px,0) * 30px),calc(var(--py,0) * 20px),0)" }}><div className="bl absolute -right-[8%] top-[10%] h-[34rem] w-[34rem] rounded-full bg-[#007BFF]/35 blur-[120px]" /></div>
+          <div className="absolute inset-0 transition-transform duration-700 ease-out" style={{ transform: "translate3d(calc(var(--px,0) * -24px),calc(var(--py,0) * -16px),0)" }}><div className="bl absolute -left-[10%] bottom-[-10%] h-[30rem] w-[30rem] rounded-full bg-[#6366F1]/30 blur-[120px]" style={{ animationDelay: "-8s" }} /></div>
+          <div className="absolute inset-0 opacity-60" style={{ backgroundImage: "repeating-linear-gradient(90deg,rgba(147,197,253,.07) 0 1px,transparent 1px 8.3333%)", maskImage: "linear-gradient(to bottom,transparent,#000 40%,transparent)" }} />
+          <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-[#050E1F] to-transparent" />
+          <div className="grain absolute inset-0" />
+        </div>
+        <div className="mx-auto grid max-w-[1400px] items-center gap-12 lg:grid-cols-12">
+          <div className="relative lg:col-span-6">
+            <svg aria-hidden="true" viewBox="0 0 700 520" className="pointer-events-none absolute top-1/2 hidden aspect-[700/520] h-[min(66vh,540px)] -translate-y-1/2 overflow-visible lg:block" style={{ right: "-4rem" }} fill="none">
+              <path d="M-1800 40 H340 A220 220 0 0 1 340 480 H-1800" pathLength={1} className="dr0" stroke="url(#gl)" strokeWidth="2.2" />
+              <circle r="5" fill="#fff" style={{ filter: "drop-shadow(0 0 8px #00B4FF)" }}><animateMotion dur="14s" begin="3.2s" repeatCount="indefinite" path="M-1800 40 H340 A220 220 0 0 1 340 480 H-1800" /></circle>
+            </svg>
+            <div className="relative py-8 lg:pl-4">
+              <p className="rv inline-flex items-center gap-2 rounded-full border border-[#3B82F6]/40 bg-white/[.05] px-4 py-1.5 text-sm text-[#CFE2FF] backdrop-blur"><span className="h-2 w-2 animate-pulse rounded-full bg-[#10B981]" />Website Development</p>
+              <h1 className={`${pop.className} rv t0 mt-6 font-extralight`} style={{ transitionDelay: "100ms" }}>
+                Websites that win
+                <span className="block"><span className="relative inline-block h-[1.14em] overflow-hidden align-bottom"><span className="wr flex flex-col">{["trust", "traffic", "customers", "growth", "trust"].map((w, k) => <b key={k} className="block h-[1.14em] bg-gradient-to-r from-[#93C5FD] via-[#00B4FF] to-[#E6F0FF] bg-clip-text font-bold leading-[1.14] text-transparent">{w}</b>)}</span></span><Acc>, fast.</Acc></span>
+              </h1>
+              <p className="rv mt-6 max-w-lg text-lg font-light leading-relaxed text-[#CFE2FF]" style={{ transitionDelay: "200ms" }}>Fast, beautiful, search-ready websites, engineered by Devntom Solutions for businesses in Pakistan, Saudi Arabia, the UK and beyond.</p>
+              <div className="rv mt-8 flex flex-wrap gap-3" style={{ transitionDelay: "300ms" }}>
+                <a href="#contact" className={`group inline-flex items-center gap-3 rounded-full bg-white py-3 pl-7 pr-3 text-sm font-medium text-[#0B1F3B] transition-colors duration-300 hover:bg-[#007BFF] hover:text-white ${ring} focus-visible:ring-offset-[#050E1F]`}>Get a free quote <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#007BFF] text-white transition group-hover:translate-x-1 group-hover:bg-white group-hover:text-[#007BFF]"><ArrowRight size={16} aria-hidden="true" /></span></a>
+                <Link href="/projects" className={`rounded-full border border-white/25 px-7 py-3 text-sm font-medium transition hover:bg-white hover:text-[#0B1F3B] ${ring} focus-visible:ring-offset-[#050E1F]`}>See our work</Link>
+              </div>
+              <dl className="rv mt-10 flex flex-wrap gap-x-10 gap-y-4 border-t border-white/15 pt-6" style={{ transitionDelay: "400ms" }}>
+                {[["150+", "Projects delivered"], ["12+", "Countries served"], ["98%", "Client satisfaction"]].map(([v, l]) => <div key={l}><dd className={`${pop.className} text-3xl font-semibold`}>{v}</dd><dt className="text-xs text-[#93C5FD]">{l}</dt></div>)}
+              </dl>
+            </div>
           </div>
-          <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {included.map(([Icon, t, d], i) => (
-              <li key={t} className="rv group rounded-[4px] border border-[#CBD8EE] p-8 transition-colors duration-300 hover:border-[#0047AB] hover:bg-[#F4F8FE]" style={{ transitionDelay: `${(i % 3) * 90}ms` }}>
-                <span className="flex h-12 w-12 items-center justify-center rounded-[4px] bg-[#E3ECFB] text-[#0047AB] transition-colors duration-300 group-hover:bg-[#0047AB] group-hover:text-white"><Icon size={24} aria-hidden="true" /></span>
-                <h3 className={`${pop.className} mt-8 text-xl font-semibold tracking-[-0.01em]`}>{t}</h3>
-                <p className="mt-3 font-light leading-relaxed text-[#3B4A63]">{d}</p>
+          <div className="relative lg:col-span-6">
+            <span className="fl absolute -top-5 right-6 z-10 rounded-full border border-white/20 bg-[#050E1F]/85 px-4 py-2 text-sm shadow-[0_10px_40px_rgba(0,0,0,.4)] backdrop-blur"><i className="mr-2 inline-block h-2 w-2 rounded-full bg-[#10B981]" />Lighthouse 98 · Live</span>
+            <span className="fl absolute -left-4 top-1/2 z-10 hidden rounded-full border border-white/20 bg-[#050E1F]/85 px-4 py-2 text-sm shadow-[0_10px_40px_rgba(0,0,0,.4)] backdrop-blur md:block" style={{ animationDelay: "-3s" }}><i className="mr-2 inline-block h-2 w-2 rounded-full bg-[#00B4FF]" />Mobile ready</span>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div data-r className="rv relative rounded-[22px] bg-white p-7 text-[#0B1F3B] shadow-[0_30px_80px_rgba(0,20,60,.45)] sm:col-span-2">
+                <Frame delay={0.2} />
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div><h2 className={`${pop.className} text-2xl font-semibold tracking-[-0.02em] text-[#0052CC]`}>For businesses</h2><p className="mt-3 text-sm text-[#475569]">Get a custom website designed, built and launched by one team.</p><a href="#contact" className={`${btn} mt-6 inline-block`}>Get a free quote</a></div>
+                  <ul className="space-y-3">{["Business websites", "E-commerce stores", "Web apps and portals", "Redesign and migration"].map((l) => <li key={l}><a href="#platforms" className="group inline-flex items-center gap-2 font-medium text-[#0052CC]">{l}<ArrowRight size={15} className="transition group-hover:translate-x-1" aria-hidden="true" /></a></li>)}</ul>
+                </div>
+              </div>
+              <div data-r className="rv relative rounded-[22px] bg-white p-7 text-[#0B1F3B] shadow-[0_30px_80px_rgba(0,20,60,.45)]" style={{ transitionDelay: "120ms" }}>
+                <Frame delay={0.5} />
+                <h2 className={`${pop.className} text-2xl font-semibold tracking-[-0.02em] text-[#0052CC]`}>For startups</h2><p className="mt-3 text-sm text-[#475569]">Launch a fast, credible site while you build the product.</p><a href="#contact" className={`${btn} mt-6 inline-block`}>Start a project</a>
+              </div>
+              <div data-r className="rv relative rounded-[22px] bg-[#0B1F3B]/90 p-7 text-white backdrop-blur" style={{ transitionDelay: "240ms" }}>
+                <Frame light delay={0.8} />
+                <h2 className={`${pop.className} text-2xl font-semibold tracking-[-0.02em]`}>See our work</h2><p className="mt-3 text-sm text-[#CFE2FF]">Real sites, real results.</p><Link href="/projects" className={`mt-6 inline-block rounded-full bg-white px-6 py-3 text-sm font-medium text-[#0B1F3B] transition-colors hover:bg-[#007BFF] hover:text-white ${ring}`}>View projects</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+        <a href="#platforms" aria-label="Scroll to platforms" className="absolute bottom-24 left-1/2 hidden h-12 w-8 -translate-x-1/2 justify-center rounded-full border border-white/40 pt-3 md:flex"><i className="block h-2 w-1 rounded-full bg-white" style={{ animation: "md 1.6s ease-in-out infinite" }} /></a>
+      </section>
+
+      {/* 2. PLATFORMS: tabs + accordion */}
+      <section id="platforms" className="relative z-10 -mt-14 rounded-t-[3rem] bg-white py-20 md:py-28" aria-labelledby="plat">
+        <div className={wrap}>
+          <div data-r className="rv mb-20 grid gap-6 border-b border-[#E2ECFA] pb-14 sm:grid-cols-2 lg:grid-cols-4">
+            {[[150, "+", "Projects delivered"], [80, "+", "Clients worldwide"], [12, "+", "Countries served"], [98, "%", "Client satisfaction"]].map(([v, x, l]) => <div key={String(l)} className="relative pl-5"><span aria-hidden="true" className="absolute left-0 top-1 h-12 w-0.5 origin-top scale-y-0 bg-gradient-to-b from-[#00B4FF] to-[#007BFF] transition-transform duration-[1400ms] [.in_&]:scale-y-100" /><p className={`${pop.className} text-4xl font-semibold text-[#0B1F3B]`}><Count to={v as number} suffix={x as string} /></p><p className="text-sm text-[#475569]">{l}</p></div>)}
+            <p className="text-xs text-[#64748B] sm:col-span-2 lg:col-span-4">Figures reflect our growth trajectory and are updated quarterly.</p>
+          </div>
+          <h2 id="plat" data-r className={`${pop.className} rv t2 text-center font-light text-[#0B1F3B]`}>Learn more about our <b className="font-semibold">website platforms</b></h2>
+          <div role="tablist" className="rv mx-auto mt-10 flex max-w-5xl gap-1 overflow-x-auto rounded-full bg-[#EEF3FA] p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {tabs.map((x, k) => <button key={x.key} role="tab" aria-selected={tab === k} onClick={() => { setTab(k); setOpen(0); }} className={`flex-1 whitespace-nowrap rounded-full px-5 py-3 text-sm font-medium transition-all duration-500 ${tab === k ? "bg-[#0B1F3B] text-white shadow-lg" : "text-[#0B1F3B]/70 hover:text-[#0B1F3B]"} ${ring}`}>{x.key}</button>)}
+          </div>
+          <div className="mx-auto mt-12 flex max-w-5xl flex-wrap items-baseline justify-between gap-4">
+            <h3 className={`${pop.className} text-2xl font-semibold text-[#0052CC]`}>{t.title}</h3>
+            <p className="max-w-lg text-[#475569]">{t.blurb}</p>
+          </div>
+          <div data-r className="rv mx-auto mt-8 grid max-w-5xl items-center gap-10 lg:grid-cols-2">
+            <div className="relative rounded-[22px] bg-[#EEF3FA] p-8">
+              <div className="overflow-hidden rounded-[8px] border border-[#CFE2FF] bg-white shadow-[0_20px_60px_rgba(0,82,204,.15)]">
+                <div className="flex gap-1.5 border-b border-[#CFE2FF] px-3 py-2"><i className="h-2 w-2 rounded-full bg-[#CFE2FF]" /><i className="h-2 w-2 rounded-full bg-[#CFE2FF]" /><i className="h-2 w-2 rounded-full bg-[#CFE2FF]" /></div>
+                <div key={`${tab}-${open}`} className="space-y-3 p-5 [animation:fadeUp_.6s_ease_both]">{mocks[(tab + open) % 4]}</div>
+              </div>
+            </div>
+            <ul>
+              {t.items.map(([q, a], k) => (
+                <li key={q} className="border-t border-[#0B1F3B]">
+                  <button onClick={() => setOpen(k)} aria-expanded={open === k} className={`flex w-full items-center justify-between py-4 text-left ${pop.className} text-xl text-[#0B1F3B] ${ring}`}>{q}<ChevronDown size={20} className={`transition-transform duration-500 ${open === k ? "rotate-180" : ""}`} aria-hidden="true" /></button>
+                  <div className={`grid transition-[grid-template-rows] duration-500 ${open === k ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}><p className="overflow-hidden pb-4 text-[#475569]">{a}</p></div>
+                </li>
+              ))}
+              <li className="border-t border-[#0B1F3B]" />
+            </ul>
+          </div>
+        </div>
+        <style>{"@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}}"}</style>
+      </section>
+
+      {/* 2b. INCLUDED */}
+      <section className="bg-[#F5F9FF] py-24 md:py-32" aria-labelledby="inc">
+        <div className={wrap}>
+          <div data-r className="rv flex flex-wrap items-end justify-between gap-6"><h2 id="inc" className={`${pop.className} t2 max-w-2xl font-light text-[#0B1F3B]`}>Included with <b className="font-semibold">every website</b></h2><p className="max-w-sm text-[#475569]">The essentials are never extras. Every project ships with these foundations.</p></div>
+          <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {included.map(([Icon, h, d], k) => (
+              <li key={h} data-r className="rv" style={{ transitionDelay: `${(k % 4) * 80}ms` }}>
+                <div onPointerMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`); e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`); }} className="group relative h-full overflow-hidden rounded-[18px] border border-[#CFE2FF] bg-white p-6 transition-colors duration-300 hover:border-[#007BFF]">
+                  <span aria-hidden="true" className="sp pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <span className="relative flex h-12 w-12 items-center justify-center rounded-[12px] bg-[#E6F0FF] text-[#0052CC] transition-all duration-500 group-hover:rotate-[-6deg] group-hover:scale-110 group-hover:bg-[#007BFF] group-hover:text-white"><Icon size={22} aria-hidden="true" /></span>
+                  <h3 className={`${pop.className} relative mt-5 text-lg font-semibold text-[#0B1F3B]`}>{h}</h3>
+                  <p className="relative mt-2 text-sm leading-relaxed text-[#475569]">{d}</p>
+                </div>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      {/* 3. PROCESS */}
-      <section className="relative overflow-hidden bg-[#0B1F3B] py-24 text-white md:py-32" aria-label="How we build websites">
-        <div aria-hidden="true" className="absolute inset-0" style={{ background: "radial-gradient(circle at 88% 12%,rgba(0,71,171,.55),transparent 50%)" }} />
-        <div className={`${wrap} relative`}>
-          <div className="mx-auto max-w-2xl text-center">
-            <Lines className="t2" lines={[<>From first call to <Acc>launch day</Acc></>]} />
-            <p className="rv mt-5 font-light text-white/70">Six phases, one delivery process. Every project follows it, and every phase feeds the next.</p>
+      {/* 2c. BEFORE / AFTER */}
+      <section className="bg-white py-24 md:py-32" aria-labelledby="cmp">
+        <div className={wrap}>
+          <h2 id="cmp" data-r className={`${pop.className} rv t2 mx-auto max-w-3xl text-center font-light text-[#0B1F3B]`}>See the <b className="font-semibold">difference</b> a better build makes</h2>
+          <p data-r className="rv mx-auto mb-10 mt-4 max-w-xl text-center text-[#475569]">Drag the slider, or use the arrow keys, to compare a typical site with a Devntom build. Illustrative example.</p>
+          <div data-r className="rv"><Compare /></div>
+        </div>
+      </section>
+
+      {/* 3. INTRO CARD with drawn chevron */}
+      <div style={{ background: "linear-gradient(#EEF3FA 50%,#0A3F9E 50%)" }} className="py-16">
+        <div className={wrap}>
+          <div data-r className="rv relative flex min-h-[22rem] items-stretch overflow-hidden rounded-[28px] bg-white shadow-[0_30px_80px_rgba(0,30,90,.2)]">
+            <div className="relative z-10 flex flex-1 flex-col justify-center p-8 md:p-14">
+              <h2 className={`${pop.className} t2 font-light text-[#0052CC]`}>Not sure where <b className="font-semibold">your site</b> stands?</h2>
+              <p className="mt-4 max-w-md text-[#475569]">Ask for a quick review of your current website: speed, mobile experience and search basics.</p>
+              <div className="mt-7 flex flex-wrap gap-3"><a href="#contact" className={btn}>Request a review</a><a href="#platforms" className={`rounded-full border border-[#0052CC] px-6 py-3 text-sm font-medium text-[#0052CC] transition hover:bg-[#0052CC] hover:text-white ${ring}`}>What we look at</a></div>
+            </div>
+            <div className="relative hidden aspect-[5/6] shrink-0 md:block" style={{ height: "auto", minHeight: "22rem" }}>
+              <img src={img(P.app, 900)} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" style={{ clipPath: "polygon(0 0,100% 0,100% 100%,0 100%,93% 50%)" }} />
+              <svg aria-hidden="true" viewBox="0 0 500 600" className="absolute inset-0 h-full w-full" preserveAspectRatio="xMinYMid slice" fill="none"><path d="M0 0 L465 300 L0 600" pathLength={1} className="dr" stroke="url(#gl)" strokeWidth="3" strokeLinejoin="round" /></svg>
+            </div>
           </div>
-          <ol className="mt-16 grid gap-px overflow-hidden rounded-[4px] border border-white/15 bg-white/15 sm:grid-cols-2 lg:grid-cols-3">
-            {steps.map(([t, d], i) => (
-              <li key={t} className="rv bg-[#0B1F3B] p-8 md:p-10" style={{ transitionDelay: `${(i % 3) * 90}ms` }}>
-                <div className="flex items-center gap-4">
-                  <span className="relative block h-7 w-7 shrink-0" style={{ "--d": `${0.6 + i * 0.5}s` } as React.CSSProperties}>
-                    <span className="spn absolute inset-0 animate-spin rounded-full border-2 border-[#2F7BFF]/30 border-t-[#6EA1FF]" />
-                    <span className="chk absolute inset-0 flex items-center justify-center rounded-full bg-[#2F7BFF] text-white"><Check size={14} strokeWidth={3} aria-hidden="true" /></span>
-                  </span>
-                  <span className="text-sm text-[#6EA1FF]">Phase {String(i + 1).padStart(2, "0")}</span>
-                </div>
-                <h3 className={`${pop.className} mt-6 text-2xl font-extralight tracking-[-0.03em]`}>{t}</h3>
-                <p className="mt-3 font-light leading-relaxed text-white/70">{d}</p>
+        </div>
+      </div>
+
+      {/* 4. ABOUT: expanding cards */}
+      <section className="bg-gradient-to-b from-[#0A3F9E] to-[#0B1F3B] pb-24 pt-16 text-white md:pb-32" aria-labelledby="abt">
+        <div className={wrap}>
+          <div data-r className="rv grid gap-6 md:grid-cols-12">
+            <h2 id="abt" className={`${pop.className} text-3xl font-semibold md:col-span-4`}>About our websites</h2>
+            <div className="md:col-span-8"><p className="max-w-2xl font-light leading-relaxed text-[#CFE2FF]">We bring engineering, design and search expertise together to create websites that load fast, look premium and keep working as your business grows.</p><Link href="/about" className={`mt-6 inline-block rounded-full bg-white px-5 py-2.5 text-sm font-medium text-[#0A3F9E] transition hover:bg-[#00B4FF] hover:text-white ${ring}`}>Learn more</Link></div>
+          </div>
+          <ul className="xc mt-12 h-[26rem] gap-3" style={{ gridTemplateColumns: about.map((_, k) => (card === k ? "3fr" : "1fr")).join(" ") }}>
+            {about.map(([n, id, d], k) => (
+              <li key={n} className="min-w-0">
+                <button onClick={() => setCard(k)} onMouseEnter={() => setCard(k)} onFocus={() => setCard(k)} aria-expanded={card === k} data-open={card === k} className={`group relative flex h-full w-full overflow-hidden rounded-[22px] bg-[#EEF3FA] text-left text-[#0B1F3B] ${ring}`}>
+                  <img src={img(id, 700)} alt="" loading="lazy" className="absolute inset-y-0 left-0 hidden w-1/2 object-cover opacity-0 transition-opacity duration-700 group-data-[open=true]:opacity-100 md:block" />
+                  <span className={`${pop.className} absolute left-5 top-5 whitespace-nowrap text-xl transition-all duration-700 md:group-data-[open=true]:left-[52%]`}>{n}</span>
+                  <span className="absolute bottom-5 left-[52%] hidden w-[44%] text-sm leading-relaxed opacity-0 transition-opacity duration-700 group-data-[open=true]:opacity-100 md:block">{d}</span>
+                  <ChevronRight size={22} className="absolute bottom-5 left-5 text-[#0052CC] transition group-data-[open=true]:opacity-0" aria-hidden="true" />
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-center text-sm text-[#CFE2FF] md:hidden">{about[card][2]}</p>
+        </div>
+      </section>
+
+      {/* 5. WHY: drawn borders */}
+      <section className="bg-white py-24 md:py-32" aria-labelledby="why">
+        <div className={wrap}>
+          <h2 id="why" data-r className={`${pop.className} rv t2 max-w-3xl font-light text-[#0B1F3B]`}>Why our websites <b className="font-semibold">perform</b> <Acc dark={false}>better</Acc></h2>
+          <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {why.map(([h, d], k) => (
+              <li key={h} data-r className="rv group relative rounded-[22px] bg-[#F5F9FF] p-8 transition-colors duration-500 hover:bg-[#EAF2FF]" style={{ transitionDelay: `${k * 90}ms` }}>
+                <Frame delay={k * 0.25} />
+                <span className="font-mono text-xs text-[#0052CC]">0{k + 1}</span>
+                <h3 className={`${pop.className} mt-10 flex items-start justify-between text-xl font-semibold text-[#0B1F3B]`}>{h}<ArrowUpRight size={20} className="text-[#007BFF] transition group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true" /></h3>
+                <p className="mt-3 text-sm leading-relaxed text-[#475569]">{d}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* 5b. TECH */}
+      <section className="overflow-hidden bg-[#F5F9FF] py-20" aria-label="Technologies we use">
+        <h2 data-r className={`${pop.className} rv mb-10 text-center text-2xl font-light text-[#0B1F3B]`}>Built with tools <b className="font-semibold">we trust</b></h2>
+        <div className="mqw space-y-4" style={{ maskImage: "linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)" }}>
+          {techRows.map((row, r) => (
+            <div key={r} className={`mq2 flex w-max ${r ? "rev" : ""}`} style={{ animationDuration: r ? "48s" : "40s" }}>
+              {[...row, ...row].map(([Ic, n], i) => <span key={i} className="mr-4 inline-flex shrink-0 items-center gap-3 rounded-full border border-[#CFE2FF] bg-white px-6 py-3.5 text-base text-[#0B1F3B]"><Ic aria-hidden="true" className="h-6 w-6 text-[#0052CC]" />{n}</span>)}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 6. PROCESS: drawn timeline with ticks */}
+      <section className="bg-[#050E1F] py-24 text-white md:py-32" aria-labelledby="proc">
+        <div className={wrap}>
+          <h2 id="proc" data-r className={`${pop.className} rv t2 mx-auto max-w-2xl text-center font-light`}>Six steps from first call to <Acc>live site</Acc></h2>
+          <ol data-r className="relative mt-16 grid gap-10 md:grid-cols-6 md:gap-4">
+            <span aria-hidden="true" className="absolute left-[8%] right-[8%] top-[22px] hidden h-px origin-left scale-x-0 bg-gradient-to-r from-[#00B4FF] to-[#007BFF] shadow-[0_0_14px_#00B4FF] transition-transform duration-[2800ms] ease-out [.in_&]:scale-x-100 md:block" />
+            {steps.map(([n, d], k) => (
+              <li key={n} className="relative text-center">
+                <span className="relative mx-auto block h-11 w-11" style={{ "--d": `${0.5 + k * 0.45}s` } as CSSProperties}>
+                  <span className="spn absolute inset-0 animate-spin rounded-full border-2 border-[#3B82F6]/30 border-t-[#8B9CFF]" />
+                  <span className="chk absolute inset-0 flex items-center justify-center rounded-full bg-[#10B981] text-black"><Check size={18} strokeWidth={3} aria-label="Done" /></span>
+                </span>
+                <h3 className={`${pop.className} mt-4 font-semibold`}>{n}</h3>
+                <p className="mt-1 text-sm font-light text-[#B8C9DE]">{d}</p>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
-      {/* TESTIMONIALS: drop your existing <Testimonials /> component here and import it at the top of this file. */}
-
-      {/* 4. RELATED SERVICES */}
-      <section className="bg-white py-24 md:py-32" aria-label="Related services">
+      {/* 6b. ENGAGEMENT OPTIONS */}
+      <section className="bg-white py-24 md:py-32" aria-labelledby="pk">
         <div className={wrap}>
-          <Lines className="max-w-3xl t2" lines={[<>Works best <b className="font-bold">with</b></>]} />
-          <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {related.map(([n, href, d], i) => (
-              <li key={n} className="rv" style={{ transitionDelay: `${i * 90}ms` }}>
-                <Link href={href} className={`group flex h-full flex-col justify-between gap-10 rounded-[4px] border border-[#CBD8EE] p-6 transition-colors duration-300 hover:border-[#0047AB] hover:bg-[#F4F8FE] ${ring}`}>
-                  <ArrowUpRight size={26} className="text-[#0047AB] transition group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true" />
-                  <div>
-                    <h3 className={`${pop.className} text-lg font-semibold tracking-[-0.01em]`}>{n}</h3>
-                    <p className="mt-2 text-sm font-light leading-relaxed text-[#3B4A63]">{d}</p>
-                  </div>
-                </Link>
+          <div data-r className="rv text-center"><h2 id="pk" className={`${pop.className} t2 font-light text-[#0B1F3B]`}>Choose how we <b className="font-semibold">work together</b></h2><p className="mx-auto mt-4 max-w-xl text-[#475569]">Three ways to start. Scope and pricing are confirmed after a free discovery call, with no surprises.</p></div>
+          <ul className="mt-14 grid gap-5 lg:grid-cols-3">
+            {packs.map(([n, who, list, hi], k) => (
+              <li key={n} data-r className={`rv group relative rounded-[24px] p-8 transition-transform duration-500 hover:-translate-y-2 ${hi ? "text-white shadow-[0_30px_80px_rgba(0,82,204,.35)]" : "bg-[#F5F9FF] text-[#0B1F3B]"}`} style={{ transitionDelay: `${k * 100}ms`, background: hi ? "linear-gradient(150deg,#0B1F3B,#0A3F9E 70%,#007BFF)" : undefined }}>
+                <Frame r={24} light={hi} delay={k * 0.3} />
+                {hi && <span className="absolute right-6 top-6 rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#0052CC]">Recommended</span>}
+                <h3 className={`${pop.className} text-2xl font-semibold`}>{n}</h3>
+                <p className={`mt-1 text-sm ${hi ? "text-[#CFE2FF]" : "text-[#475569]"}`}>{who}</p>
+                <ul className="mt-6 space-y-3">{list.map((x) => <li key={x} className="flex items-start gap-3 text-sm"><span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${hi ? "bg-[#00B4FF] text-[#0B1F3B]" : "bg-[#CFE2FF] text-[#0052CC]"}`}><Check size={12} strokeWidth={3} aria-hidden="true" /></span>{x}</li>)}</ul>
+                <a href="#contact" className={`mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors duration-300 ${hi ? "bg-white text-[#0B1F3B] hover:bg-[#00B4FF] hover:text-white" : "bg-[#007BFF] text-white hover:bg-[#0B1F3B]"} ${ring}`}>Request a quote <ArrowRight size={16} aria-hidden="true" /></a>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      {/* 5. FAQ */}
-      <section className="bg-[#F4F8FE] py-24 md:py-36" aria-label="Frequently asked questions">
-        <div className={`${wrap} grid gap-14 lg:grid-cols-12`}>
-          <div className="lg:col-span-4">
-            <div className="lg:sticky lg:top-28">
-              <Lines className="t2" lines={[<>Questions,</>, <><b className="font-bold">answered</b></>]} />
-              <p className="rv mt-6 max-w-xs font-light leading-relaxed text-[#3B4A63]">Can&apos;t find what you need? Write to <a href="mailto:info@devntomsolutions.com" className={`rounded-[3px] font-medium text-[#0047AB] underline underline-offset-4 ${ring}`}>info@devntomsolutions.com</a>.</p>
-            </div>
-          </div>
+      <Industries />
+      <ClientLogos />
+      <Testimonials />
+      <Blog />
+
+      {/* 7. FAQ */}
+      <section className="bg-[#F5F9FF] py-24 md:py-32" aria-labelledby="faq">
+        <div className={`${wrap} grid gap-12 lg:grid-cols-12`}>
+          <h2 id="faq" data-r className={`${pop.className} rv t2 font-light text-[#0B1F3B] lg:col-span-4`}>Website <b className="font-semibold">questions</b></h2>
           <div className="lg:col-span-8">
             {faqs.map(([q, a]) => (
-              <details key={q} className="rv group border-t border-[#CBD8EE] last:border-b">
-                <summary className={`flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-left ${ring} [&::-webkit-details-marker]:hidden`}>
-                  <span className={`${pop.className} text-lg font-semibold tracking-[-0.01em] md:text-xl`}>{q}</span>
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#8FB0E8] text-[#0047AB] transition group-open:rotate-45 group-open:border-[#0047AB] group-open:bg-[#0047AB] group-open:text-white"><Plus size={18} aria-hidden="true" /></span>
-                </summary>
-                <p className="max-w-2xl pb-6 font-light leading-relaxed text-[#3B4A63]">{a}</p>
+              <details key={q} className="group border-t border-[#CFE2FF] last:border-b">
+                <summary className={`flex cursor-pointer list-none items-center justify-between gap-6 py-6 ${ring} [&::-webkit-details-marker]:hidden`}><span className={`${pop.className} text-lg font-semibold text-[#0B1F3B] md:text-xl`}>{q}</span><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#93C5FD] text-[#0052CC] transition group-open:rotate-45 group-open:bg-[#007BFF] group-open:text-white"><Plus size={18} aria-hidden="true" /></span></summary>
+                <p className="max-w-2xl pb-6 font-light leading-relaxed text-[#475569]">{a}</p>
               </details>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 6. CONTACT FORM */}
-      <section id="contact-form" className="relative isolate overflow-hidden py-24 text-white md:py-32" aria-label="Start your website project" style={{ background: `linear-gradient(120deg,${BLACK} 0%,${NAVY} 45%,${COBALT} 100%)` }}>
-        <div aria-hidden="true" className="absolute inset-0 -z-10 opacity-60" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,.22) 1px,transparent 1px)", backgroundSize: "22px 22px", WebkitMaskImage: "linear-gradient(to right,transparent 20%,#000)", maskImage: "linear-gradient(to right,transparent 20%,#000)" }} />
-        <div aria-hidden="true" className={`${pop.className} pointer-events-none absolute -bottom-[4vw] left-0 -z-10 w-full select-none whitespace-nowrap text-center text-[18vw] font-bold leading-none tracking-[-0.05em] text-transparent`} style={{ WebkitTextStroke: "1px rgba(255,255,255,.16)" }}>Let&apos;s build</div>
-        <div className={`${wrap} grid items-center gap-14 lg:grid-cols-12`}>
-          <div className="lg:col-span-6">
-            <Lines className="t1" lines={["Let's build", <><Acc>your</Acc> <b className="font-bold">website.</b></>]} />
-            <p className="rv mt-8 max-w-md text-lg font-light leading-relaxed text-[#DCE7FB]">Tell us what you want to achieve. We reply with a plan, a timeline and a quote.</p>
-            <ul className="rv mt-8 space-y-2 font-medium">
-              <li><a href="mailto:info@devntomsolutions.com" className={`rounded-[3px] underline decoration-[#6EA1FF] underline-offset-4 hover:text-[#6EA1FF] ${ring} focus-visible:ring-offset-[#0B1F3B]`}>info@devntomsolutions.com</a></li>
-              <li><a href="https://wa.me/923256036838" className={`rounded-[3px] underline decoration-[#6EA1FF] underline-offset-4 hover:text-[#6EA1FF] ${ring} focus-visible:ring-offset-[#0B1F3B]`}>WhatsApp +92 325 6036838</a></li>
-            </ul>
-          </div>
-          <form onSubmit={submit} className="rv rounded-[4px] bg-white p-7 text-[#0B1F3B] shadow-[0_30px_100px_rgba(0,71,171,.45)] md:p-9 lg:col-span-6" style={{ transitionDelay: "120ms" }}>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <label className={label}>Full name<input name="name" required autoComplete="name" className={field} placeholder="Your name" /></label>
-              <label className={label}>Email<input name="email" type="email" required autoComplete="email" className={field} placeholder="you@company.com" /></label>
+      {/* 8. HOW CAN WE HELP: outlined card, round photo */}
+      <section className="bg-white py-20 md:py-28" aria-labelledby="help">
+        <div className={wrap}>
+          <div data-r className="rv relative overflow-hidden rounded-[28px] bg-[#0B1F3B] text-white">
+            <Frame r={28} delay={0.1} />
+            <div className="relative grid items-center md:grid-cols-2">
+              <div className="p-8 md:p-14"><h2 id="help" className={`${pop.className} t2 font-light`}>How can we <b className="font-semibold">help?</b></h2><p className="mt-4 max-w-sm text-[#CFE2FF]">Tell us about your project, or ask any question. We reply with a plan, a timeline and a quote.</p><a href="#contact" className={`mt-7 inline-block rounded-full bg-white px-6 py-3 text-sm font-medium text-[#0B1F3B] transition hover:bg-[#007BFF] hover:text-white ${ring} focus-visible:ring-offset-[#0B1F3B]`}>Contact us</a></div>
+              <div className="relative h-72 md:h-[26rem]"><img src={img(P.team, 1000)} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover md:rounded-l-[16rem]" /></div>
             </div>
-            <label className={`${label} mt-5 block`}>What do you need?
-              <select name="service" required defaultValue="Website Development" className={field}>
-                {serviceOptions.map((n) => <option key={n}>{n}</option>)}
-              </select>
-            </label>
-            <label className={`${label} mt-5 block`}>Project details<textarea name="message" required rows={4} className={field} placeholder="Goals, audience, budget, timeline" /></label>
-            <input name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
-            <button disabled={state === "sending"} className={`group mt-6 inline-flex w-full items-center justify-center gap-3 rounded-full bg-[#0047AB] px-8 py-4 font-medium text-white transition hover:bg-[#0B1F3B] disabled:opacity-60 ${ring}`}>
-              {state === "sending" ? "Sending…" : "Send message"} <ArrowRight size={18} className="transition group-hover:translate-x-1" aria-hidden="true" />
-            </button>
-            <p role="status" className={`mt-4 text-sm ${state === "error" ? "text-[#B91C1C]" : "text-[#0B1F3B]"}`}>
-              {state === "sent" && "Thank you. We received your message and will reply soon."}
-              {state === "error" && "Something went wrong. Please email info@devntomsolutions.com instead."}
-            </p>
-          </form>
+          </div>
         </div>
       </section>
+
+      <div id="contact" className="[&>*:last-child]:mb-0"><ContactForm /></div>
     </main>
   );
 }
