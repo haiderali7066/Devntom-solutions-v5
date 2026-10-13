@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LenisProvider from "@/components/LenisProvider";
+import CookieConsent from "@/components/CookieConsent";
 
 const SITE = "https://www.devntomsolutions.com";
 
@@ -227,6 +228,8 @@ export default function RootLayout({
           <Navbar />
 
           {children}
+          <CookieConsent />
+          <LenisProvider/>
 
           <Footer showCta={false} />
       </body>
