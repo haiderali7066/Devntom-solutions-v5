@@ -1,7 +1,48 @@
-import React from 'react'
+import type { Metadata } from "next";
+import AboutClient from "./AboutClient";
 
-export default function page() {
+const SITE = "https://www.devntomsolutions.com";
+const TITLE = "About DEVNTOM Solutions | Software and Digital Agency";
+const DESC = "DEVNTOM Solutions designs and builds websites, software and marketing for businesses worldwide, from offices in Lahore, Riyadh and London.";
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESC,
+  alternates: { canonical: SITE + "/about" },
+  openGraph: { title: TITLE, description: DESC, url: SITE + "/about", type: "website" },
+  twitter: { card: "summary_large_image" },
+};
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: TITLE,
+    url: SITE + "/about",
+    mainEntity: {
+      "@type": "Organization",
+      name: "DEVNTOM Solutions",
+      url: SITE,
+      description: DESC,
+      email: "info@devntomsolutions.com",
+      location: ["Lahore, Pakistan", "Riyadh, Saudi Arabia", "London, United Kingdom"].map((n) => ({ "@type": "Place", name: n })),
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE },
+      { "@type": "ListItem", position: 2, name: "About", item: SITE + "/about" },
+    ],
+  },
+];
+
+export default function Page() {
   return (
-    <div>page</div>
-  )
+    <>
+      {jsonLd.map((d, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(d) }} />)}
+      <AboutClient />
+    </>
+  );
 }
