@@ -7,7 +7,7 @@ const SITE = "https://www.devntomsolutions.com";
 export const metadata: Metadata = {
   title: { absolute: "Devntom Solutions | Website, Software, Mobile App and AI Automation Company" },
   description:
-    "Devntom Solutions builds fast websites, custom software, mobile apps and AI automation. Offices in Lahore, Riyadh and London. 150+ projects delivered for 80+ clients in 12+ countries.",
+    "Devntom Solutions builds fast websites, custom software, mobile apps and AI automation. Offices in Lahore, Riyadh and London. ",
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
