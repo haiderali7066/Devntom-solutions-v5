@@ -1,20 +1,5 @@
 "use client";
 
-/**
- * /about
- *
- * Client component for the page. Rendered by page.tsx (the server page that holds the metadata and
- * JSON-LD). No Nav, no Footer (both live in app/layout.tsx).
- *
- * Sections: hero with a three-city network diagram, a scroll-scrubbed manifesto (the words light up as
- * you scroll), counting stats, values, services, an optional team grid, the tools we use, and a closing
- * call to action.
- *
- * REPLACE before launch (search this file for "REPLACE"): the STATS numbers if they have changed, and the
- * `team` array, which is empty so that no invented people appear. The section hides itself until you add real ones.
- *
- * Palette: cobalt, navy, white, black.
- */
 
 import * as React from "react";
 import Link from "next/link";
