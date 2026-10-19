@@ -1436,7 +1436,7 @@ export default function HomeClient() {
                 href="/contact"
                 className={`inline-flex items-center gap-3 rounded-full border border-white/25 bg-gradient-to-b from-white/10 to-white/[.02] py-3 pl-4 pr-8 text-lg shadow-[0_0_40px_rgba(0,123,255,.25)] transition hover:border-[#3B82F6] ${ring} focus-visible:ring-offset-black`}
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3033fd] text-xl leading-none">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2b59f1dc] text-xl leading-none">
                   +
                 </span>
                 Your business
@@ -1742,96 +1742,7 @@ export default function HomeClient() {
       </section>
 
       {/* 4. PROJECTS: pinned horizontal gallery */}
-      <section data-hs className="bg-white lg:h-[340vh]" aria-labelledby="prj">
-        <div className="py-24 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-center lg:overflow-hidden lg:py-0">
-          <div
-            className={`${wrap} flex flex-wrap items-end justify-between gap-6`}
-          >
-            <Lines
-              className="max-w-3xl t2 text-[#0B1F3B]"
-              lines={[
-                <>
-                  Selected <b className="font-bold">projects</b>
-                </>,
-                <>
-                  built to <Acc dark={false}>perform</Acc>
-                </>,
-              ]}
-            />
-            <Link
-              href="/projects"
-              id="prj"
-              data-magnetic
-              className={`inline-flex items-center gap-2 rounded-full bg-[#0B1F3B] px-6 py-3 font-medium text-white transition hover:bg-[#007BFF] ${ring}`}
-            >
-              All projects <ArrowRight size={18} aria-hidden="true" />
-            </Link>
-          </div>
-          <div
-            data-scroller
-            className="mt-10 overflow-x-auto lg:overflow-visible"
-          >
-            <div
-              data-track
-              className="flex w-max gap-6 px-6 pb-4 md:px-12 lg:pr-24"
-            >
-              {projects.map(([t, d, tags, stack, href], i) => (
-                <Link
-                  key={t}
-                  href={href}
-                  data-tilt
-                  data-cursor="view"
-                  className={`gb group block w-[82vw] shrink-0 overflow-hidden rounded-[4px] md:w-[46vw] lg:w-[30vw] ${ring}`}
-                >
-                  <div className="relative h-[34vh] min-h-[220px] overflow-hidden bg-gradient-to-br from-[#0052CC] to-[#0B1F3B]">
-                    <img
-                      src={projectImgs[i]}
-                      alt={`${t} preview`}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
-                    />
-                    <div
-                      aria-hidden="true"
-                      className="absolute inset-0 bg-gradient-to-t from-[#0B1F3B]/60 to-transparent"
-                    />
-                    <ul className="absolute left-4 top-4 flex flex-wrap gap-2">
-                      {tags.map((g) => (
-                        <li
-                          key={g}
-                          className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-[#0052CC]"
-                        >
-                          {g}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="p-6">
-                    <h3
-                      className={`${pop.className} flex items-start justify-between gap-3 text-xl font-semibold tracking-[-0.01em] text-[#0B1F3B]`}
-                    >
-                      {t}
-                      <ArrowUpRight
-                        size={20}
-                        className="mt-1 shrink-0 text-[#007BFF] transition group-hover:-translate-y-1 group-hover:translate-x-1"
-                        aria-hidden="true"
-                      />
-                    </h3>
-                    <p className="mt-2 font-light leading-relaxed text-[#475569]">
-                      {d}
-                    </p>
-                    <p className="mt-4 border-t border-[#E5E7EB] pt-3 text-sm text-[#64748B]">
-                      Stack:{" "}
-                      <span className="font-medium text-[#1F2937]">
-                        {stack}
-                      </span>
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* 5. WHY */}
       <section
@@ -2055,7 +1966,12 @@ export default function HomeClient() {
                   fill="#00B4FF"
                 />
               </svg> */}
-              <Image src="/sign.png" alt="Devntom Solutions" width={72} height={72} />
+              <Image
+                src="/sign.png"
+                alt="Devntom Solutions"
+                width={72}
+                height={72}
+              />
             </div>
           </div>
         </div>
