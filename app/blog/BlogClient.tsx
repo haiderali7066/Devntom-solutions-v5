@@ -3,11 +3,11 @@
 /* Blog list design, filters and search in ONE client file. Used by your existing server page.tsx
    (it passes `posts`). Needs ./posts.ts next to it. */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Poppins, Roboto, Playwrite_CA } from "next/font/google";
 import { ArrowRight, ArrowUpRight, Search, X } from "lucide-react";
-import { CATEGORIES, fmtDate, type Category, type PostMeta } from "./posts";
+import { CATEGORIES, fmtDate, getAllPosts, toMeta, type Category, type Post, type PostMeta } from "./posts";
 
 const pop = Poppins({ subsets: ["latin"], weight: ["200", "300", "400", "600", "700"], display: "swap" });
 const rob = Roboto({ subsets: ["latin"], weight: ["300", "400", "500", "700"], display: "swap" });
@@ -93,11 +93,24 @@ function Card({ p, i }: { p: PostMeta; i: number }) {
   );
 }
 
-export default function BlogClient({
-  posts = [],
-}: {
-  posts?: PostMeta[];
-}) {
+type Item = PostMeta | Post;
+type Props = { posts?: Item[]; initialPosts?: Item[]; items?: Item[] };
+
+/* Accepts either the light list (toMeta) or full posts, and fills in anything missing. */
+const normalise = (p: Item): PostMeta => ("body" in p ? toMeta(p) : { ...p, tags: p.tags ?? [], readMins: p.readMins ?? 3 });
+
+export default function BlogClient(props: Props) {
+  const provided = props.posts ?? props.initialPosts ?? props.items;
+  // Safety net: if the server page forgot to pass the posts, load them here instead of crashing.
+  const [loaded, setLoaded] = useState<Item[] | null>(null);
+  useEffect(() => {
+    if (provided) return;
+    let live = true;
+    getAllPosts().then((p) => live && setLoaded(p));
+    return () => { live = false; };
+  }, [provided]);
+  const posts = useMemo(() => (provided ?? loaded ?? []).map(normalise), [provided, loaded]);
+
   const [cat, setCat] = useState<string>("All");
   const [q, setQ] = useState("");
   const filtering = cat !== "All" || q.trim() !== "";
