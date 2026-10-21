@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LenisProvider from "@/components/LenisProvider";
 import CookieConsent from "@/components/CookieConsent";
+import Cursor from "@/components/Cursor";
 
 const SITE = "https://www.devntomsolutions.com";
 
@@ -225,13 +226,14 @@ export default function RootLayout({
           Skip to content
         </a>
 
-          <Navbar />
+        <Navbar />
+        <Cursor />
 
-          {children}
-          <CookieConsent />
-          <LenisProvider/>
+        {children}
+        <CookieConsent />
+        <LenisProvider />
 
-          <Footer showCta={false} />
+        <Footer showCta={false} />
       </body>
     </html>
   );
