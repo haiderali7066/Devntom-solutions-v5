@@ -7,7 +7,7 @@ const URL = `${SITE}${PATH}`;
 
 // The layout adds " | Devntom Solutions" through its title template.
 export const metadata: Metadata = {
-  title: "SEO Services: Technical, On-Page and Local SEO",
+  title: "SEO Optimization",
   description:
     "Devntom Solutions delivers technical, on-page and local SEO that lifts your rankings and brings in qualified customers. Free SEO audit. Offices in Lahore, Riyadh and London.",
   keywords: [
