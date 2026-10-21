@@ -1,25 +1,31 @@
 "use client";
-/* eslint-disable @next/next/no-img-element */
 
 /**
  * /services/custom-software-development
  *
- * One self-contained file: no imports from your own files, no Nav, no Footer
- * (both live in app/layout.tsx).
+ * Client component for the page. Rendered by page.tsx (the server page that holds the metadata and
+ * JSON-LD). It can receive the FAQs and a server-rendered summary as props; with no props it falls back
+ * to the FAQs below. No Nav, no Footer (both live in app/layout.tsx).
  *
- * The opening is a pinned, scroll-driven isometric stack drawn in SVG (no WebGL):
- * Interface, API and logic, Database, Cloud. Scroll pulls the layers apart one at a
- * time while data packets travel between them. Below it: tabbed product mock-ups
- * (CRM, ERP, SaaS, internal tools), what is included, process, FAQ and a contact form.
+ * SEO: one H1 ("Custom Software Development Services for Growing Businesses"), a clear H2 per topic, and
+ * keywords used where they fit the sentence. Services are only the ones listed in the keyword brief.
+ * Nothing on the page states prices, client names or results. Every screen is an illustration.
+ *
+ * Sections: hero with a layered-architecture diagram, overview, solutions explorer, technical
+ * capabilities, AI-powered software, process, who we work with, project cost, locations, related
+ * services, FAQ and the contact form.
  *
  * Palette: cobalt, navy, white, black.
- * Search this file for "TESTIMONIALS" to see where to drop your component.
  */
 
 import * as React from "react";
 import Link from "next/link";
 import { Poppins, Roboto, Playwrite_CA } from "next/font/google";
-import { ArrowRight, ArrowUpRight, BadgeCheck, BarChart3, Check, Layers, LifeBuoy, Package, Plug, Plus, Receipt, ShieldCheck, Users, Workflow } from "lucide-react";
+import {
+  ArrowRight, ArrowUpRight, Bot, Building2, Check, Database, FileText, Layers, LayoutDashboard, LifeBuoy, MapPin, Plug,
+  Plus, RefreshCw, Rocket, ShieldCheck, Sparkles, Users, Workflow, Briefcase, Code2, Globe,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 const pop = Poppins({ subsets: ["latin"], weight: ["200", "300", "400", "600", "700"], display: "swap" });
 const rob = Roboto({ subsets: ["latin"], weight: ["300", "400", "500", "700"], display: "swap" });
@@ -28,660 +34,457 @@ const pw = Playwrite_CA({ weight: "400", display: "swap" });
 /* ------------------------------ BRAND ------------------------------ */
 
 const COBALT = "#0047AB";
-const COBALT_HI = "#2F7BFF"; // lighter cobalt for the 3D-style stack and glow on dark
-const COBALT_TEXT = "#6EA1FF"; // small text on dark (passes contrast on navy and black)
+const COBALT_HI = "#2F7BFF";
 const NAVY = "#0B1F3B";
-const NAVY_DEEP = "#071A33";
 const BLACK = "#02050B";
-const WHITE = "#FFFFFF";
-
-const SITE = "https://www.devntomsolutions.com";
-const PATH = "/services/custom-software-development";
-const TITLE = "Custom Software Development Services | DEVNTOM Solutions";
-const DESC = "Scalable web apps, SaaS platforms, CRM, ERP and business management systems built around how you work. DEVNTOM Solutions, Lahore, Riyadh and London.";
 
 /* ------------------------------ CONTENT ------------------------------ */
 
-const frames = [
+const techs = ["Custom software", "Web applications", "SaaS platforms", "CRM and ERP", "Workflow automation", "API integration", "AI-powered software", "Legacy modernization", "Maintenance and support"];
+
+const stack = ["Next.js", "React", "TypeScript", "Node.js", "MongoDB", "PostgreSQL", "REST and GraphQL APIs", "Cloud hosting"];
+
+type Solution = { name: string; keyword: string; text: string; has: string[]; fit: string; mock: { title: string; kpis: string[]; rows: [string, string][] } };
+const solutions: Solution[] = [
   {
-    kicker: "Custom software",
-    title: "Software built around how you work",
-    text: "Scalable web apps, SaaS platforms, CRM, ERP and business management systems built to streamline complex operations.",
-    chips: [] as string[],
+    name: "CRM and ERP systems",
+    keyword: "Custom business management software",
+    text: "CRM software development and ERP software development that put customers, orders, stock, invoices and reports in one system, shaped around how your team really works instead of the other way round.",
+    has: ["Customer and lead management", "Quotes, orders and invoicing", "Inventory and purchasing", "Role-based access and reporting"],
+    fit: "Teams outgrowing spreadsheets and disconnected tools",
+    mock: { title: "Customer pipeline", kpis: ["New leads", "Open quotes", "Invoices due"], rows: [["Account 1042", "Quote sent"], ["Account 1043", "Meeting set"], ["Account 1044", "Won"], ["Account 1045", "New lead"]] },
   },
   {
-    kicker: "01 · Interface",
-    title: "Screens people enjoy using",
-    text: "Dashboards, portals and admin panels designed around real workflows, so your team and customers get things done faster.",
-    chips: ["React and Next.js", "Role-based views", "Accessible UI"],
+    name: "Web applications and SaaS",
+    keyword: "Web application development",
+    text: "Web application development and SaaS application development, from a first working version to a multi-user platform with accounts, subscriptions, dashboards and admin tools.",
+    has: ["Multi-user accounts and permissions", "Subscriptions and billing", "Dashboards and analytics", "Admin and support tools"],
+    fit: "Startups launching a product and companies selling software",
+    mock: { title: "Workspace overview", kpis: ["Active users", "Plans", "Uptime"], rows: [["Team workspace", "Active"], ["Billing cycle", "Renewed"], ["New sign-up", "Onboarding"], ["Support ticket", "Open"]] },
   },
   {
-    kicker: "02 · API and logic",
-    title: "Your rules in one reliable place",
-    text: "Secure APIs and services that connect your tools, automate approvals and keep every business rule consistent.",
-    chips: ["REST and GraphQL", "Auth and permissions", "Integrations"],
+    name: "Workflow automation",
+    keyword: "Workflow automation software",
+    text: "Software for business process automation: approvals, hand-offs, reminders and data entry handled automatically, with people stepping in only when a decision is needed.",
+    has: ["Approval and hand-off flows", "Automatic data transfer between systems", "Alerts and reminders", "An audit trail for every step"],
+    fit: "Operations with repetitive, manual, error-prone work",
+    mock: { title: "Order workflow", kpis: ["Received", "In review", "Completed"], rows: [["Order received", "Done"], ["Stock checked", "Done"], ["Approval needed", "Waiting"], ["Invoice created", "Queued"]] },
   },
   {
-    kicker: "03 · Database",
-    title: "Data you can trust",
-    text: "Clean data models, backups and reporting, so every number on the screen is the right one.",
-    chips: ["SQL and NoSQL", "Backups and recovery", "Reporting-ready"],
+    name: "Enterprise software",
+    keyword: "Enterprise software development",
+    text: "Enterprise software development for larger teams: several departments, many user roles, security requirements and integrations with the systems you already run.",
+    has: ["Multi-department structure", "Single sign-on and detailed roles", "Integration with existing systems", "Reporting across the business"],
+    fit: "Established companies with complex processes",
+    mock: { title: "Departments", kpis: ["Sales", "Finance", "Operations"], rows: [["Sales report", "Ready"], ["Finance review", "In progress"], ["Operations sync", "Done"], ["Compliance check", "Scheduled"]] },
   },
   {
-    kicker: "04 · Cloud",
-    title: "Ready to scale from day one",
-    text: "Deployment, monitoring and release pipelines, so the system stays fast and stable as your users and data grow.",
-    chips: ["Cloud hosting", "Monitoring", "CI/CD"],
+    name: "Portals and internal tools",
+    keyword: "Custom web-based business applications",
+    text: "Custom web-based business applications for staff and customers: portals, admin panels and internal tools that replace email chains and shared files with one clear place to work.",
+    has: ["Customer and partner portals", "Staff dashboards and admin panels", "Document and request handling", "Notifications and status tracking"],
+    fit: "Businesses whose teams share work through email and spreadsheets",
+    mock: { title: "Customer portal", kpis: ["Requests", "Documents", "Messages"], rows: [["Request submitted", "Received"], ["Document shared", "New"], ["Status update", "Sent"], ["Invoice ready", "Paid"]] },
+  },
+  {
+    name: "AI-powered software",
+    keyword: "AI-powered software development",
+    text: "AI-powered software development that adds assistants, document reading and smart automation to the systems you already use, with clear limits and a human in the loop.",
+    has: ["Assistants trained on your content", "Document and data extraction", "Automatic classification and routing", "Summaries and suggestions for staff"],
+    fit: "Teams that want to save time on reading, sorting and replying",
+    mock: { title: "AI inbox", kpis: ["Read", "Sorted", "Replied"], rows: [["Invoice received", "Extracted"], ["Support request", "Answered"], ["Enquiry", "Routed to sales"], ["Unclear request", "Sent to a person"]] },
   },
 ];
-const LAYERS = ["Interface", "API and logic", "Database", "Cloud"];
 
-const builds = [
-  {
-    id: "crm",
-    name: "CRM",
-    title: "Track every lead and customer in one place",
-    text: "A CRM shaped around your sales process, not a generic template. Your team always knows who to talk to next.",
-    points: ["Pipelines and deal stages", "Contact and activity history", "Reminders and reports your team will use"],
-  },
-  {
-    id: "erp",
-    name: "ERP",
-    title: "Run operations from one system",
-    text: "Inventory, orders, invoicing and people, connected, so nobody re-types the same data into three places.",
-    points: ["Inventory and orders", "Invoicing and finance", "Roles and approvals"],
-  },
-  {
-    id: "saas",
-    name: "SaaS",
-    title: "Launch a platform customers can subscribe to",
-    text: "Multi-tenant products with accounts, plans, billing and dashboards, built to grow with your customer base.",
-    points: ["Accounts, plans and billing", "Usage dashboards", "APIs for your own customers"],
-  },
-  {
-    id: "tools",
-    name: "Internal tools",
-    title: "Replace spreadsheets and email chains",
-    text: "Simple, secure apps for the processes your team repeats every week, with the approvals and alerts built in.",
-    points: ["Approval workflows", "Admin panels", "Automations and notifications"],
-  },
-] as const;
+const capabilities: [LucideIcon, string, string][] = [
+  [Plug, "API development and integration", "REST and GraphQL APIs, plus connections to payments, accounting, CRM, email and messaging, so your systems share data instead of duplicating it."],
+  [Database, "Database-driven application development", "Applications designed around a clean data model, with the right database for the job and backups and migrations planned from day one."],
+  [Layers, "Scalable software architecture", "A structure that handles more users, more data and more features without a rewrite every time the business grows."],
+  [RefreshCw, "Legacy software modernization", "Moving ageing or spreadsheet-based systems to a modern, maintainable platform in safe stages, keeping the business running."],
+  [LifeBuoy, "Software maintenance and support", "Monitoring, updates, bug fixes and improvements after launch, so the software stays secure and keeps pace with your needs."],
+  [ShieldCheck, "Security and access control", "Role-based permissions, protected data, safe dependencies and sensible defaults built in rather than added at the end."],
+];
 
-const included = [
-  [Layers, "Discovery and architecture", "We map your process and design a system that fits it before a line of code is written."],
-  [ShieldCheck, "Secure by design", "Authentication, permissions and safe handling of data are part of the first build, not an add-on."],
-  [Plug, "Integrations", "Payments, email, messaging and the tools you already use, connected through clean APIs."],
-  [BarChart3, "Admin and reporting", "Dashboards and exports so managers see what is happening without asking anyone."],
-  [BadgeCheck, "Testing and quality", "Every release is tested on real scenarios before it reaches your team."],
-  [LifeBuoy, "Support and scaling", "Fixes, improvements and new features after launch, as your needs change."],
-] as const;
+const ai: [LucideIcon, string, string][] = [
+  [Bot, "Assistants inside your software", "A chatbot or assistant that answers staff and customer questions from your own content and data."],
+  [FileText, "Document and data processing", "Invoices, forms and emails read automatically, checked against your rules and filed in the right place."],
+  [Sparkles, "Smart automation", "Classification, routing and suggestions that remove routine decisions and keep people on the work that matters."],
+];
 
 const steps = [
-  ["Discovery and strategy", "Goals, users, processes and a plan we both sign off on."],
-  ["UI/UX and architecture", "Screens and system design you approve before development."],
-  ["Development", "Built in short cycles, with working software you can try early."],
-  ["Testing and QA", "Real scenarios, devices and data checked before launch."],
-  ["Launch", "Deployment, data migration and training handled with you."],
-  ["Support and growth", "Monitoring, fixes and new features as you grow."],
+  ["Discovery and consultation", "We learn your business, your users and the problem. You leave with a clear understanding of what to build first."],
+  ["Scope and architecture", "Requirements, a technical plan, a timeline and a fixed scope for the first release."],
+  ["UX and interface design", "Screens and flows designed and approved before development starts."],
+  ["Development in sprints", "Working software delivered in short cycles, reviewed with you as it grows."],
+  ["Testing and launch", "Testing on real scenarios, data migration if needed and a managed go-live."],
+  ["Support and evolution", "Maintenance, monitoring and new features as your business changes."],
 ] as const;
 
-const stack = ["React and Next.js", "TypeScript", "Node.js", "REST and GraphQL APIs", "SQL and NoSQL databases", "Cloud hosting and CI/CD"];
-
-const related = [
-  ["AI Automation", "/services/ai-automation", "Workflows that remove repetitive work from your new system."],
-  ["Mobile Apps", "/services/mobile-app-development", "Native and cross-platform apps that connect to it."],
-  ["UI/UX Design", "/services/ui-ux-design", "Interfaces people understand on the first visit."],
-  ["Website Development", "/services/website-development", "A fast public site to go with your platform."],
-] as const;
-
-const faqs = [
-  ["What kinds of software do you build?", "Web apps, SaaS platforms, CRM, ERP, internal tools, portals and business management systems. If a process lives in spreadsheets or email, we can turn it into software."],
-  ["Why custom software instead of an off-the-shelf tool?", "Off-the-shelf tools make you adapt your process to them. Custom software adapts to you, connects to your other systems and grows with you, with no per-seat surprises."],
-  ["How does a project start?", "Tell us what you want to achieve. We run a short discovery step, then send a clear plan with deliverables, a timeline and a quote."],
-  ["Will I see progress during development?", "Yes. We build in short cycles and share working software early, so you can give feedback while it is cheap to change."],
-  ["Can you connect it to the tools we already use?", "Yes. We integrate with payment providers, email, messaging, accounting tools and other systems through their APIs."],
-  ["Who owns the code?", "You do. We agree ownership, documentation and handover terms in the project scope, so you are never locked in."],
-  ["How do you keep the software secure?", "Authentication, role-based permissions, validated input, backups and monitoring are part of the build from the start, and we review them before every release."],
-  ["Do you support the software after launch?", "Yes. Support and growth is the last step of our process, covering fixes, monitoring and new features."],
-] as const;
-
-const serviceOptions = ["Custom Software", "Website Development", "Mobile Apps", "AI Automation", "Digital Marketing", "UI/UX Design", "SEO", "Something else"];
-
-const jsonLd = [
-  {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    name: "Custom Software Development",
-    serviceType: "Custom software development",
-    description: DESC,
-    url: SITE + PATH,
-    provider: { "@type": "Organization", name: "DEVNTOM Solutions", url: SITE },
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: SITE },
-      { "@type": "ListItem", position: 2, name: "Services", item: SITE + "/services" },
-      { "@type": "ListItem", position: 3, name: "Custom Software", item: SITE + PATH },
-    ],
-  },
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqs.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
-  },
+const audiences: [LucideIcon, string, string][] = [
+  [Rocket, "Startups", "Software development for startups: a focused first version that proves your idea, built so it can grow into the full product."],
+  [Briefcase, "Small businesses", "Custom software for small businesses that have outgrown spreadsheets and off-the-shelf tools that do not quite fit."],
+  [LayoutDashboard, "Growing businesses", "Scalable software solutions for growing businesses: systems that keep up as teams, customers and data increase."],
+  [Building2, "Established companies", "Integration, modernization and new platforms for companies with existing systems and more complex processes."],
 ];
 
-/* ------------------------------ SCROLL TIMELINE ------------------------------ */
+const costFactors = [
+  ["Scope and features", "The number of modules, screens and rules the software needs."],
+  ["Users and roles", "Who uses it, what each role can see and do."],
+  ["Integrations", "How many other systems it must connect to, and how well they are documented."],
+  ["Design depth", "A simple internal tool needs less design than a customer-facing product."],
+  ["Existing data", "Migrating and cleaning data from spreadsheets or older systems."],
+  ["Timeline and support", "How fast you need it and what ongoing support you want."],
+] as const;
 
-const clamp01 = (x: number) => (x <= 0 ? 0 : x > 1 ? 1 : x);
-const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const places = [
+  { city: "Lahore", country: "Pakistan", h: "Custom software development company in Lahore", text: "Our Lahore team builds custom software and business systems for companies across Pakistan, from local startups to established firms." },
+  { city: "Riyadh", country: "Saudi Arabia", h: "Software development company in Riyadh and Saudi Arabia", text: "From Riyadh we support businesses in Saudi Arabia with custom software, integrations and multilingual interfaces where they are needed." },
+  { city: "London", country: "United Kingdom", h: "Custom software development company in London", text: "Our London team works with UK startups and growing companies on custom software development services across the United Kingdom." },
+] as const;
 
-/** 0 while the root's top sits at the stage's top, 1 when its bottom does. */
-const progressFrom = (top: number, height: number, viewport: number) => {
-  const travel = height - viewport;
-  if (travel <= 0) return 0;
-  return clamp01(-top / travel);
-};
+const related = [
+  ["AI Automation and Chatbots", "/services/ai-automation-chatbots", "Add assistants and automation to the software you build."],
+  ["Website Development", "/services/website-development", "Fast, secure websites that connect to your systems."],
+  ["Digital Marketing", "/services/digital-marketing", "Bring the right customers to your platform."],
+  ["Mobile Apps", "/services/mobile-app-development", "Native and cross-platform apps to go with your software."],
+] as const;
 
-/** Scroll progress to a continuous frame coordinate in 0..n-1. Each frame holds for `hold` of its slot. */
-const sceneCoord = (p: number, n: number, hold: number) => {
-  if (n <= 1) return 0;
-  const t = clamp01(p) * (n - 1);
-  const i = Math.min(Math.floor(t), n - 2);
-  const h = hold / 2;
-  return i + easeInOut(clamp01((t - i - h) / (1 - 2 * h)));
-};
+const FAQS = [
+  ["What are custom software development services?", "They cover designing, building and maintaining software made for one business instead of buying a ready-made product. It is shaped around your workflows, your data and your goals, and you own the result."],
+  ["When should I choose custom software instead of off-the-shelf tools?", "When ready-made tools force you to change how you work, when you pay for features you do not use, or when your processes are what make your business different. If an existing tool fits well, we will tell you."],
+  ["How much does custom software development cost?", "It depends on scope, users, integrations, design and timeline, so we do not publish fixed prices. After a short consultation we send a clear proposal with deliverables, a timeline and a price. Building in phases helps you control spend."],
+  ["Do you work with startups and small businesses?", "Yes. For startups we usually start with a focused first release. For small businesses we often replace spreadsheets and manual steps with one simple system that can grow."],
+  ["Can you build CRM and ERP systems?", "Yes. We build custom CRM and ERP software, as well as workflow automation, portals, internal tools and SaaS platforms, and connect them to the tools you already use."],
+  ["Can you modernize our existing software?", "Yes. We review what you have, keep what works and move the rest to a modern platform in stages, so the business keeps running during the change."],
+  ["Can we outsource custom software development to you?", "Yes. Many clients hand us the whole project, from discovery to launch and support, while others use us to extend their own team. We agree who does what in the proposal."],
+  ["Who owns the code and the data?", "You do. We agree this in writing at the start, and we document the system so it is not dependent on us."],
+  ["Do you support the software after launch?", "Yes. We offer maintenance and support covering monitoring, updates, fixes and new features."],
+  ["Where do you work?", "We have teams in Lahore, Riyadh and London and work with businesses worldwide, using video calls and shared tools to keep projects moving."],
+] as const;
 
-/** How present one frame is at `coord`. */
-const reveal = (coord: number, scene: number) => clamp01((0.62 - Math.abs(coord - scene)) / 0.22);
+const serviceOptions = ["Custom Software", "CRM or ERP", "SaaS or Web Application", "Workflow Automation", "AI Integration", "Legacy Modernization", "Website Development", "Something else"];
 
-const SCENES = frames.length;
-const HOLD = 0.34;
+/* ------------------------------ SMALL HELPERS ------------------------------ */
 
-/* ------------------------------ ISOMETRIC STACK ------------------------------ */
+function useReduced() {
+  const [r, setR] = React.useState(false);
+  React.useEffect(() => setR(window.matchMedia("(prefers-reduced-motion: reduce)").matches), []);
+  return r;
+}
 
-const SIZE = 150; // half the side of one layer's square, in plane units
-const THICK = 22;
-const ISO = "matrix(0.866 0.5 -0.866 0.5 500 0)";
-const CX = 500;
-const CY = 440;
-/** four connector ports on each layer, in plane coordinates */
-const PORTS: [number, number][] = [[-70, -70], [70, -70], [-70, 70], [70, 70]];
-const portX = (p: [number, number]) => CX + (p[0] - p[1]) * 0.866;
-const portY = (p: [number, number]) => (p[0] + p[1]) * 0.5;
+const bar = (w: string, extra = "") => <span className={`block h-2 rounded-full bg-white/20 ${extra}`} style={{ width: w }} />;
 
-const RX = SIZE * 0.866 * 2; // horizontal half-width of the rhombus (matches the iso matrix)
-const TOP = `${CX},${-SIZE} ${CX + RX},0 ${CX},${SIZE} ${CX - RX},0`;
-const LEFT = `${CX - RX},0 ${CX},${SIZE} ${CX},${SIZE + THICK} ${CX - RX},${THICK}`;
-const RIGHT = `${CX},${SIZE} ${CX + RX},0 ${CX + RX},${THICK} ${CX},${SIZE + THICK}`;
+/* ------------------------------ HERO: LAYERED ARCHITECTURE ------------------------------ */
 
-const stroke = { fill: "none", stroke: COBALT_TEXT, strokeWidth: 1.6, strokeLinejoin: "round" } as const;
-const soft = { fill: "rgba(47,123,255,0.16)", stroke: COBALT_TEXT, strokeWidth: 1.4, strokeLinejoin: "round" } as const;
-
-function LayerArt({ i }: { i: number }) {
-  if (i === 0)
-    return (
-      <>
-        <rect x={-120} y={-110} width={240} height={220} rx={8} {...stroke} />
-        <rect x={-120} y={-110} width={240} height={26} rx={8} {...soft} />
-        {[0, 1, 2].map((k) => <circle key={k} cx={-106 + k * 14} cy={-97} r={3.5} fill={COBALT_TEXT} />)}
-        <rect x={-120} y={-84} width={50} height={194} {...soft} />
-        {[0, 1, 2].map((k) => <rect key={k} x={-62 + k * 60} y={-76} width={54} height={44} rx={4} {...soft} />)}
-        {[30, 52, 40, 70, 58, 84].map((h, k) => <rect key={k} x={-56 + k * 28} y={96 - h} width={16} height={h} rx={2} fill={COBALT_HI} opacity={0.75} />)}
-      </>
-    );
-  if (i === 1) {
-    const n: [number, number][] = [[-92, -62], [-22, -96], [72, -52], [-72, 40], [8, 8], [94, 62], [-8, 92]];
-    const e = [[0, 1], [1, 2], [0, 4], [1, 4], [2, 4], [3, 4], [4, 5], [4, 6], [3, 6], [2, 5]];
-    return (
-      <>
-        {e.map(([a, b], k) => <line key={k} x1={n[a][0]} y1={n[a][1]} x2={n[b][0]} y2={n[b][1]} stroke={COBALT_TEXT} strokeWidth={1.6} opacity={0.8} />)}
-        {n.map((p, k) => <circle key={k} cx={p[0]} cy={p[1]} r={k === 4 ? 16 : 10} fill={k === 4 ? COBALT_HI : "rgba(47,123,255,0.25)"} stroke={COBALT_TEXT} strokeWidth={1.6} />)}
-      </>
-    );
-  }
-  if (i === 2)
-    return (
-      <>
-        {[-90, -25, 40].map((y, k) => (
-          <g key={k}>
-            <rect x={-104} y={y} width={208} height={50} rx={6} {...soft} />
-            <circle cx={-84} cy={y + 25} r={5} fill={COBALT_HI} />
-            {[0, 1, 2, 3].map((r) => <rect key={r} x={-62 + r * 42} y={y + 21} width={30} height={8} rx={2} fill={COBALT_TEXT} opacity={0.55} />)}
-          </g>
-        ))}
-      </>
-    );
+function Layer({ label, items, delay }: { label: string; items: [LucideIcon, string][]; delay: number }) {
   return (
-    <>
-      {[0, 1, 2].flatMap((r) =>
-        [0, 1, 2].map((c) => (
-          <g key={`${r}${c}`}>
-            <rect x={-102 + c * 72} y={-102 + r * 72} width={60} height={60} rx={6} {...soft} />
-            <circle cx={-90 + c * 72} cy={-90 + r * 72} r={3.5} fill={(r + c) % 2 ? COBALT_HI : WHITE} opacity={0.9} />
-            <rect x={-90 + c * 72} y={-72 + r * 72} width={36} height={5} rx={2} fill={COBALT_TEXT} opacity={0.5} />
-            <rect x={-90 + c * 72} y={-62 + r * 72} width={24} height={5} rx={2} fill={COBALT_TEXT} opacity={0.5} />
-          </g>
-        ))
-      )}
-    </>
+    <div className="wf-pop rounded-[16px] border border-white/20 bg-[#0B1F3B]/90 p-5 shadow-[0_30px_80px_rgba(0,71,171,.35)]" style={{ animationDelay: `${delay}ms` }}>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#6EA1FF]">{label}</p>
+      <ul className="mt-3 flex flex-wrap gap-2.5">
+        {items.map(([I, t]) => <li key={t} className="flex items-center gap-2 rounded-[10px] border border-white/15 bg-white/[0.06] px-3.5 py-2.5 text-sm text-[#E6EEFF]"><I size={16} className="text-[#6EA1FF]" aria-hidden="true" />{t}</li>)}
+      </ul>
+    </div>
   );
 }
 
-/* ------------------------------ PINNED STAGE ------------------------------ */
-
-function StackStage() {
-  const rootRef = React.useRef<HTMLElement | null>(null);
-  const stageRef = React.useRef<HTMLDivElement | null>(null);
-  const layerRefs = React.useRef<(SVGGElement | null)[]>([]);
-  const glowRefs = React.useRef<(SVGPolygonElement | null)[]>([]);
-  const labelRefs = React.useRef<(SVGGElement | null)[]>([]);
-  const lineRefs = React.useRef<(SVGLineElement | null)[]>([]);
-  const packetRefs = React.useRef<(SVGCircleElement | null)[]>([]);
-  const haloRef = React.useRef<HTMLDivElement | null>(null);
-  const [reduced, setReduced] = React.useState(false);
-  const [active, setActive] = React.useState(0);
-
-  React.useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReduced(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-  const look = React.useRef({ reduced });
-  look.current = { reduced };
-
-  React.useEffect(() => {
-    const root = rootRef.current;
-    const stage = stageRef.current;
-    if (!root || !stage) return;
-    const items = Array.from(stage.querySelectorAll<HTMLElement>("[data-sc]")).map((el) => ({ el, scene: Number(el.dataset.sc), last: -1 }));
-
-    let raf = 0;
-    let running = false;
-    let visible = true;
-    let last = performance.now();
-    let time = 0;
-    let prog = -1;
-    let shown = -1;
-    let pointer = 0;
-    let pointerTarget = 0;
-    const onMove = (e: PointerEvent) => {
-      const r = stage.getBoundingClientRect();
-      pointerTarget = ((e.clientX - r.left) / r.width) * 2 - 1;
-    };
-    stage.addEventListener("pointermove", onMove);
-
-    const frame = (now: number) => {
-      raf = requestAnimationFrame(frame);
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
-      const still = look.current.reduced;
-      if (!still) time += dt;
-
-      const r = root.getBoundingClientRect();
-      const p = progressFrom(r.top, r.height, stage.clientHeight);
-      prog = prog < 0 || still ? p : prog + (p - prog) * (1 - Math.exp(-dt * 9));
-      const coord = sceneCoord(prog, SCENES, HOLD);
-      const scene = Math.round(coord);
-      if (scene !== shown) {
-        shown = scene;
-        setActive(scene);
-      }
-      pointer += (pointerTarget - pointer) * (1 - Math.exp(-dt * 4));
-
-      // layout of the stack
-      const e = easeInOut(clamp01(coord));
-      const gap = 40 + (138 - 40) * e;
-      const bob = still ? 0 : Math.sin(time * 0.9) * 5;
-      const ys = [0, 1, 2, 3].map((i) => CY + (i - 1.5) * gap + bob);
-      const px = still ? 0 : pointer * 14;
-      const hs = [0, 1, 2, 3].map((i) => clamp01(1 - Math.abs(coord - (i + 1)) * 1.4));
-
-      for (let i = 0; i < 4; i++) {
-        layerRefs.current[i]?.setAttribute("transform", `translate(${px.toFixed(1)} ${ys[i].toFixed(1)})`);
-        const g = glowRefs.current[i];
-        if (g) g.style.opacity = String(0.12 * (1 - e) + hs[i] * 0.95);
-        const lb = labelRefs.current[i];
-        if (lb) lb.style.opacity = String(e * (0.35 + 0.65 * hs[i]));
-      }
-
-      for (let i = 0; i < 3; i++) {
-        const strong = Math.max(hs[i], hs[i + 1]);
-        for (let j = 0; j < 4; j++) {
-          const x = portX(PORTS[j]) + px;
-          const y1 = ys[i] + portY(PORTS[j]);
-          const y2 = ys[i + 1] + portY(PORTS[j]);
-          const ln = lineRefs.current[i * 4 + j];
-          if (ln) {
-            ln.setAttribute("x1", x.toFixed(1));
-            ln.setAttribute("x2", x.toFixed(1));
-            ln.setAttribute("y1", y1.toFixed(1));
-            ln.setAttribute("y2", y2.toFixed(1));
-            ln.style.opacity = String(e * (0.18 + 0.6 * strong));
-          }
-          for (let k = 0; k < 2; k++) {
-            const c = packetRefs.current[(i * 4 + j) * 2 + k];
-            if (!c) continue;
-            let t = (time * 0.32 + j * 0.23 + k * 0.5) % 1;
-            if (j % 2) t = 1 - t;
-            c.setAttribute("cx", x.toFixed(1));
-            c.setAttribute("cy", (y1 + (y2 - y1) * t).toFixed(1));
-            c.style.opacity = String(e * Math.sin(Math.PI * t) * (0.45 + 0.55 * strong));
-          }
-        }
-      }
-
-      // the haze behind the stack follows the active layer
-      const halo = haloRef.current;
-      if (halo) {
-        const focus = Math.max(0, Math.min(3, coord - 1));
-        const yy = coord < 1 ? CY : CY + (focus - 1.5) * gap;
-        halo.style.setProperty("--hy", `${((yy / 900) * 100).toFixed(1)}%`);
-      }
-
-      // the text
-      for (const it of items) {
-        const v = reveal(coord, it.scene);
-        const q = Math.round(v * 500) / 500;
-        if (q === it.last) continue;
-        it.last = q;
-        const s = it.el.style;
-        const dir = coord < it.scene ? 1 : -1;
-        s.visibility = q <= 0 ? "hidden" : "";
-        s.opacity = String(q);
-        if (!still) {
-          s.transform = `translateY(${((1 - q) * 28 * dir).toFixed(1)}px)`;
-          s.filter = q > 0.995 ? "" : `blur(${((1 - q) * 6).toFixed(1)}px)`;
-        }
-      }
-    };
-
-    const start = () => {
-      if (running || !visible || document.hidden) return;
-      running = true;
-      last = performance.now();
-      raf = requestAnimationFrame(frame);
-    };
-    const stop = () => {
-      running = false;
-      cancelAnimationFrame(raf);
-    };
-    const io = new IntersectionObserver(([en]) => {
-      visible = en.isIntersecting;
-      if (visible) start();
-      else stop();
-    });
-    io.observe(root);
-    const onVis = () => (document.hidden ? stop() : start());
-    document.addEventListener("visibilitychange", onVis);
-    start();
-    return () => {
-      stop();
-      io.disconnect();
-      document.removeEventListener("visibilitychange", onVis);
-      stage.removeEventListener("pointermove", onMove);
-    };
-  }, []);
-
-  const jump = (i: number) => {
-    const root = rootRef.current;
-    const stage = stageRef.current;
-    if (!root || !stage) return;
-    const r = root.getBoundingClientRect();
-    const travel = r.height - stage.clientHeight;
-    window.scrollBy({ top: (i / (SCENES - 1)) * travel + r.top, behavior: reduced ? "auto" : "smooth" });
-  };
-
-  const sans = { fontFamily: rob.style.fontFamily } as React.CSSProperties;
-  const display = { fontFamily: pop.style.fontFamily } as React.CSSProperties;
-
+function Connector({ delay = 0 }: { delay?: number }) {
   return (
-    <section
-      ref={rootRef}
-      className="relative w-full"
-      style={{ height: `calc(100svh * ${(1 + (SCENES - 1) * 1.1).toFixed(2)})`, background: BLACK }}
-      aria-label="Custom software, explained in four layers"
-    >
-      <div ref={stageRef} className="sticky top-0 w-full select-none overflow-hidden" style={{ height: "100svh", background: BLACK, color: WHITE }}>
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(120% 90% at 70% 50%, ${NAVY} 0%, ${BLACK} 70%)` }} />
-        <div
-          ref={haloRef}
-          aria-hidden
-          className="pointer-events-none absolute right-0 top-0 h-full w-full lg:w-[66%]"
-          style={{ ["--hy" as string]: "49%", background: `radial-gradient(closest-side at 50% var(--hy), ${COBALT}80, ${COBALT}22 55%, transparent 100%)` } as React.CSSProperties}
-        />
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.12]" style={{ backgroundImage: "linear-gradient(rgba(110,161,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(110,161,255,.5) 1px,transparent 1px)", backgroundSize: "64px 64px", WebkitMaskImage: "radial-gradient(70% 70% at 70% 50%,#000,transparent)", maskImage: "radial-gradient(70% 70% at 70% 50%,#000,transparent)" }} />
+    <div aria-hidden className="relative mx-auto h-9 w-px overflow-hidden bg-gradient-to-b from-transparent via-[#2F7BFF]/60 to-transparent">
+      <span className="flow absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-white shadow-[0_0_12px_#2F7BFF]" style={{ animationDelay: `${delay}ms` }} />
+    </div>
+  );
+}
 
-        {/* the stack */}
-        <div className="absolute right-0 top-0 h-[54%] w-full lg:h-full lg:w-[66%]">
-          <svg viewBox="0 0 1000 900" role="img" aria-label="Four layers of a software system: interface, API and logic, database and cloud" className="h-full w-full" preserveAspectRatio="xMidYMid meet">
-            <defs>
-              <linearGradient id="sw-top" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#10305E" />
-                <stop offset="1" stopColor="#0A1B38" />
-              </linearGradient>
-              <linearGradient id="sw-side" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#0A2A5C" />
-                <stop offset="1" stopColor="#050E1F" />
-              </linearGradient>
-              <filter id="sw-blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9" /></filter>
-              <filter id="sw-dot" x="-300%" y="-300%" width="700%" height="700%"><feGaussianBlur stdDeviation="3.5" /></filter>
-            </defs>
-
-            {Array.from({ length: 12 }).map((_, k) => (
-              <line key={k} ref={(el) => { lineRefs.current[k] = el; }} stroke={COBALT_TEXT} strokeWidth={1.3} strokeDasharray="3 6" opacity={0} />
-            ))}
-
-            {[3, 2, 1, 0].map((i) => (
-              <g key={i} ref={(el) => { layerRefs.current[i] = el; }} transform={`translate(0 ${CY + (i - 1.5) * 40})`}>
-                <polygon points={LEFT} fill="url(#sw-side)" stroke="rgba(110,161,255,.35)" strokeWidth={1} strokeLinejoin="round" />
-                <polygon points={RIGHT} fill="url(#sw-side)" stroke="rgba(110,161,255,.35)" strokeWidth={1} strokeLinejoin="round" opacity={0.85} />
-                <polygon ref={(el) => { glowRefs.current[i] = el; }} points={TOP} fill={COBALT_HI} stroke={COBALT_HI} strokeWidth={14} strokeLinejoin="round" filter="url(#sw-blur)" opacity={0.12} />
-                <polygon points={TOP} fill="url(#sw-top)" stroke={COBALT_HI} strokeWidth={2} strokeLinejoin="round" />
-                <g transform={ISO}><LayerArt i={i} /></g>
-                {PORTS.map((p, k) => <circle key={k} cx={portX(p)} cy={portY(p)} r={4.5} fill={BLACK} stroke={WHITE} strokeWidth={1.6} />)}
-                <g ref={(el) => { labelRefs.current[i] = el; }} opacity={0}>
-                  <line x1={CX + RX + 12} y1={0} x2={CX + RX + 60} y2={0} stroke={COBALT_TEXT} strokeWidth={1.2} />
-                  <text x={CX + RX + 70} y={6} fill={WHITE} fontSize={22} style={{ ...display, fontWeight: 300 }}>{LAYERS[i]}</text>
-                </g>
-              </g>
-            ))}
-
-            <g filter="url(#sw-dot)">
-              {Array.from({ length: 24 }).map((_, k) => (
-                <circle key={k} ref={(el) => { packetRefs.current[k] = el; }} r={6} fill={COBALT_TEXT} opacity={0} />
-              ))}
-            </g>
-            <g>
-              {Array.from({ length: 24 }).map((_, k) => (
-                <circle key={k} ref={(el) => { packetRefs.current[24 + k] = el; }} r={2.6} fill={WHITE} opacity={0} />
-              ))}
-            </g>
-          </svg>
+function Architecture() {
+  return (
+    <div className="relative mx-auto w-full max-w-[560px]" role="img" aria-label="Diagram of a custom software system: interfaces on top, business logic and APIs in the middle, data underneath, connected to your existing tools">
+      <div aria-hidden className="absolute -inset-10 -z-10 rounded-full opacity-70 blur-2xl" style={{ background: `radial-gradient(closest-side, ${COBALT}88, transparent)` }} />
+      <div className="mk-float-slow">
+        <Layer label="Interfaces" delay={0} items={[[Globe, "Web app"], [LayoutDashboard, "Admin panel"], [Users, "Customer portal"]]} />
+        <Connector />
+        <Layer label="Business logic and APIs" delay={150} items={[[Workflow, "Workflows"], [ShieldCheck, "Roles and security"], [Plug, "Integrations"]]} />
+        <Connector delay={600} />
+        <Layer label="Data" delay={300} items={[[Database, "Database"], [FileText, "Documents"], [LayoutDashboard, "Reports"]]} />
+        <div className="mt-4 flex justify-center">
+          <span className="pulse-soft inline-flex items-center gap-2 rounded-full border border-dashed border-[#6EA1FF]/70 px-4 py-2 text-sm text-[#BFD4FF]"><Plus size={14} aria-hidden="true" />New module when you need it</span>
         </div>
+      </div>
+      <div aria-hidden className="mk-float absolute -right-5 top-[27%] hidden items-center gap-2 rounded-full border border-white/25 bg-[#0B1F3B]/95 px-4 py-2.5 text-sm text-white xl:flex"><Plug size={15} className="text-[#6EA1FF]" />Your existing tools</div>
+    </div>
+  );
+}
 
-        {/* the text frames */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[46%] lg:inset-y-0 lg:right-auto lg:h-full lg:w-[44%]">
-          {frames.map((f, i) => (
-            <div
-              key={f.kicker}
-              data-sc={i}
-              className="pointer-events-auto absolute inset-0 flex flex-col justify-start px-6 pt-2 md:px-12 lg:justify-center lg:pt-0 xl:pl-[max(3rem,calc((100vw-1400px)/2+3rem))]"
-              style={{ visibility: i === 0 ? undefined : "hidden", opacity: i === 0 ? undefined : 0 }}
-              aria-hidden={active !== i}
-            >
-              <p style={sans} className="text-xs uppercase tracking-[0.22em] text-[#6EA1FF]">{f.kicker}</p>
-              <p style={{ ...display, fontWeight: 200, letterSpacing: "-0.04em" }} className={`mt-4 leading-[1] ${i === 0 ? "text-[clamp(2.1rem,5.2vw,5rem)]" : "text-[clamp(1.8rem,4vw,3.8rem)]"}`}>{f.title}</p>
-              <p style={sans} className="mt-5 max-w-md text-[0.95rem] font-light leading-relaxed text-[#DCE7FB] md:text-base">{f.text}</p>
-              {f.chips.length > 0 && (
-                <ul className="mt-6 flex flex-wrap gap-2">
-                  {f.chips.map((c) => <li key={c} style={sans} className="rounded-full border border-white/20 px-4 py-1.5 text-xs text-[#DCE7FB]">{c}</li>)}
-                </ul>
-              )}
-              {i === 0 && (
-                <div className="mt-8 flex flex-wrap items-center gap-3">
-                  <a href="#contact-form" style={sans} className="group inline-flex items-center gap-3 rounded-full bg-[#0047AB] px-7 py-3.5 text-sm font-medium text-white transition hover:bg-white hover:text-[#0B1F3B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6EA1FF] focus-visible:ring-offset-2 focus-visible:ring-offset-black">
-                    Start a project <ArrowRight size={16} className="transition group-hover:translate-x-1" aria-hidden="true" />
-                  </a>
-                  <a href="#builds" style={sans} className="inline-flex items-center rounded-full border border-white/30 px-7 py-3.5 text-sm font-medium text-white transition hover:border-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6EA1FF]">See what we build</a>
-                </div>
-              )}
-              {i === SCENES - 1 && (
-                <div className="mt-8">
-                  <a href="#contact-form" style={sans} className="group inline-flex items-center gap-3 rounded-full bg-[#0047AB] px-7 py-3.5 text-sm font-medium text-white transition hover:bg-white hover:text-[#0B1F3B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6EA1FF] focus-visible:ring-offset-2 focus-visible:ring-offset-black">
-                    Tell us what to build <ArrowRight size={16} className="transition group-hover:translate-x-1" aria-hidden="true" />
-                  </a>
-                </div>
-              )}
-            </div>
-          ))}
+function Hero() {
+  return (
+    <section className="relative isolate overflow-hidden text-white" aria-label="Custom software development services" style={{ background: `radial-gradient(70% 60% at 76% 34%, ${COBALT}70 0%, transparent 65%), radial-gradient(50% 50% at 8% 90%, ${COBALT}33 0%, transparent 70%), linear-gradient(180deg, ${BLACK} 0%, ${NAVY} 100%)` }}>
+      <div aria-hidden className="hero-grid pointer-events-none absolute inset-0 -z-10 opacity-[0.16]" />
+      <div className={`${wrap} relative grid min-h-[100svh] items-center gap-14 pb-36 pt-32 lg:grid-cols-12 lg:pt-36`}>
+        <div className="lg:col-span-6">
+          <p className="rv inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/[0.06] py-2 pl-3 pr-5 text-[11px] uppercase tracking-[0.18em] text-[#DCE7FB]">
+            <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2F7BFF] opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-[#2F7BFF]" /></span>
+            Custom software development company
+          </p>
+          <Lines h1 className="mt-7 text-[clamp(2.2rem,4vw,3.9rem)] leading-[0.98] tracking-[-0.045em] [text-shadow:0_2px_40px_rgba(2,5,11,.5)]" lines={[<b key="a" className="font-bold">Custom Software</b>, "Development Services", <>for <Acc>Growing</Acc> Businesses</>]} />
+          <p className="rv mt-8 max-w-xl text-lg font-light leading-relaxed text-[#DCE7FB]" style={{ transitionDelay: "150ms" }}>
+            DEVNTOM Solutions designs and builds scalable business applications, custom platforms and software solutions tailored to your workflows and goals, from the first idea to launch and long-term support.
+          </p>
+          <div className="rv mt-9 flex flex-wrap items-center gap-3" style={{ transitionDelay: "250ms" }}>
+            <a href="#contact-form" className={`group inline-flex items-center gap-3 rounded-full bg-[#0047AB] px-8 py-4 text-sm font-medium text-white transition hover:bg-white hover:text-[#0B1F3B] ${ringDark}`}>
+              Book a free consultation <ArrowRight size={16} className="transition group-hover:translate-x-1" aria-hidden="true" />
+            </a>
+            <a href="#solutions" className={`inline-flex items-center rounded-full border border-white/30 px-8 py-4 text-sm font-medium text-white transition hover:border-white ${ringDark}`}>See what we build</a>
+          </div>
+          <ul className="rv mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm text-[#DCE7FB]" style={{ transitionDelay: "350ms" }}>
+            {["End-to-end delivery", "You own the code", "Support after launch"].map((t) => (
+              <li key={t} className="flex items-center gap-2"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#2F7BFF] text-white"><Check size={12} strokeWidth={3} aria-hidden="true" /></span>{t}</li>
+            ))}
+          </ul>
         </div>
-
-        {/* frame dots */}
-        <nav aria-label="Software layers" className="absolute right-4 top-1/2 hidden -translate-y-1/2 flex-col gap-3 md:flex">
-          {frames.map((f, i) => (
-            <button
-              key={f.kicker}
-              type="button"
-              onClick={() => jump(i)}
-              aria-label={`Go to ${f.kicker}`}
-              aria-current={active === i ? "step" : undefined}
-              className="group flex h-4 w-4 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6EA1FF]"
-            >
-              <span className={`block rounded-full transition-all ${active === i ? "h-3 w-3 bg-[#2F7BFF]" : "h-1.5 w-1.5 bg-white/40 group-hover:bg-white"}`} />
-            </button>
-          ))}
-        </nav>
-        <div style={sans} className="pointer-events-none absolute bottom-5 left-6 text-[10px] uppercase tracking-[0.3em] text-white/60 md:left-12 lg:bottom-6">Scroll to pull the layers apart</div>
+        <div className="lg:col-span-6"><Architecture /></div>
+      </div>
+      <div className="absolute inset-x-0 bottom-0 border-t border-white/10 bg-black/40 py-5" aria-label="What we build">
+        <div className="overflow-hidden">
+          <div className="mq flex w-max items-center gap-14 whitespace-nowrap text-sm uppercase tracking-[0.2em] text-white/60">
+            {[...techs, ...techs, ...techs].map((t, i) => <span key={i} className="flex items-center gap-14">{t}<span className="h-1 w-1 rounded-full bg-[#2F7BFF]" /></span>)}
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
-/* ------------------------------ PRODUCT MOCK-UPS ------------------------------ */
+/* ------------------------------ OVERVIEW ------------------------------ */
 
-const bar = "block rounded-full bg-white/25";
-const pill = "rounded-full px-2.5 py-0.5 text-[10px] font-medium";
-
-function WindowFrame({ title, children }: { title: string; children: React.ReactNode }) {
+function Overview() {
+  const points: [LucideIcon, string, string][] = [
+    [Workflow, "Fits your workflows", "Software modelled on how your team actually works, with no features you do not need and no workarounds for the ones you do."],
+    [Layers, "Built to scale", "A scalable software architecture that grows with your users, data and ambitions, without a costly rewrite."],
+    [ShieldCheck, "Yours to own", "You own the code and the data, with clear documentation, so you are never locked in."],
+  ];
   return (
-    <div className="overflow-hidden rounded-[6px] border border-white/15 bg-[#071A33] shadow-[0_30px_90px_rgba(0,71,171,.35)]" aria-hidden="true">
-      <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.04] px-4 py-3">
-        <span className="h-2.5 w-2.5 rounded-full bg-white/30" />
-        <span className="h-2.5 w-2.5 rounded-full bg-white/30" />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#2F7BFF]" />
-        <span className="ml-3 text-xs text-white/60">{title}</span>
+    <section className="bg-white py-24 md:py-36" aria-label="Overview">
+      <div className={`${wrap} grid gap-14 lg:grid-cols-12`}>
+        <div className="lg:col-span-6">
+          <Lines className="t2" lines={[<>A custom software</>, <>development <b className="font-bold">company</b></>, <>built around <Acc dark={false}>you</Acc></>]} />
+          <div className="rv mt-8 space-y-5 text-lg font-light leading-relaxed text-[#3B4A63]" style={{ transitionDelay: "120ms" }}>
+            <p>Off-the-shelf tools work until your business does something they do not expect. Our custom software development services close that gap with bespoke software development shaped around your processes, your customers and your goals.</p>
+            <p>As a software development company with teams in Lahore, Riyadh and London, we deliver end-to-end software development: discovery, design, engineering, testing, launch and support. The result is business software development you can rely on, with tailored software solutions that your team will actually use.</p>
+          </div>
+        </div>
+        <ul className="grid gap-5 lg:col-span-6">
+          {points.map(([I, t, d], i) => (
+            <li key={t} className="rv group flex gap-6 rounded-[4px] border border-[#CBD8EE] p-7 transition-colors duration-300 hover:border-[#0047AB] hover:bg-[#F4F8FE]" style={{ transitionDelay: `${i * 90}ms` }}>
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[4px] bg-[#E3ECFB] text-[#0047AB] transition-colors duration-300 group-hover:bg-[#0047AB] group-hover:text-white"><I size={24} aria-hidden="true" /></span>
+              <span><h3 className={`${pop.className} text-xl font-semibold tracking-[-0.01em]`}>{t}</h3><p className="mt-2 font-light leading-relaxed text-[#3B4A63]">{d}</p></span>
+            </li>
+          ))}
+        </ul>
       </div>
-      <div className="p-4 md:p-6">{children}</div>
+    </section>
+  );
+}
+
+/* ------------------------------ SOLUTIONS EXPLORER ------------------------------ */
+
+function SolutionMock({ s }: { s: Solution }) {
+  const m = s.mock;
+  return (
+    <div aria-hidden="true" className="overflow-hidden rounded-[12px] border border-white/15 bg-[#071A33] shadow-[0_30px_80px_rgba(2,5,11,.4)]">
+      <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.04] px-4 py-3"><span className="h-2.5 w-2.5 rounded-full bg-white/25" /><span className="h-2.5 w-2.5 rounded-full bg-white/25" /><span className="h-2.5 w-2.5 rounded-full bg-[#2F7BFF]" /><span className="ml-3 text-xs text-white/60">{m.title}</span></div>
+      <div className="p-5">
+        <div className="grid grid-cols-3 gap-3">
+          {m.kpis.map((k, i) => <div key={k} className="wf-pop rounded-[8px] border border-white/10 bg-white/[0.05] p-3" style={{ animationDelay: `${i * 90}ms` }}><p className="text-[11px] text-[#BFD4FF]">{k}</p>{bar("55%", "mt-3 !bg-white/70 !h-3")}</div>)}
+        </div>
+        <ul className="mt-4 divide-y divide-white/10 rounded-[8px] border border-white/10">
+          {m.rows.map(([a, b], i) => (
+            <li key={a} className="wf-pop flex items-center justify-between px-4 py-3 text-sm" style={{ animationDelay: `${250 + i * 90}ms` }}>
+              <span className="flex items-center gap-3 text-[#E6EEFF]"><span className="h-6 w-6 rounded-full bg-white/15" />{a}</span>
+              <span className={`rounded-full px-3 py-1 text-[11px] ${/Done|Won|Paid|Ready|Renewed|Answered|Extracted|Active/.test(b) ? "bg-[#2F7BFF] text-white" : "bg-white/10 text-white/80"}`}>{b}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
 
-function MockCRM() {
-  const cols: [string, number][] = [["New", 3], ["Contacted", 2], ["Proposal", 3], ["Won", 2]];
+function Solutions() {
+  const [sel, setSel] = React.useState(0);
+  const s = solutions[sel];
+  const onKey = (e: React.KeyboardEvent, i: number) => {
+    const n = solutions.length;
+    const next = e.key === "ArrowDown" || e.key === "ArrowRight" ? (i + 1) % n : e.key === "ArrowUp" || e.key === "ArrowLeft" ? (i - 1 + n) % n : -1;
+    if (next < 0) return;
+    e.preventDefault();
+    setSel(next);
+    (e.currentTarget.parentElement?.children[next] as HTMLElement | undefined)?.focus();
+  };
   return (
-    <WindowFrame title="CRM · Pipeline">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {cols.map(([n, c], ci) => (
-          <div key={n} className="rounded-[4px] bg-white/[0.05] p-3">
-            <div className="mb-3 flex items-center justify-between text-xs text-white/70"><span>{n}</span><span className={`${pill} bg-[#2F7BFF]/25 text-[#6EA1FF]`}>{c}</span></div>
-            <div className="space-y-2">
-              {Array.from({ length: c }).map((_, k) => (
-                <div key={k} className="sw-pop rounded-[4px] border border-white/10 bg-white/[0.06] p-3" style={{ ["--i" as string]: ci * 2 + k } as React.CSSProperties}>
-                  <span className={`${bar} h-2 w-3/4`} />
-                  <span className={`${bar} mt-2 h-2 w-1/2 opacity-60`} />
-                  <span className={`${pill} mt-3 inline-block ${n === "Won" ? "bg-[#2F7BFF] text-white" : "bg-white/10 text-white/70"}`}>{n === "Won" ? "Closed" : "Follow up"}</span>
-                </div>
-              ))}
+    <section id="solutions" className="relative overflow-hidden py-24 text-white md:py-36" aria-label="Custom software solutions" style={{ background: `linear-gradient(180deg, ${NAVY} 0%, ${BLACK} 100%)` }}>
+      <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(circle at 12% 10%, rgba(0,71,171,.5), transparent 45%)" }} />
+      <div className={`${wrap} relative`}>
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <Lines className="t2 max-w-3xl" lines={[<>Custom software</>, <><b className="font-bold">solutions</b> we <Acc>build</Acc></>]} />
+          <p className="rv max-w-sm font-light leading-relaxed text-white/70">From business management systems to SaaS platforms, choose a type of software to see what it covers. Screens are illustrations.</p>
+        </div>
+        <div className="mt-14 grid gap-10 lg:grid-cols-12">
+          <div role="tablist" aria-label="Types of custom software" aria-orientation="vertical" className="lg:col-span-4">
+            {solutions.map((x, i) => (
+              <button key={x.name} role="tab" id={`sol-tab-${i}`} aria-selected={sel === i} aria-controls="sol-panel" tabIndex={sel === i ? 0 : -1} onClick={() => setSel(i)} onKeyDown={(e) => onKey(e, i)} className={`flex w-full items-baseline gap-4 border-t border-white/15 py-5 pr-4 text-left transition last:border-b ${ringDark}`}>
+                <span className="text-xs text-white/50">{String(i + 1).padStart(2, "0")}</span>
+                <span className={`${pop.className} text-2xl tracking-[-0.03em] transition-colors ${sel === i ? "font-semibold text-[#6EA1FF]" : "font-extralight text-white hover:text-[#6EA1FF]"}`}>{x.name}</span>
+              </button>
+            ))}
+          </div>
+          <div id="sol-panel" role="tabpanel" aria-labelledby={`sol-tab-${sel}`} className="lg:col-span-8">
+            <div key={sel} className="mk-swap grid gap-8 md:grid-cols-2">
+              <div>
+                <h3 className={`${pop.className} text-2xl font-semibold leading-tight tracking-[-0.03em] md:text-3xl`}>{s.keyword}</h3>
+                <p className="mt-4 font-light leading-relaxed text-[#DCE7FB]">{s.text}</p>
+                <ul className="mt-6 space-y-3">
+                  {s.has.map((h) => <li key={h} className="flex items-start gap-3 text-[#E6EEFF]"><span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#2F7BFF] text-white"><Check size={12} strokeWidth={3} aria-hidden="true" /></span>{h}</li>)}
+                </ul>
+                <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-[#6EA1FF]">A good fit for</p>
+                <p className="mt-1 text-[#DCE7FB]">{s.fit}</p>
+              </div>
+              <SolutionMock s={s} />
             </div>
-          </div>
-        ))}
-      </div>
-    </WindowFrame>
-  );
-}
-
-function MockERP() {
-  const mods = [[Package, "Inventory"], [Receipt, "Invoicing"], [Users, "People"], [Workflow, "Orders"]] as const;
-  const bars = [38, 56, 44, 72, 60, 88, 68];
-  return (
-    <WindowFrame title="ERP · Operations">
-      <div className="grid gap-4 md:grid-cols-[200px_1fr]">
-        <ul className="space-y-2">
-          {mods.map(([Icon, n], k) => (
-            <li key={n} className={`sw-pop flex items-center gap-3 rounded-[4px] px-3 py-3 text-sm ${k === 0 ? "bg-[#2F7BFF]/25 text-white" : "bg-white/[0.05] text-white/70"}`} style={{ ["--i" as string]: k } as React.CSSProperties}>
-              <Icon size={16} aria-hidden="true" /> {n}
-            </li>
-          ))}
-        </ul>
-        <div className="rounded-[4px] bg-white/[0.05] p-4">
-          <span className={`${bar} h-2 w-1/3`} />
-          <div className="mt-5 flex h-36 items-end gap-3">
-            {bars.map((h, k) => <span key={k} className="sw-pop flex-1 rounded-t-[3px] bg-gradient-to-t from-[#0047AB] to-[#2F7BFF]" style={{ height: `${h}%`, ["--i" as string]: k + 2 } as React.CSSProperties} />)}
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            {[0, 1, 2].map((k) => <span key={k} className={`${bar} h-2`} />)}
           </div>
         </div>
       </div>
-    </WindowFrame>
+    </section>
   );
 }
 
-function MockSaaS() {
+/* ------------------------------ CAPABILITIES ------------------------------ */
+
+function Capabilities() {
   return (
-    <WindowFrame title="SaaS · Dashboard">
-      <div className="grid grid-cols-3 gap-3">
-        {["Active users", "Usage", "Plan"].map((n, k) => (
-          <div key={n} className="sw-pop rounded-[4px] bg-white/[0.05] p-3" style={{ ["--i" as string]: k } as React.CSSProperties}>
-            <div className="text-[11px] text-white/60">{n}</div>
-            <span className={`${bar} mt-3 h-3 w-2/3`} />
-          </div>
-        ))}
+    <section className="bg-white py-24 md:py-36" aria-label="Technical capabilities">
+      <div className={wrap}>
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <Lines className="t2 max-w-3xl" lines={[<>Technical</>, <><b className="font-bold">capabilities</b> that <Acc dark={false}>last</Acc></>]} />
+          <p className="rv max-w-sm font-light leading-relaxed text-[#3B4A63]">Good software is more than screens. These are the foundations we build into every project.</p>
+        </div>
+        <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {capabilities.map(([I, t, d], i) => (
+            <li key={t} className="rv group rounded-[4px] border border-[#CBD8EE] p-8 transition-colors duration-300 hover:border-[#0047AB] hover:bg-[#F4F8FE]" style={{ transitionDelay: `${(i % 3) * 90}ms` }}>
+              <span className="flex h-12 w-12 items-center justify-center rounded-[4px] bg-[#E3ECFB] text-[#0047AB] transition-colors duration-300 group-hover:bg-[#0047AB] group-hover:text-white"><I size={24} aria-hidden="true" /></span>
+              <h3 className={`${pop.className} mt-8 text-xl font-semibold tracking-[-0.01em]`}>{t}</h3>
+              <p className="mt-3 font-light leading-relaxed text-[#3B4A63]">{d}</p>
+            </li>
+          ))}
+        </ul>
+        <div className="rv mt-12 flex flex-wrap items-center gap-3">
+          <span className="mr-2 text-sm font-semibold uppercase tracking-[0.18em] text-[#5B6B84]">Built with</span>
+          {stack.map((t) => <span key={t} className="rounded-full border border-[#CBD8EE] px-4 py-2 text-sm text-[#3B4A63]">{t}</span>)}
+        </div>
       </div>
-      <div className="mt-4 rounded-[4px] bg-white/[0.05] p-4">
-        <svg viewBox="0 0 400 110" className="h-28 w-full" preserveAspectRatio="none">
-          <path d="M0 90 C40 80 60 60 100 66 S170 30 210 40 S290 70 330 32 S380 18 400 12 L400 110 L0 110Z" fill="rgba(47,123,255,.18)" />
-          <path className="sw-draw" pathLength={1} d="M0 90 C40 80 60 60 100 66 S170 30 210 40 S290 70 330 32 S380 18 400 12" fill="none" stroke={COBALT_TEXT} strokeWidth={2.5} strokeLinecap="round" />
-        </svg>
-      </div>
-      <div className="mt-4 space-y-2">
-        {[0, 1, 2].map((k) => (
-          <div key={k} className="sw-pop flex items-center justify-between rounded-[4px] bg-white/[0.05] px-3 py-3" style={{ ["--i" as string]: k + 3 } as React.CSSProperties}>
-            <span className={`${bar} h-2 w-1/3`} />
-            <span className={`${pill} ${k === 0 ? "bg-[#2F7BFF] text-white" : "bg-white/10 text-white/70"}`}>{k === 0 ? "Pro" : "Starter"}</span>
-          </div>
-        ))}
-      </div>
-    </WindowFrame>
+    </section>
   );
 }
 
-function MockTools() {
-  const rows: [string, string, boolean][] = [["Leave request", "Approved", true], ["Purchase order", "Pending", false], ["Access request", "In review", false], ["Expense claim", "Approved", true]];
+/* ------------------------------ AI-POWERED SOFTWARE ------------------------------ */
+
+function AiSection() {
   return (
-    <WindowFrame title="Internal tools · Approvals">
-      <div className="space-y-2">
-        {rows.map(([n, s, ok], k) => (
-          <div key={n} className="sw-pop flex items-center justify-between gap-3 rounded-[4px] bg-white/[0.05] px-4 py-3.5" style={{ ["--i" as string]: k } as React.CSSProperties}>
-            <div className="flex items-center gap-3">
-              <span className={`flex h-6 w-6 items-center justify-center rounded-full ${ok ? "bg-[#2F7BFF] text-white" : "border border-white/30 text-transparent"}`}><Check size={13} strokeWidth={3} /></span>
-              <span className="text-sm text-white/85">{n}</span>
-            </div>
-            <span className={`${pill} ${ok ? "bg-[#2F7BFF]/25 text-[#6EA1FF]" : "bg-white/10 text-white/70"}`}>{s}</span>
-          </div>
-        ))}
+    <section className="bg-[#F4F8FE] py-24 md:py-36" aria-label="AI-powered software">
+      <div className={`${wrap} grid items-start gap-14 lg:grid-cols-12`}>
+        <div className="lg:col-span-5">
+          <Lines className="t2" lines={[<>AI-powered</>, <>software <b className="font-bold">development</b></>]} />
+          <p className="rv mt-6 max-w-md font-light leading-relaxed text-[#3B4A63]">We can build intelligence into your software where it clearly helps: reading documents, answering questions and routing work, always with limits you control and a person able to step in.</p>
+          <Link href="/services/ai-automation-chatbots" className={`rv group mt-8 inline-flex items-center gap-3 rounded-full border border-[#0B1F3B]/30 px-7 py-3.5 text-sm font-medium transition hover:border-[#0047AB] hover:text-[#0047AB] ${ring}`}>
+            AI automation and chatbots <ArrowRight size={16} className="transition group-hover:translate-x-1" aria-hidden="true" />
+          </Link>
+        </div>
+        <ul className="grid gap-5 lg:col-span-7">
+          {ai.map(([I, t, d], i) => (
+            <li key={t} className="rv flex gap-6 rounded-[4px] border border-[#CBD8EE] bg-white p-7" style={{ transitionDelay: `${i * 90}ms` }}>
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[4px] bg-[#0047AB] text-white"><I size={24} aria-hidden="true" /></span>
+              <span><h3 className={`${pop.className} text-xl font-semibold tracking-[-0.01em]`}>{t}</h3><p className="mt-2 font-light leading-relaxed text-[#3B4A63]">{d}</p></span>
+            </li>
+          ))}
+        </ul>
       </div>
-      <div className="mt-4 flex gap-3"><span className="rounded-full bg-[#0047AB] px-5 py-2 text-xs text-white">Approve</span><span className="rounded-full border border-white/25 px-5 py-2 text-xs text-white/70">Request changes</span></div>
-    </WindowFrame>
+    </section>
   );
 }
 
-const mocks: Record<string, React.ReactNode> = { crm: <MockCRM />, erp: <MockERP />, saas: <MockSaaS />, tools: <MockTools /> };
+/* ------------------------------ AUDIENCES ------------------------------ */
+
+function Audiences() {
+  return (
+    <section className="bg-white py-24 md:py-36" aria-label="Who we build software for">
+      <div className={wrap}>
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <Lines className="t2 max-w-3xl" lines={[<>Software for startups,</>, <>small and <b className="font-bold">growing</b> <Acc dark={false}>businesses</Acc></>]} />
+          <p className="rv max-w-sm font-light leading-relaxed text-[#3B4A63]">Whatever your size, we start from your goals and build only what moves you toward them.</p>
+        </div>
+        <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {audiences.map(([I, t, d], i) => (
+            <li key={t} className="rv rounded-[4px] border border-[#CBD8EE] p-7" style={{ transitionDelay: `${i * 80}ms` }}>
+              <span className="flex h-12 w-12 items-center justify-center rounded-[4px] bg-[#E3ECFB] text-[#0047AB]"><I size={24} aria-hidden="true" /></span>
+              <h3 className={`${pop.className} mt-6 text-xl font-semibold tracking-[-0.01em]`}>{t}</h3>
+              <p className="mt-3 font-light leading-relaxed text-[#3B4A63]">{d}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------ COST ------------------------------ */
+
+function Cost() {
+  return (
+    <section className="relative overflow-hidden py-24 text-white md:py-32" aria-label="Project cost" style={{ background: `linear-gradient(180deg, ${NAVY} 0%, ${BLACK} 100%)` }}>
+      <div aria-hidden className="absolute inset-0" style={{ background: "radial-gradient(circle at 88% 12%, rgba(0,71,171,.5), transparent 50%)" }} />
+      <div className={`${wrap} relative grid gap-14 lg:grid-cols-12`}>
+        <div className="lg:col-span-5">
+          <Lines className="t2" lines={[<>What affects</>, <>custom software</>, <>project <b className="font-bold">cost</b></>]} />
+          <p className="rv mt-6 max-w-md font-light leading-relaxed text-white/75">Every project is different, so we scope before we price. After a short consultation you receive a clear proposal with deliverables and a timeline, and we can deliver in phases so you spend as you see results.</p>
+          <a href="#contact-form" className={`rv group mt-8 inline-flex items-center gap-3 rounded-full bg-white px-8 py-4 text-sm font-medium text-[#0B1F3B] transition hover:bg-[#0047AB] hover:text-white ${ringDark}`}>
+            Request a quote <ArrowUpRight size={16} className="transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+          </a>
+        </div>
+        <ul className="grid gap-px overflow-hidden rounded-[4px] border border-white/15 bg-white/15 sm:grid-cols-2 lg:col-span-7">
+          {costFactors.map(([t, d], i) => (
+            <li key={t} className="rv bg-[#0B1F3B] p-7" style={{ transitionDelay: `${(i % 2) * 80}ms` }}>
+              <span className="text-sm text-[#6EA1FF]">0{i + 1}</span>
+              <h3 className={`${pop.className} mt-3 text-xl font-semibold tracking-[-0.01em]`}>{t}</h3>
+              <p className="mt-2 font-light leading-relaxed text-white/70">{d}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------ LOCATIONS ------------------------------ */
+
+function Places() {
+  return (
+    <section className="bg-white py-24 md:py-36" aria-label="Where we work">
+      <div className={wrap}>
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <Lines className="t2 max-w-3xl" lines={[<>Custom software in</>, <><b className="font-bold">Pakistan</b>, Saudi Arabia</>, <>and the <Acc dark={false}>UK</Acc></>]} />
+          <p className="rv max-w-sm font-light leading-relaxed text-[#3B4A63]">Three offices, one delivery process, and a custom software development company for businesses worldwide.</p>
+        </div>
+        <ul className="mt-14 grid gap-5 md:grid-cols-3">
+          {places.map((p, i) => (
+            <li key={p.city} className="rv rounded-[4px] border border-[#CBD8EE] p-8" style={{ transitionDelay: `${i * 90}ms` }}>
+              <p className="flex items-center gap-2 text-sm text-[#0047AB]"><MapPin size={16} aria-hidden="true" />{p.city}, {p.country}</p>
+              <h3 className={`${pop.className} mt-5 text-xl font-semibold leading-snug tracking-[-0.01em]`}>{p.h}</h3>
+              <p className="mt-3 font-light leading-relaxed text-[#3B4A63]">{p.text}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
 
 /* ------------------------------ PAGE STYLES ------------------------------ */
 
@@ -695,27 +498,59 @@ const PAGE_CSS = `
 .t2{font-size:clamp(2.2rem,4.5vw,4.2rem);line-height:1.02;letter-spacing:-.035em}
 .spn{transition:opacity .3s linear var(--d)}.in .spn{opacity:0}
 .chk{opacity:0;transform:scale(.3);transition:opacity .4s ease var(--d),transform .5s cubic-bezier(.34,1.56,.64,1) var(--d)}.in .chk{opacity:1;transform:none}
-@keyframes swpop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
-.sw-pop{animation:swpop .6s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i,0) * 70ms)}
-@keyframes swdraw{to{stroke-dashoffset:0}}
-.sw-draw{stroke-dasharray:1;stroke-dashoffset:1;animation:swdraw 1.4s ease .2s forwards}
-@media (prefers-reduced-motion:reduce){.ln>span,.rv{transform:none!important;opacity:1!important;transition:none!important}.spn{display:none}.chk{opacity:1;transform:none;transition:none}.sw-pop{animation:none}.sw-draw{animation:none;stroke-dashoffset:0}}
+@keyframes wfpop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.wf-pop{animation:wfpop .5s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i,0) * 120ms)}
+@keyframes msgin{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.msg-in{animation:msgin .45s cubic-bezier(.16,1,.3,1) both}
+@keyframes dotb{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+.dot{animation:dotb 1s ease-in-out infinite}
+@keyframes mkfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.mk-float{animation:mkfloat 5.5s ease-in-out infinite}
+.mk-float-slow{animation:mkfloat 8s ease-in-out infinite}
+@keyframes mq{to{transform:translate3d(-25%,0,0)}}
+.mq{animation:mq 45s linear infinite;will-change:transform;backface-visibility:hidden}
+.mq:hover{animation-play-state:paused}
+.hero-grid{background-image:linear-gradient(rgba(110,161,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(110,161,255,.5) 1px,transparent 1px);background-size:64px 64px;-webkit-mask-image:radial-gradient(75% 75% at 70% 40%,#000,transparent);mask-image:radial-gradient(75% 75% at 70% 40%,#000,transparent)}
+@keyframes kbbar{0%{width:0}60%,100%{width:100%}}
+.kb-bar{width:0;animation:kbbar 6s ease-in-out infinite}
+@keyframes kbchk{0%,55%{opacity:0;transform:scale(.3)}70%,100%{opacity:1;transform:none}}
+.kb-check{opacity:0;animation:kbchk 6s ease-in-out infinite}
+@keyframes tabfill{from{width:0}to{width:100%}}
+@keyframes mkswap{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+.mk-swap{animation:mkswap .7s cubic-bezier(.16,1,.3,1) both}
+@keyframes mkdraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+.sw-line{stroke-dasharray:1;animation:mkdraw 1.6s ease .3s both}
+@keyframes areain{from{opacity:0}to{opacity:1}}
+.area-in{animation:areain 1.2s ease 1s both}
+@keyframes barin{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.bar-in{transform-box:fill-box;transform-origin:bottom;animation:barin .8s cubic-bezier(.16,1,.3,1) both}
+@keyframes gx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.gx{transform-origin:left;animation:gx .9s cubic-bezier(.16,1,.3,1) both}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+.mk-beat{animation:beat 1.6s ease-in-out infinite}
+@keyframes flow{0%{transform:translate(-50%,-8px);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translate(-50%,40px);opacity:0}}
+.flow{animation:flow 2.2s linear infinite}
+@keyframes softpulse{0%,100%{opacity:.65}50%{opacity:1}}
+.pulse-soft{animation:softpulse 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.flow,.pulse-soft{animation:none!important}.mk-swap,.sw-line,.area-in,.bar-in,.gx,.mk-beat{animation:none!important}.sw-line{stroke-dasharray:none}.mk-float,.mk-float-slow,.mq,.hero-grid,.dot,.msg-in,.wf-pop{animation:none!important}.kb-bar{animation:none;width:100%}.kb-check{animation:none;opacity:1}.ln>span,.rv{transform:none!important;opacity:1!important;transition:none!important}.spn{display:none}.chk{opacity:1;transform:none;transition:none}}
 `;
 
 const wrap = "mx-auto w-full max-w-[1400px] px-6 md:px-12";
 const ring = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F7BFF] focus-visible:ring-offset-2";
+const ringDark = `${ring} focus-visible:ring-offset-[#0B1F3B]`;
 const field = "mt-2 w-full rounded-[3px] border border-[#CBD8EE] bg-[#F4F8FE] px-4 py-3 text-[#0B1F3B] placeholder:text-[#5B6B84] focus:border-[#0047AB] focus:outline-none focus:ring-2 focus:ring-[#0047AB]/30";
 const label = "text-sm font-medium text-[#0B1F3B]";
 
-function Lines({ lines, className = "" }: { lines: React.ReactNode[]; className?: string }) {
+function Lines({ lines, className = "", h1 = false }: { lines: React.ReactNode[]; className?: string; h1?: boolean }) {
+  const Tag = (h1 ? "h1" : "h2") as "h2";
   return (
-    <h2 data-r className={`${pop.className} font-extralight ${className}`}>
+    <Tag data-r className={`${pop.className} font-extralight ${className}`}>
       {lines.map((l, i) => (
         <span key={i} className="ln block">
           <span style={{ transitionDelay: `${i * 110}ms` }}>{l}</span>
         </span>
       ))}
-    </h2>
+    </Tag>
   );
 }
 
@@ -725,11 +560,9 @@ const Acc = ({ children, dark = true }: { children: React.ReactNode; dark?: bool
 
 /* ------------------------------ PAGE ------------------------------ */
 
-export default function CustomSoftwarePage() {
+export default function CustomSoftwareClient({ faqs = FAQS, geo }: { faqs?: readonly (readonly [string, string])[]; geo?: React.ReactNode }) {
   const main = React.useRef<HTMLElement>(null);
   const [state, setState] = React.useState<"idle" | "sending" | "sent" | "error">("idle");
-  const [tab, setTab] = React.useState(0);
-  const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
 
   React.useEffect(() => {
     const el = main.current!;
@@ -740,18 +573,6 @@ export default function CustomSoftwarePage() {
     el.querySelectorAll("[data-r],.rv").forEach((n) => io.observe(n));
     return () => io.disconnect();
   }, []);
-
-  const onTabKey = (e: React.KeyboardEvent, i: number) => {
-    let n = i;
-    if (e.key === "ArrowRight" || e.key === "ArrowDown") n = (i + 1) % builds.length;
-    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") n = (i - 1 + builds.length) % builds.length;
-    else if (e.key === "Home") n = 0;
-    else if (e.key === "End") n = builds.length - 1;
-    else return;
-    e.preventDefault();
-    setTab(n);
-    tabRefs.current[n]?.focus();
-  };
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -769,104 +590,23 @@ export default function CustomSoftwarePage() {
     }
   }
 
-  const b = builds[tab];
-
   return (
     <main ref={main} id="main" className={`${rob.className} overflow-x-clip bg-white text-[#0B1F3B]`}>
-      {/* Page metadata. React 19 / Next 15 move these into <head>. */}
-      <title>{TITLE}</title>
-      <meta name="description" content={DESC} />
-      <link rel="canonical" href={SITE + PATH} />
-      <meta property="og:title" content={TITLE} />
-      <meta property="og:description" content={DESC} />
-      <meta property="og:url" content={SITE + PATH} />
-      <meta property="og:type" content="website" />
-      <meta name="twitter:card" content="summary_large_image" />
-      {jsonLd.map((d, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(d) }} />)}
       <style>{PAGE_CSS}</style>
 
-      <h1 className="sr-only">Custom Software Development Services by DEVNTOM Solutions</h1>
-
-      {/* 1. PINNED ISOMETRIC STACK */}
-      <StackStage />
-
-      {/* 2. WHAT WE BUILD */}
-      <section id="builds" className="relative overflow-hidden py-24 text-white md:py-32" aria-label="What we build" style={{ background: `linear-gradient(180deg,${BLACK} 0%,${NAVY} 100%)` }}>
-        <div className={wrap}>
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <Lines className="t2 max-w-3xl" lines={[<>What we <b className="font-bold">build</b></>, <>for <Acc>your team</Acc></>]} />
-            <p className="rv max-w-sm font-light leading-relaxed text-[#DCE7FB]">Pick a system to see the kind of screens we deliver. These are illustrations, not client data.</p>
-          </div>
-
-          <div role="tablist" aria-label="Types of software" className="rv mt-12 flex flex-wrap gap-2">
-            {builds.map((x, i) => (
-              <button
-                key={x.id}
-                ref={(el) => { tabRefs.current[i] = el; }}
-                role="tab"
-                id={`tab-${x.id}`}
-                aria-selected={tab === i}
-                aria-controls={`panel-${x.id}`}
-                tabIndex={tab === i ? 0 : -1}
-                onClick={() => setTab(i)}
-                onKeyDown={(e) => onTabKey(e, i)}
-                className={`rounded-full border px-6 py-3 text-sm font-medium transition ${tab === i ? "border-[#2F7BFF] bg-[#2F7BFF] text-white" : "border-white/25 text-white/80 hover:border-white hover:text-white"} ${ring} focus-visible:ring-offset-[#0B1F3B]`}
-              >
-                {x.name}
-              </button>
-            ))}
-          </div>
-
-          <div role="tabpanel" id={`panel-${b.id}`} aria-labelledby={`tab-${b.id}`} className="mt-10 grid items-center gap-10 lg:grid-cols-12">
-            <div className="lg:col-span-5">
-              <h3 className={`${pop.className} text-3xl font-extralight leading-[1.1] tracking-[-0.03em] md:text-4xl`}>{b.title}</h3>
-              <p className="mt-5 max-w-md font-light leading-relaxed text-[#DCE7FB]">{b.text}</p>
-              <ul className="mt-6 space-y-3">
-                {b.points.map((p) => (
-                  <li key={p} className="flex items-start gap-3 text-white/90">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#2F7BFF] text-white"><Check size={12} strokeWidth={3} aria-hidden="true" /></span>
-                    {p}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="lg:col-span-7" key={b.id}>{mocks[b.id]}</div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. WHAT IS INCLUDED */}
-      <section className="bg-white py-24 md:py-36" aria-label="What is included">
-        <div className={wrap}>
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <Lines className="t2 max-w-3xl" lines={[<>Built to run your</>, <><b className="font-bold">business</b>, <Acc dark={false}>properly</Acc></>]} />
-            <p className="rv max-w-sm font-light leading-relaxed text-[#3B4A63]">Every project includes the work that makes software dependable, not just the screens you can see.</p>
-          </div>
-          <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {included.map(([Icon, t, d], i) => (
-              <li key={t} className="rv group rounded-[4px] border border-[#CBD8EE] p-8 transition-colors duration-300 hover:border-[#0047AB] hover:bg-[#F4F8FE]" style={{ transitionDelay: `${(i % 3) * 90}ms` }}>
-                <span className="flex h-12 w-12 items-center justify-center rounded-[4px] bg-[#E3ECFB] text-[#0047AB] transition-colors duration-300 group-hover:bg-[#0047AB] group-hover:text-white"><Icon size={24} aria-hidden="true" /></span>
-                <h3 className={`${pop.className} mt-8 text-xl font-semibold tracking-[-0.01em]`}>{t}</h3>
-                <p className="mt-3 font-light leading-relaxed text-[#3B4A63]">{d}</p>
-              </li>
-            ))}
-          </ul>
-          <div className="rv mt-14 border-t border-[#CBD8EE] pt-8">
-            <p className="text-sm font-medium text-[#0B1F3B]">Tools we choose from</p>
-            <ul className="mt-4 flex flex-wrap gap-2">
-              {stack.map((s) => <li key={s} className="rounded-full border border-[#CBD8EE] px-4 py-2 text-sm text-[#3B4A63]">{s}</li>)}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. PROCESS */}
+      <Hero />
+      <Overview />
+      <Solutions />
+      <Capabilities />
+      <AiSection />
+      <Audiences />
+      {/* 3. PROCESS */}
       <section className="relative overflow-hidden bg-[#0B1F3B] py-24 text-white md:py-32" aria-label="How we build software">
         <div aria-hidden="true" className="absolute inset-0" style={{ background: "radial-gradient(circle at 88% 12%,rgba(0,71,171,.55),transparent 50%)" }} />
         <div className={`${wrap} relative`}>
           <div className="mx-auto max-w-2xl text-center">
             <Lines className="t2" lines={[<>From first call to <Acc>launch day</Acc></>]} />
-            <p className="rv mt-5 font-light text-white/70">Six phases, one delivery process. Every project follows it, and every phase feeds the next.</p>
+            <p className="rv mt-5 font-light text-white/70">Six phases, one process. Every project follows it, and every phase feeds the next.</p>
           </div>
           <ol className="mt-16 grid gap-px overflow-hidden rounded-[4px] border border-white/15 bg-white/15 sm:grid-cols-2 lg:grid-cols-3">
             {steps.map(([t, d], i) => (
@@ -886,12 +626,15 @@ export default function CustomSoftwarePage() {
         </div>
       </section>
 
+      <Cost />
+      <Places />
+
       {/* TESTIMONIALS: drop your existing <Testimonials /> component here and import it at the top of this file. */}
 
-      {/* 5. RELATED SERVICES */}
+      {/* 4. RELATED SERVICES */}
       <section className="bg-white py-24 md:py-32" aria-label="Related services">
         <div className={wrap}>
-          <Lines className="t2 max-w-3xl" lines={[<>Works best <b className="font-bold">with</b></>]} />
+          <Lines className="max-w-3xl t2" lines={[<>Works best <b className="font-bold">with</b></>]} />
           <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {related.map(([n, href, d], i) => (
               <li key={n} className="rv" style={{ transitionDelay: `${i * 90}ms` }}>
@@ -908,7 +651,10 @@ export default function CustomSoftwarePage() {
         </div>
       </section>
 
-      {/* 6. FAQ */}
+      {/* Server-rendered summary and locations (passed in from page.tsx) */}
+      {geo}
+
+      {/* 5. FAQ */}
       <section className="bg-[#F4F8FE] py-24 md:py-36" aria-label="Frequently asked questions">
         <div className={`${wrap} grid gap-14 lg:grid-cols-12`}>
           <div className="lg:col-span-4">
@@ -931,14 +677,14 @@ export default function CustomSoftwarePage() {
         </div>
       </section>
 
-      {/* 7. CONTACT FORM */}
+      {/* 6. CONTACT FORM */}
       <section id="contact-form" className="relative isolate overflow-hidden py-24 text-white md:py-32" aria-label="Start your software project" style={{ background: `linear-gradient(120deg,${BLACK} 0%,${NAVY} 45%,${COBALT} 100%)` }}>
         <div aria-hidden="true" className="absolute inset-0 -z-10 opacity-60" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,.22) 1px,transparent 1px)", backgroundSize: "22px 22px", WebkitMaskImage: "linear-gradient(to right,transparent 20%,#000)", maskImage: "linear-gradient(to right,transparent 20%,#000)" }} />
         <div aria-hidden="true" className={`${pop.className} pointer-events-none absolute -bottom-[4vw] left-0 -z-10 w-full select-none whitespace-nowrap text-center text-[18vw] font-bold leading-none tracking-[-0.05em] text-transparent`} style={{ WebkitTextStroke: "1px rgba(255,255,255,.16)" }}>Let&apos;s build</div>
         <div className={`${wrap} grid items-center gap-14 lg:grid-cols-12`}>
           <div className="lg:col-span-6">
-            <Lines className="t1" lines={["Let's build", <><Acc>your</Acc> <b className="font-bold">system.</b></>]} />
-            <p className="rv mt-8 max-w-md text-lg font-light leading-relaxed text-[#DCE7FB]">Tell us what you want to achieve. We reply with a plan, a timeline and a quote.</p>
+            <Lines className="t1" lines={["Let's build", <><Acc>your</Acc> <b className="font-bold">software.</b></>]} />
+            <p className="rv mt-8 max-w-md text-lg font-light leading-relaxed text-[#DCE7FB]">Tell us about your business and what the software should do. We reply with a plan, a timeline and a quote.</p>
             <ul className="rv mt-8 space-y-2 font-medium">
               <li><a href="mailto:info@devntomsolutions.com" className={`rounded-[3px] underline decoration-[#6EA1FF] underline-offset-4 hover:text-[#6EA1FF] ${ring} focus-visible:ring-offset-[#0B1F3B]`}>info@devntomsolutions.com</a></li>
               <li><a href="https://wa.me/923256036838" className={`rounded-[3px] underline decoration-[#6EA1FF] underline-offset-4 hover:text-[#6EA1FF] ${ring} focus-visible:ring-offset-[#0B1F3B]`}>WhatsApp +92 325 6036838</a></li>
@@ -954,7 +700,7 @@ export default function CustomSoftwarePage() {
                 {serviceOptions.map((n) => <option key={n}>{n}</option>)}
               </select>
             </label>
-            <label className={`${label} mt-5 block`}>Project details<textarea name="message" required rows={4} className={field} placeholder="What should it do, who will use it, timeline" /></label>
+            <label className={`${label} mt-5 block`}>Project details<textarea name="message" required rows={4} className={field} placeholder="What should the software do? Who will use it? Systems it must connect to, and your timeline" /></label>
             <input name="company" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
             <button disabled={state === "sending"} className={`group mt-6 inline-flex w-full items-center justify-center gap-3 rounded-full bg-[#0047AB] px-8 py-4 font-medium text-white transition hover:bg-[#0B1F3B] disabled:opacity-60 ${ring}`}>
               {state === "sending" ? "Sending…" : "Send message"} <ArrowRight size={18} className="transition group-hover:translate-x-1" aria-hidden="true" />
