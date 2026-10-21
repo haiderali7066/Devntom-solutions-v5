@@ -15,7 +15,7 @@ const SITE = "https://www.devntomsolutions.com";
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 // Cached per post. Admin saves call revalidatePath, so edits appear immediately.
-export const revalidate = 3600;
+// export const revalidate = 3600;
 
 const getPost = cache(async (slug: string) => {
   if (!SLUG.test(slug) || slug.length > 120) return null;

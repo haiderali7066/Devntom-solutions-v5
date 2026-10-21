@@ -5,7 +5,6 @@ import { Post } from "@/models/Post";
 import { objectId } from "@/lib/validate";
 import PostForm from "@/components/admin/PostForm";
 
-export const dynamic = "force-dynamic";
 export const metadata = { title: "Edit post" };
 
 export default async function EditPostPage({ params }: { params: Promise<{ id: string }> }) {

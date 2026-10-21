@@ -3,8 +3,7 @@ import { handlers } from "@/auth";
 import { getIp, limitLogin } from "@/lib/rate-limit";
 
 // bcrypt and mongoose need the Node.js runtime, not the edge runtime.
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+
 
 export const { GET } = handlers;
 

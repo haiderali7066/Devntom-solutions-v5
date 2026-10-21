@@ -5,8 +5,7 @@ import { deleteImage, uploadImage } from "@/lib/cloudinary";
 import { limitUpload } from "@/lib/rate-limit";
 import { MAX_IMAGE_BYTES, sniffImage } from "@/lib/validate";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+
 
 const json = (body: unknown, status = 200, extra: Record<string, string> = {}) =>
   Response.json(body, { status, headers: { "Cache-Control": "no-store", ...extra } });
