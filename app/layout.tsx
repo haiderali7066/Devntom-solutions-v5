@@ -4,7 +4,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LenisProvider from "@/components/LenisProvider";
 import CookieConsent from "@/components/CookieConsent";
-import { Suspense } from "react";
 
 const SITE = "https://www.devntomsolutions.com";
 
@@ -226,9 +225,8 @@ export default function RootLayout({
           Skip to content
         </a>
 
-          <Suspense fallback={null}>
-  <Navbar />
-</Suspense>
+          <Navbar />
+
           {children}
           <CookieConsent />
           <LenisProvider/>
