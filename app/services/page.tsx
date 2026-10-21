@@ -5,7 +5,7 @@ const SITE = "https://www.devntomsolutions.com";
 const URL = `${SITE}/services`;
 
 export const metadata: Metadata = {
-  title: "Our Services: Websites, Software, Apps, AI, Design, Marketing and SEO",
+  title: "Our Services",
   description:
     "Explore Devntom Solutions' seven services: website development, custom software, mobile apps, AI automation, digital marketing, UI/UX design and SEO. Offices in Lahore, Riyadh and London.",
   keywords: ["software development services", "website development", "mobile app development", "AI automation", "digital marketing", "UI/UX design", "SEO services"],
