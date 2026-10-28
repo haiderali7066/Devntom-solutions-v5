@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import DigitalMarketingClient from "./DigitalMarketingClient";
 
 export const metadata: Metadata = {
-  title: "Digital Marketing & Growth Engineering | DEVNTOM Solutions",
+  title: "Digital Marketing & Growth Engineering",
   description:
     "Data-driven digital marketing, SEO, performance advertising, and conversion rate optimization engineered for absolute scale. Based in Lahore, serving global enterprises.",
   alternates: {

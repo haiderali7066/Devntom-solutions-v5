@@ -6,7 +6,7 @@ const PAGE_URL = `${SITE_URL}/services/website-development`;
 
 export const metadata: Metadata = {
   title:
-    "Website Development Services | Custom Business Websites | DEVNTOM Solutions",
+    "Website Development Services",
 
   description:
     "DEVNTOM Solutions delivers custom website development for businesses, startups, and enterprises. Build fast, responsive, SEO-friendly websites designed to drive growth worldwide.",

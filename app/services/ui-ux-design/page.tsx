@@ -5,7 +5,7 @@ const SITE_URL = "https://www.devntomsolutions.com";
 const PAGE_URL = `${SITE_URL}/services/ui-ux-design`;
 
 export const metadata: Metadata = {
-  title: "UI/UX Design & Product Strategy Services | DEVNTOM Solutions",
+  title: "UI/UX Design & Product Strategy Services",
   description:
     "High-end UI/UX design, interactive prototyping, and scalable design systems engineered for user delight and conversion. Based in Lahore, serving global enterprises.",
   alternates: {

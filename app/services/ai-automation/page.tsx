@@ -7,7 +7,7 @@ const PAGE_URL = `${SITE_URL}/ai-automation`;
 
 export const metadata: Metadata = {
   title:
-    "AI Automation Services | Business Process Automation | DEVNTOM Solutions",
+    "AI Automation Services ",
 
   description:
     "Automate business workflows with AI-powered solutions, intelligent agents, and custom automation systems. DEVNTOM Solutions serves businesses in Pakistan, Saudi Arabia, and the United Kingdom.",
