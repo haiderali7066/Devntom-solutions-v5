@@ -3,7 +3,7 @@ import ProjectsClient from "./ProjectsClient";
 // import { projects } from "@/data/projects"; // your data: map its fields onto the Project type in ProjectsClient
 
 const SITE = "https://www.devntomsolutions.com";
-const TITLE = "Our Projects | Websites, Apps, Marketing and Automation | DEVNTOM Solutions";
+const TITLE = "Our Projects ";
 const DESC = "A selection of websites, online stores, web apps, marketing campaigns and AI automation projects delivered by DEVNTOM Solutions.";
 
 export const metadata: Metadata = {

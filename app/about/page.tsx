@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import AboutClient from "./AboutClient";
 
 const SITE = "https://www.devntomsolutions.com";
-const TITLE = "About DEVNTOM Solutions | Software and Digital Agency";
-const DESC = "DEVNTOM Solutions designs and builds websites, software and marketing for businesses worldwide, from offices in Lahore, Riyadh and London.";
+const TITLE = "About Us";
+const DESC = "Devntom Solutions designs and builds websites, software and marketing for businesses worldwide, from offices in Lahore, Riyadh and London.";
 
 export const metadata: Metadata = {
   title: TITLE,

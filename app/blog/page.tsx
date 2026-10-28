@@ -3,8 +3,8 @@ import BlogClient from "./BlogClient";
 // import { getAllPosts } from "@/lib/blog"; // your data layer: map its fields onto the Post type in BlogClient
 
 const SITE = "https://www.devntomsolutions.com";
-const TITLE = "Blog | Web, Marketing, Software and AI Insights | DEVNTOM Solutions";
-const DESC = "Practical guides on websites, digital marketing, custom software and AI automation from the team at DEVNTOM Solutions.";
+const TITLE = "Our Blog";
+const DESC = "Practical guides on websites, digital marketing, custom software and AI automation from the team at Devntom Solutions.";
 
 export const metadata: Metadata = {
   title: TITLE,

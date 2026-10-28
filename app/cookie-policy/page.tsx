@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalLayout, { A, CO, Li, P, Table, Ul, BASE, type LegalSection } from "@/components/LegalLayout";
 
-const TITLE = "Cookie Policy | DEVNTOM Solutions";
+const TITLE = "Cookie Policy | Devntom Solutions";
 const DESC = "What cookies are, which ones devntomsolutions.com uses, and how you can control them.";
 
 export const metadata: Metadata = {

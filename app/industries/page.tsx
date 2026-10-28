@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import IndustriesClient from "./IndustriesClient";
 
 const SITE = "https://www.devntomsolutions.com";
-const TITLE = "Industries We Serve | Websites, Software and Marketing | DEVNTOM Solutions";
+const TITLE = "Industries We Serve ";
 const DESC = "Websites, software, digital marketing and AI automation for healthcare, retail, real estate, education, finance, hospitality, professional services and logistics.";
 
 export const metadata: Metadata = {

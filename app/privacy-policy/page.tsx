@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import LegalLayout, { A, CO, H3, Li, P, Table, Ul, BASE, type LegalSection } from "@/components/LegalLayout";
 import Link from "next/link";
 
-const TITLE = "Privacy Policy | DEVNTOM Solutions";
-const DESC = "How DEVNTOM Solutions collects, uses, shares and protects personal data, and the rights you have over it.";
+const TITLE = "Privacy Policy | Devntom Solutions";
+const DESC = "How Devntom Solutions collects, uses, shares and protects personal data, and the rights you have over it.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE),
