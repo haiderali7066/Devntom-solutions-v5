@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ContactClient from "./ContactClient";
 
 const SITE = "https://www.devntomsolutions.com";
-const TITLE = "Contact DEVNTOM Solutions | Start Your Project";
+const TITLE = "Contact Us";
 const DESC = "Tell us about your website, marketing, software or automation project. Email or WhatsApp us, or send the form. Offices in Lahore, Riyadh and London.";
 
 export const metadata: Metadata = {

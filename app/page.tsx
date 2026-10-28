@@ -5,7 +5,7 @@ const SITE = "https://www.devntomsolutions.com";
 
 // Page-level SEO: overrides the layout defaults for the homepage only.
 export const metadata: Metadata = {
-  title: { absolute: "Devntom Solutions | Website, Software, Mobile App and AI Automation Company" },
+  title: { absolute: "Devntom Solutions | Home" },
   description:
     "Devntom Solutions builds fast websites, custom software, mobile apps and AI automation. Offices in Lahore, Riyadh and London. ",
   alternates: { canonical: "/" },

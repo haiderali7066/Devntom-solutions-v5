@@ -258,8 +258,8 @@ export default function RootLayout({
         <Navbar />
         <Cursor />
 
-        {children}
         <CookieConsent />
+        {children}
         <LenisProvider />
 
         <Footer showCta={false} />
