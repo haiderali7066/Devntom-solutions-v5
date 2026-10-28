@@ -1,442 +1,256 @@
 "use client";
 
+import { useRef, useState, type CSSProperties } from "react";
+import { Bricolage_Grotesque } from "next/font/google";
 
-import * as React from "react";
-import Link from "next/link";
-import { Poppins, Roboto, Playwrite_CA } from "next/font/google";
-import { ArrowRight, ArrowUpRight, BarChart3, Bot, Code2, Globe, Megaphone, Palette, Smartphone } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+const font = Bricolage_Grotesque({ subsets: ["latin"], display: "swap" });
 
-const pop = Poppins({ subsets: ["latin"], weight: ["200", "300", "400", "600", "700"], display: "swap" });
-const rob = Roboto({ subsets: ["latin"], weight: ["300", "400", "500", "700"], display: "swap" });
-const pw = Playwrite_CA({ weight: "400", display: "swap" });
+// "--x:22;--y:8" -> style object (CSS custom properties + camelCased props)
+const st = (s: string) =>
+  Object.fromEntries(
+    s.split(";").filter(Boolean).map((p) => {
+      const i = p.indexOf(":");
+      const k = p.slice(0, i).trim();
+      return [k.startsWith("--") ? k : k.replace(/-([a-z])/g, (_, c) => c.toUpperCase()), p.slice(i + 1).trim()];
+    })
+  ) as CSSProperties;
 
-/* ------------------------------ BRAND ------------------------------ */
+const css = `
+.dp-wrap{max-width:70rem;margin:0 auto;padding:1rem}
+.dp-frame:fullscreen{display:grid;place-items:center;background:#000}
+.dp-frame:fullscreen .dp-stage{width:min(100vw,calc(100vh*16/9));border-radius:0;border:0}
+.dp-ctl{display:flex;gap:.6rem;margin-top:.8rem}
+.dp-ctl button{font:inherit;font-weight:600;color:#0b0f1a;background:#fff;border:1px solid rgba(128,128,128,.35);border-radius:999px;padding:.55rem 1.2rem;cursor:pointer}
+.dp-ctl button:focus-visible{outline:2px solid #1f6bff;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){
+.dp-bg i,.dp-dot{animation:none}
+.dp-play .dp-sc{animation:none;opacity:0}
+.dp-play .dp-s7{opacity:1}
+.dp-play .dp-s7 *{animation:none!important;opacity:1;transform:none}}
+.dp-stage{--e:cubic-bezier(.16,1,.3,1);--bl:#1f6bff;--navy:#091426;--logo:url("data:image/png;base64,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");
+position:relative;container-type:inline-size;aspect-ratio:16/9;width:100%;overflow:hidden;border-radius:1rem;border:1px solid rgba(128,128,128,.28);background:#fbfbfd;color:#0b0f1a;font-weight:700}
+.dp-bl{color:var(--bl)}
+.dp-p{position:absolute;left:calc(var(--x)*1cqw);top:calc(var(--y)*1cqw);width:calc(var(--w)*1cqw);height:calc(var(--h)*1cqw)}
+.dp-mk{background:var(--logo) center/contain no-repeat;aspect-ratio:256/210}
+.dp-bg i{position:absolute;border-radius:50%;filter:blur(5cqw);animation:drift 11s ease-in-out infinite alternate}
+.dp-bg i:nth-child(1){left:-8cqw;top:-10cqw;width:40cqw;height:40cqw;background:rgba(31,107,255,.16)}
+.dp-bg i:nth-child(2){right:-10cqw;bottom:-12cqw;width:44cqw;height:44cqw;background:rgba(90,162,255,.2);animation-delay:-4s}
+.dp-bg i:nth-child(3){left:40cqw;top:30cqw;width:24cqw;height:24cqw;background:rgba(120,90,255,.1);animation-delay:-7s}
+.dp-dot{position:absolute;left:calc(var(--x)*1cqw);bottom:-2cqw;width:.8cqw;height:.8cqw;border-radius:50%;background:var(--bl);opacity:0;animation:rise2 var(--v,9s) linear var(--w,0s) infinite}
+.dp-sc{position:absolute;inset:0;opacity:0}
+.dp-k{position:absolute;left:0;right:0;top:calc(var(--y,7)*1cqw);text-align:center;font-size:calc(var(--s,5.4)*1cqw);letter-spacing:-.03em;line-height:1.05;opacity:0}
+.dp-k.m{font-weight:500;color:#5b657f}
+.dp-t{position:absolute;left:6cqw;top:calc(var(--y)*1cqw);font-size:3.8cqw;letter-spacing:-.03em;line-height:1.1;opacity:0}
+.dp-w{position:absolute;border-radius:1cqw;background:#fff;border:.15cqw solid #e2e7f1;box-shadow:0 2cqw 4.5cqw -1.5cqw rgba(25,45,100,.22);opacity:0}
+.dp-w::before{content:"";position:absolute;left:0;right:0;top:0;height:2.2cqw;background:#f1f4fa;border-radius:1cqw 1cqw 0 0}
+.dp-b{position:absolute;border:.15cqw dashed #c4cde3;border-radius:.6cqw;overflow:hidden}
+.dp-b::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,#1f6bff,#5aa2ff);transform:scaleX(0);transform-origin:left}
+.dp-b.dp-g::after{background:#e3e8f3}
+.dp-chip{position:absolute;left:calc(var(--x)*1cqw);top:calc(var(--y)*1cqw);display:flex;align-items:center;gap:.8cqw;padding:.7cqw 1.6cqw .7cqw .8cqw;border-radius:999px;background:#fff;border:.12cqw solid #e4e8f0;
+box-shadow:0 .6cqw 1.6cqw rgba(20,30,60,.1);font-size:1.9cqw;font-weight:500;white-space:nowrap;transform:rotate(var(--r,0deg));opacity:0}
+.dp-chip i{display:grid;place-items:center;width:2.6cqw;height:2.6cqw;border-radius:.7cqw;background:var(--c,#1f6bff);color:#fff;font-style:normal;font-size:1.4cqw;font-weight:700}
+.dp-sb{display:flex;align-items:center;gap:1.2cqw;padding:0 2.4cqw;border-radius:999px;background:#fff;border:.15cqw solid #e2e7f1;box-shadow:0 1.2cqw 3cqw -.6cqw rgba(25,45,100,.2);font-size:2.4cqw;font-weight:500;opacity:0}
+.dp-mg{position:relative;flex:none;width:2.4cqw;height:2.4cqw;border:.4cqw solid var(--bl);border-radius:50%}
+.dp-mg::after{content:"";position:absolute;left:1.8cqw;top:1.9cqw;width:1.2cqw;height:.4cqw;background:var(--bl);transform:rotate(45deg);border-radius:.2cqw}
+.dp-ty{display:inline-block;overflow:hidden;white-space:nowrap;width:0;border-right:.25cqw solid var(--bl)}
+.dp-res{position:absolute;display:flex;align-items:center;gap:1.4cqw;padding:0 2cqw;border-radius:1.2cqw;background:#fff;border:.15cqw solid #e6eaf3;box-shadow:0 .8cqw 2cqw -.8cqw rgba(25,45,100,.16);opacity:0}
+.dp-res i{flex:none;width:3.4cqw;height:3.4cqw;border-radius:50%;background:#dfe5f1}
+.dp-res s{flex:1;height:1cqw;border-radius:.5cqw;background:#e6ebf4;text-decoration:none}
+.dp-res s+s{flex:.5}
+.dp-res.dp-me{background:var(--bl);border-color:var(--bl);color:#fff;font-size:2.2cqw;box-shadow:0 1.6cqw 4cqw -.6cqw rgba(31,107,255,.6);z-index:3}
+.dp-res.dp-me i{background:rgba(255,255,255,.28)}
+.dp-ring{position:absolute;left:50%;top:50%;width:8cqw;height:8cqw;margin:-4cqw;border:.4cqw solid var(--bl);border-radius:50%;opacity:0}
+.dp-cur{position:absolute;left:0;top:0;width:3.2cqw;opacity:0;z-index:5;filter:drop-shadow(0 .3cqw .5cqw rgba(0,0,0,.3))}
+.dp-bar{position:absolute;border-radius:.6cqw .6cqw 0 0;background:linear-gradient(180deg,#8ab8ff,#1f6bff);transform:scaleY(0);transform-origin:bottom}
+.dp-card{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6cqw;border-radius:1.4cqw;background:#fff;border:.15cqw solid #e2e7f1;box-shadow:0 1.4cqw 3cqw -1cqw rgba(25,45,100,.2);font-size:2.3cqw;opacity:0}
+.dp-card b{display:grid;place-items:center;width:5cqw;height:5cqw;border-radius:1.4cqw;background:var(--bl);color:#fff;font-size:3cqw}
+.dp-nv{background:var(--navy);color:#fff}
+.dp-nv .dp-row{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:2.4cqw;top:-6cqw}
+.dp-nv .dp-mk{width:13cqw}
+.dp-wm{font-size:8.4cqw;letter-spacing:-.04em;line-height:1}
+.dp-so{display:block;margin-top:1.2cqw;font-size:2.2cqw;font-weight:500;letter-spacing:.42em;color:#dbe4ff}
+.dp-tag{position:absolute;left:0;right:0;top:36cqw;text-align:center;font-size:2.8cqw;font-weight:500;color:#b9c6ee;opacity:0}
+.dp-pill{position:absolute;left:50%;top:43cqw;margin-left:-17cqw;width:34cqw;padding:1.2cqw 0;border-radius:999px;text-align:center;font-size:2.2cqw;color:#fff;background:var(--bl);box-shadow:0 1.4cqw 4cqw -.6cqw rgba(31,107,255,.8);opacity:0}
+.dp-pg{position:absolute;left:0;bottom:0;width:100%;height:.5cqw;background:var(--bl);transform:scaleX(0);transform-origin:left;z-index:9}
 
-const COBALT = "#0047AB";
-const COBALT_HI = "#2F7BFF";
-const NAVY = "#0B1F3B";
-const BLACK = "#02050B";
+/* timeline 37s: 0-6 search, 6-12 stand out, 12-18 who we are, 18-22 sites, 22-26 results, 26-32 impact, 32-37 close */
+.dp-s1{--t:0s;--L:6s}.dp-s2{--t:6s;--L:6s}.dp-s3{--t:12s;--L:6s}.dp-s4{--t:18s;--L:4s}.dp-s5{--t:22s;--L:4s}.dp-s6{--t:26s;--L:6s}.dp-s7{--t:32s;--L:5s}
+.dp-play .dp-sc{animation:sc var(--L) linear var(--t) both}
+.dp-play .dp-s7{animation:sce var(--L) linear var(--t) both}
+.dp-play .dp-k,.dp-play .dp-t{animation:word var(--l,6s) var(--e) calc(var(--t) + var(--d)) both}
+.dp-play .dp-t{animation:upn .8s var(--e) calc(var(--t) + var(--d)) both}
+.dp-play .dp-up{animation:up .8s var(--e) calc(var(--t) + var(--d)) both}
+.dp-play .dp-res.dp-me{animation:up .8s var(--e) calc(var(--t) + var(--d)) both,rise 1.1s cubic-bezier(.65,0,.2,1) calc(var(--t) + 3.4s) both}
+.dp-play .dp-w,.dp-play .dp-sb,.dp-play .dp-res,.dp-play .dp-card,.dp-play .dp-tag,.dp-play .dp-pill{animation:up .8s var(--e) calc(var(--t) + var(--d)) both}
+.dp-play .dp-chip{animation:pop .7s var(--e) calc(var(--t) + var(--d)) both,floaty 3s ease-in-out calc(var(--t) + var(--d) + .8s) infinite alternate}
+.dp-play .dp-b::after{animation:fx .8s var(--e) calc(var(--t) + var(--d)) forwards}
+.dp-play .dp-bar{animation:gy 1s var(--e) calc(var(--t) + var(--d)) forwards}
+.dp-play .dp-ty{animation:type var(--l) steps(30) calc(var(--t) + var(--d)) forwards,blink .6s step-end calc(var(--t) + var(--d)) infinite}
+.dp-play .dp-ring{animation:ripple 2.4s ease-out calc(var(--t) + var(--d)) var(--n,1) both}
+.dp-play .dp-cur{animation:cur 2s var(--e) calc(var(--t) + var(--d)) both}
+.dp-play .dp-pop2{animation:pop2 .8s var(--e) calc(var(--t) + var(--d)) both}
+.dp-play .dp-sk::after{animation:fx .5s ease-out calc(var(--t) + var(--d)) forwards}
+.dp-play .dp-spin{animation:spin 14s linear infinite}
+.dp-play .dp-ln{animation:draw 2s ease-out calc(var(--t) + var(--d)) forwards}
+.dp-play .dp-pg{animation:fx 37s linear forwards}
+.dp-up{opacity:0}
+.dp-sk{position:relative;display:inline-block}
+.dp-sk::after{content:"";position:absolute;left:-.5cqw;right:-.5cqw;top:55%;height:.7cqw;background:#ef4444;border-radius:.4cqw;transform:scaleX(0);transform-origin:left}
+.dp-ln{fill:none;stroke:var(--bl);stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+.dp-spin{position:absolute;border:.25cqw dashed rgba(31,107,255,.35);border-radius:50%}
 
-/* ------------------------------ CONTENT ------------------------------ */
+@keyframes sc{0%{opacity:0}3%{opacity:1}97%{opacity:1}100%{opacity:0}}
+@keyframes sce{0%{opacity:0}4%,100%{opacity:1}}
+@keyframes word{0%{opacity:0;transform:translateY(1.8cqw) scale(.97)}10%{opacity:1;transform:none}88%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-1.2cqw)}}
+@keyframes upn{from{opacity:0;transform:translateY(2cqw)}to{opacity:1;transform:none}}
+@keyframes up{from{opacity:0;transform:translateY(2.4cqw) scale(.97)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:translateY(-4cqw) rotate(calc(var(--r,0deg)*3)) scale(.85)}to{opacity:1;transform:rotate(var(--r,0deg))}}
+@keyframes pop2{from{opacity:0;transform:scale(.2) rotate(-40deg)}to{opacity:1;transform:none}}
+@keyframes floaty{from{opacity:1;transform:rotate(var(--r,0deg)) translateY(0)}to{opacity:1;transform:rotate(var(--r,0deg)) translateY(-1cqw)}}
+@keyframes fx{to{transform:scaleX(1)}}
+@keyframes gy{to{transform:scaleY(1)}}
+@keyframes type{to{width:var(--tw,33cqw)}}
+@keyframes blink{50%{border-color:transparent}}
+@keyframes rise{to{transform:translateY(-27cqw)}}
+@keyframes ripple{0%{opacity:.7;transform:scale(.5)}100%{opacity:0;transform:scale(var(--g,7))}}
+@keyframes cur{0%{opacity:0;transform:translate(70cqw,6cqw)}20%{opacity:1}70%{opacity:1;transform:translate(52cqw,19cqw)}85%{transform:translate(52cqw,19.6cqw) scale(.85)}100%{opacity:1;transform:translate(52cqw,19cqw)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes drift{to{transform:translate(6cqw,5cqw) scale(1.12)}}
+@keyframes rise2{0%{opacity:0;transform:translateY(0)}10%{opacity:.4}90%{opacity:.25}100%{opacity:0;transform:translateY(-62cqw)}}
 
-// REPLACE: confirm these are current.
-const STATS: [number, string, string][] = [
-  [150, "+", "Projects delivered"],
-  [80, "+", "Clients worldwide"],
-  [98, "%", "Client satisfaction"],
-  [3, "", "Offices: Lahore, Riyadh, London"],
-];
-
-const MANIFESTO =
-  "We are a software and digital agency with teams in Lahore, Riyadh and London. We design and build websites, software and marketing that help businesses grow. We talk plainly, deliver what we promise and stay around after launch.";
-
-const values = [
-  ["Plain talk", "No jargon. You always know what we are doing, why we are doing it and what it costs."],
-  ["Built to last", "Clean code and sensible choices, so your product keeps working as your business grows."],
-  ["Measured by results", "We agree what success looks like first, then report on it honestly."],
-  ["Always reachable", "Real people, quick replies and support that continues after launch."],
-] as const;
-
-const services: [LucideIcon, string, string, string][] = [
-  [Globe, "Website Development", "/services/website-development", "Fast, secure sites built with Next.js and React."],
-  [Megaphone, "Digital Marketing", "/services/digital-marketing", "SEO, ads, social and email with clear reporting."],
-  [Bot, "AI Automation and Chatbots", "/services/ai-automation-chatbots", "Assistants and workflows that handle routine work."],
-  [Code2, "Custom Software", "/services/custom-software-development", "CRMs, ERPs, SaaS and internal tools."],
-  [Smartphone, "Mobile Apps", "/services/mobile-app-development", "Native and cross-platform apps."],
-  [Palette, "UI/UX Design", "/services/ui-ux-design", "Interfaces people understand on the first visit."],
-];
-
-// REPLACE: add your real team here. Example: { name: "Full Name", role: "Founder", photo: "/team/name.jpg" }
-// Leave the array empty to hide the section.
-const team: { name: string; role: string; photo?: string }[] = [];
-
-const tools = ["Next.js", "React", "TypeScript", "Tailwind CSS", "Node.js", "GSAP", "Framer Motion", "PostgreSQL", "Vercel", "Figma"];
-
-const cities = [
-  { name: "Lahore", lon: 74.3, lat: 31.5, dx: 0, dy: -18 },
-  { name: "Riyadh", lon: 46.7, lat: 24.7, dx: 0, dy: 26 },
-  { name: "London", lon: -0.1, lat: 51.5, dx: 0, dy: -18 },
-] as const;
-
-/* ------------------------------ SMALL HELPERS ------------------------------ */
-
-function useReduced() {
-  const [r, setR] = React.useState(false);
-  React.useEffect(() => setR(window.matchMedia("(prefers-reduced-motion: reduce)").matches), []);
-  return r;
-}
-
-function Count({ to, suffix, run }: { to: number; suffix: string; run: boolean }) {
-  const reduced = useReduced();
-  const [v, setV] = React.useState(0);
-  React.useEffect(() => {
-    if (!run) return;
-    if (reduced) { setV(to); return; }
-    let raf = 0;
-    const t0 = performance.now();
-    const f = (t: number) => {
-      const k = Math.min(1, (t - t0) / 1800);
-      setV(Math.round(to * (1 - Math.pow(1 - k, 3))));
-      if (k < 1) raf = requestAnimationFrame(f);
-    };
-    raf = requestAnimationFrame(f);
-    return () => cancelAnimationFrame(raf);
-  }, [run, to, reduced]);
-  return <span aria-label={`${to}${suffix}`}>{v}{suffix}</span>;
-}
-
-/* ------------------------------ HERO: THREE CITIES ------------------------------ */
-
-const MW = 560, MH = 400;
-const px = (lon: number) => ((lon + 25) / 120) * MW;
-const py = (lat: number) => ((62 - lat) / 45) * MH;
-
-function Network() {
-  const pts = cities.map((c) => ({ ...c, x: px(c.lon), y: py(c.lat) }));
-  const arc = (a: { x: number; y: number }, b: { x: number; y: number }) => {
-    const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2 - Math.hypot(b.x - a.x, b.y - a.y) * 0.28;
-    return `M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
-  };
-  const links: [number, number][] = [[2, 1], [1, 0], [2, 0]];
-  const reduced = useReduced();
-  return (
-    <div className="relative mx-auto w-full max-w-[600px]">
-      <div aria-hidden className="absolute -inset-10 -z-10 rounded-full opacity-70 blur-2xl" style={{ background: `radial-gradient(closest-side, ${COBALT}88, transparent)` }} />
-      <svg viewBox={`0 0 ${MW} ${MH}`} className="block h-auto w-full" role="img" aria-label="Network diagram linking our offices in London, Riyadh and Lahore">
-        <defs>
-          <pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.3" fill="rgba(110,161,255,.35)" /></pattern>
-          <radialGradient id="fade" cx=".5" cy=".5" r=".6"><stop offset="0" stopColor="#fff" /><stop offset="1" stopColor="#fff" stopOpacity="0" /></radialGradient>
-          <mask id="m"><rect width={MW} height={MH} fill="url(#fade)" /></mask>
-        </defs>
-        <rect width={MW} height={MH} fill="url(#dots)" mask="url(#m)" />
-        {links.map(([a, b], i) => <path key={i} d={arc(pts[a], pts[b])} fill="none" stroke={COBALT_HI} strokeOpacity=".55" strokeWidth="1.5" strokeDasharray="4 6" />)}
-        {!reduced && links.map(([a, b], i) => (
-          <circle key={i} r="4" fill="#fff">
-            <animateMotion dur={`${3.4 + i * 0.7}s`} begin={`${i * 0.9}s`} repeatCount="indefinite" path={arc(pts[a], pts[b])} />
-          </circle>
-        ))}
-        {pts.map((p, i) => (
-          <g key={p.name}>
-            <circle cx={p.x} cy={p.y} r="16" fill={COBALT_HI} opacity=".18" className={reduced ? "" : "pulse-ring"} style={{ animationDelay: `${i * 0.5}s`, transformOrigin: `${p.x}px ${p.y}px` }} />
-            <circle cx={p.x} cy={p.y} r="6" fill={COBALT_HI} stroke="#0B1F3B" strokeWidth="2" />
-            <text x={p.x} y={p.y + p.dy} textAnchor="middle" fontSize="14" fontWeight="600" fill="#fff" style={{ letterSpacing: ".04em" }}>{p.name}</text>
-          </g>
-        ))}
-      </svg>
-    </div>
-  );
-}
-
-function Hero() {
-  return (
-    <section className="relative isolate overflow-hidden text-white" aria-label="About DEVNTOM Solutions" style={{ background: `radial-gradient(70% 60% at 76% 34%, ${COBALT}70 0%, transparent 65%), radial-gradient(50% 50% at 8% 90%, ${COBALT}33 0%, transparent 70%), linear-gradient(180deg, ${BLACK} 0%, ${NAVY} 100%)` }}>
-      <div aria-hidden className="hero-grid pointer-events-none absolute inset-0 -z-10 opacity-[0.16]" />
-      <div className={`${wrap} relative grid min-h-[92svh] items-center gap-14 pb-36 pt-32 lg:grid-cols-12 lg:pt-36`}>
-        <div className="lg:col-span-7">
-          <p className="rv inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/[0.06] py-2 pl-3 pr-5 text-[11px] uppercase tracking-[0.18em] text-[#DCE7FB]">
-            <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2F7BFF] opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-[#2F7BFF]" /></span>
-            About DEVNTOM Solutions
-          </p>
-          <Lines h1 className="mt-7 text-[clamp(2.7rem,6.4vw,6.2rem)] leading-[0.96] tracking-[-0.045em] [text-shadow:0_2px_40px_rgba(2,5,11,.5)]" lines={["The team behind", <><b className="font-bold">your</b> digital</>, <><Acc>growth.</Acc></>]} />
-          <p className="rv mt-8 max-w-lg text-lg font-light leading-relaxed text-[#DCE7FB]" style={{ transitionDelay: "150ms" }}>
-            We design, build and grow websites, software and marketing for businesses across the world, from our offices in Lahore, Riyadh and London.
-          </p>
-          <div className="rv mt-9 flex flex-wrap items-center gap-3" style={{ transitionDelay: "250ms" }}>
-            <Link href="/contact" className={`group inline-flex items-center gap-3 rounded-full bg-[#0047AB] px-8 py-4 text-sm font-medium text-white transition hover:bg-white hover:text-[#0B1F3B] ${ringDark}`}>
-              Work with us <ArrowRight size={16} className="transition group-hover:translate-x-1" aria-hidden="true" />
-            </Link>
-            <Link href="/projects" className={`inline-flex items-center rounded-full border border-white/30 px-8 py-4 text-sm font-medium text-white transition hover:border-white ${ringDark}`}>See our work</Link>
-          </div>
-        </div>
-        <div className="lg:col-span-5"><Network /></div>
-      </div>
-      <div className="absolute inset-x-0 bottom-0 border-t border-white/10 bg-black/30 py-5 backdrop-blur-sm" aria-label="Tools we build with">
-        <div className="overflow-hidden">
-          <div className="mq flex w-max items-center gap-14 whitespace-nowrap text-sm uppercase tracking-[0.2em] text-white/60">
-            {[...tools, ...tools, ...tools, ...tools].map((t, i) => <span key={i} className="flex items-center gap-14">{t}<span className="h-1 w-1 rounded-full bg-[#2F7BFF]" /></span>)}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------ MANIFESTO: WORDS LIGHT UP ON SCROLL ------------------------------ */
-
-function Manifesto() {
-  const root = React.useRef<HTMLElement>(null);
-  const reduced = useReduced();
-  const [p, setP] = React.useState(0);
-  const words = React.useMemo(() => MANIFESTO.split(" "), []);
-
-  React.useEffect(() => {
-    if (reduced) return;
-    const el = root.current;
-    if (!el) return;
-    let raf = 0;
-    const calc = () => {
-      raf = 0;
-      const r = el.getBoundingClientRect();
-      const travel = r.height - window.innerHeight;
-      setP(travel <= 0 ? 1 : Math.max(0, Math.min(1, -r.top / travel)));
-    };
-    const on = () => { if (!raf) raf = requestAnimationFrame(calc); };
-    calc();
-    window.addEventListener("scroll", on, { passive: true });
-    window.addEventListener("resize", on);
-    return () => { window.removeEventListener("scroll", on); window.removeEventListener("resize", on); cancelAnimationFrame(raf); };
-  }, [reduced]);
-
-  const n = words.length;
-  const lit = reduced ? n : p * 1.15 * n;
-  return (
-    <section ref={root} aria-label="Who we are" className="relative bg-white" style={{ height: reduced ? "auto" : "260vh" }}>
-      <div className={`${reduced ? "py-28" : "sticky top-0 flex h-screen items-center"}`}>
-        <div className={wrap}>
-          <p className="mb-8 text-xs font-semibold uppercase tracking-[0.2em] text-[#0047AB]">Who we are</p>
-          <p className={`${pop.className} max-w-5xl text-[clamp(1.7rem,4.2vw,3.6rem)] font-semibold leading-[1.15] tracking-[-0.035em]`}>
-            {words.map((w, i) => {
-              const o = Math.max(0.14, Math.min(1, lit - i));
-              return <span key={i} style={{ opacity: o, color: o > 0.95 ? NAVY : "#7C8BA5", transition: "opacity .25s linear, color .25s linear" }}>{w} </span>;
-            })}
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------ STATS ------------------------------ */
-
-function Stats() {
-  const ref = React.useRef<HTMLUListElement>(null);
-  const [run, setRun] = React.useState(false);
-  React.useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setRun(true); io.disconnect(); } }, { threshold: 0.3 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  return (
-    <section className="relative overflow-hidden py-20 text-white md:py-28" aria-label="Our numbers" style={{ background: `linear-gradient(120deg, ${BLACK} 0%, ${NAVY} 50%, ${COBALT} 100%)` }}>
-      <div className={wrap}>
-        <ul ref={ref} className="grid gap-y-12 sm:grid-cols-2 lg:grid-cols-4 lg:divide-x lg:divide-white/15">
-          {STATS.map(([n, s, l]) => (
-            <li key={l} className="lg:px-10 lg:first:pl-0">
-              <p className={`${pop.className} text-6xl font-semibold tabular-nums tracking-[-0.05em] md:text-7xl`}><Count to={n} suffix={s} run={run} /></p>
-              <p className="mt-3 max-w-[14rem] font-light leading-snug text-[#DCE7FB]">{l}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------ VALUES ------------------------------ */
-
-function Values() {
-  return (
-    <section className="bg-white py-24 md:py-36" aria-label="How we work">
-      <div className={wrap}>
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <Lines className="t2 max-w-3xl" lines={[<>How we</>, <><b className="font-bold">work</b>, <Acc dark={false}>every day</Acc></>]} />
-          <p className="rv max-w-sm font-light leading-relaxed text-[#3B4A63]">Four habits that shape every project, large or small.</p>
-        </div>
-        <ol className="mt-16">
-          {values.map(([t, d], i) => (
-            <li key={t} className="rv group grid items-baseline gap-4 border-t border-[#CBD8EE] py-10 transition-colors last:border-b hover:bg-[#F4F8FE] md:grid-cols-12 md:px-4" style={{ transitionDelay: `${i * 60}ms` }}>
-              <span className="text-sm text-[#5B6B84] md:col-span-1">{String(i + 1).padStart(2, "0")}</span>
-              <h3 className={`${pop.className} text-3xl font-extralight tracking-[-0.035em] transition-colors group-hover:text-[#0047AB] md:col-span-5 md:text-5xl`}>{t}</h3>
-              <p className="max-w-md font-light leading-relaxed text-[#3B4A63] md:col-span-6 md:text-lg">{d}</p>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------ SERVICES ------------------------------ */
-
-function Services() {
-  return (
-    <section className="bg-[#F4F8FE] py-24 md:py-36" aria-label="What we do">
-      <div className={wrap}>
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <Lines className="t2 max-w-3xl" lines={[<>What we</>, <><b className="font-bold">do</b> for <Acc dark={false}>clients</Acc></>]} />
-          <Link href="/services" className={`group inline-flex items-center gap-3 rounded-full border border-[#0B1F3B]/30 px-7 py-3.5 text-sm font-medium transition hover:border-[#0047AB] hover:text-[#0047AB] ${ring}`}>
-            All services <ArrowRight size={16} className="transition group-hover:translate-x-1" aria-hidden="true" />
-          </Link>
-        </div>
-        <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {services.map(([Icon, t, href, d], i) => (
-            <li key={t} className="rv" style={{ transitionDelay: `${(i % 3) * 90}ms` }}>
-              <Link href={href} className={`group flex h-full flex-col justify-between gap-12 rounded-[4px] border border-[#CBD8EE] bg-white p-8 transition-colors duration-300 hover:border-[#0047AB] ${ring}`}>
-                <div className="flex items-start justify-between">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-[4px] bg-[#E3ECFB] text-[#0047AB] transition-colors duration-300 group-hover:bg-[#0047AB] group-hover:text-white"><Icon size={24} aria-hidden="true" /></span>
-                  <ArrowUpRight size={24} className="text-[#0047AB] transition group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true" />
-                </div>
-                <div>
-                  <h3 className={`${pop.className} text-xl font-semibold tracking-[-0.01em]`}>{t}</h3>
-                  <p className="mt-2 font-light leading-relaxed text-[#3B4A63]">{d}</p>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------ TEAM (hidden until you add people) ------------------------------ */
-
-function Team() {
-  if (!team.length) return null;
-  return (
-    <section className="bg-white py-24 md:py-36" aria-label="Our team">
-      <div className={wrap}>
-        <Lines className="t2 max-w-3xl" lines={[<>The people</>, <>behind the <Acc dark={false}>work</Acc></>]} />
-        <ul className="mt-14 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-          {team.map((m, i) => (
-            <li key={m.name} className="rv" style={{ transitionDelay: `${(i % 4) * 80}ms` }}>
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[6px]" style={{ background: `linear-gradient(140deg, ${NAVY}, ${COBALT})` }}>
-                {m.photo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={m.photo} alt={m.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-                ) : (
-                  <span className={`${pop.className} absolute inset-0 flex items-center justify-center text-6xl font-semibold text-white/80`}>{m.name.split(" ").map((x) => x[0]).slice(0, 2).join("")}</span>
-                )}
-              </div>
-              <h3 className={`${pop.className} mt-4 text-xl font-semibold tracking-[-0.01em]`}>{m.name}</h3>
-              <p className="text-sm text-[#3B4A63]">{m.role}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------ CLOSING CTA ------------------------------ */
-
-function Closing() {
-  return (
-    <section className="relative isolate overflow-hidden py-28 text-white md:py-40" aria-label="Work with us" style={{ background: `linear-gradient(120deg, ${BLACK} 0%, ${NAVY} 45%, ${COBALT} 100%)` }}>
-      <div aria-hidden="true" className="absolute inset-0 -z-10 opacity-60" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,.22) 1px,transparent 1px)", backgroundSize: "22px 22px", WebkitMaskImage: "linear-gradient(to right,transparent 20%,#000)", maskImage: "linear-gradient(to right,transparent 20%,#000)" }} />
-      <div aria-hidden="true" className={`${pop.className} pointer-events-none absolute -bottom-[4vw] left-0 -z-10 w-full select-none whitespace-nowrap text-center text-[18vw] font-bold leading-none tracking-[-0.05em] text-transparent`} style={{ WebkitTextStroke: "1px rgba(255,255,255,.16)" }}>Together</div>
-      <div className={`${wrap} text-center`}>
-        <Lines className="t1" lines={["Let's build", <><Acc>something</Acc> <b className="font-bold">great.</b></>]} />
-        <p className="rv mx-auto mt-8 max-w-md text-lg font-light leading-relaxed text-[#DCE7FB]">Tell us about your project. We reply with a plan, a timeline and a quote.</p>
-        <div className="rv mt-10 flex flex-wrap items-center justify-center gap-3" style={{ transitionDelay: "150ms" }}>
-          <Link href="/contact" className={`group inline-flex items-center gap-3 rounded-full bg-white px-9 py-4 text-sm font-medium text-[#0B1F3B] transition hover:bg-[#0047AB] hover:text-white ${ringDark}`}>
-            Start a project <ArrowRight size={16} className="transition group-hover:translate-x-1" aria-hidden="true" />
-          </Link>
-          <a href="mailto:info@devntomsolutions.com" className={`inline-flex items-center rounded-full border border-white/30 px-9 py-4 text-sm font-medium transition hover:border-white ${ringDark}`}>info@devntomsolutions.com</a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------ PAGE STYLES ------------------------------ */
-
-const PAGE_CSS = `
-.ln{overflow:hidden;padding-bottom:.16em;margin-bottom:-.16em}
-.ln>span{display:block;transform:translateY(112%);transition:transform 1.2s cubic-bezier(.16,1,.3,1)}
-.in .ln>span{transform:none}
-.rv{opacity:0;transform:translateY(48px);transition:opacity .9s ease,transform 1.1s cubic-bezier(.16,1,.3,1)}
-.rv.in{opacity:1;transform:none}
-.t1{font-size:clamp(2.8rem,7.4vw,7rem);line-height:.95;letter-spacing:-.04em;text-shadow:0 2px 40px rgba(2,5,11,.5)}
-.t2{font-size:clamp(2.2rem,4.5vw,4.2rem);line-height:1.02;letter-spacing:-.035em}
-.spn{transition:opacity .3s linear var(--d)}.in .spn{opacity:0}
-.chk{opacity:0;transform:scale(.3);transition:opacity .4s ease var(--d),transform .5s cubic-bezier(.34,1.56,.64,1) var(--d)}.in .chk{opacity:1;transform:none}
-@keyframes wfpop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.wf-pop{animation:wfpop .5s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i,0) * 120ms)}
-@keyframes msgin{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
-.msg-in{animation:msgin .45s cubic-bezier(.16,1,.3,1) both}
-@keyframes dotb{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
-.dot{animation:dotb 1s ease-in-out infinite}
-@keyframes mkfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-.mk-float{animation:mkfloat 5.5s ease-in-out infinite}
-.mk-float-slow{animation:mkfloat 8s ease-in-out infinite}
-@keyframes mq{to{transform:translateX(-25%)}}
-.mq{animation:mq 38s linear infinite}
-@keyframes gridmove{to{background-position:64px 64px}}
-.hero-grid{background-image:linear-gradient(rgba(110,161,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(110,161,255,.5) 1px,transparent 1px);background-size:64px 64px;-webkit-mask-image:radial-gradient(75% 75% at 70% 40%,#000,transparent);mask-image:radial-gradient(75% 75% at 70% 40%,#000,transparent);animation:gridmove 12s linear infinite}
-@keyframes kbbar{0%{width:0}60%,100%{width:100%}}
-.kb-bar{width:0;animation:kbbar 6s ease-in-out infinite}
-@keyframes kbchk{0%,55%{opacity:0;transform:scale(.3)}70%,100%{opacity:1;transform:none}}
-.kb-check{opacity:0;animation:kbchk 6s ease-in-out infinite}
-@keyframes tabfill{from{width:0}to{width:100%}}
-@keyframes mkswap{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
-.mk-swap{animation:mkswap .7s cubic-bezier(.16,1,.3,1) both}
-@keyframes mkdraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
-.sw-line{stroke-dasharray:1;animation:mkdraw 1.6s ease .3s both}
-@keyframes areain{from{opacity:0}to{opacity:1}}
-.area-in{animation:areain 1.2s ease 1s both}
-@keyframes barin{from{transform:scaleY(0)}to{transform:scaleY(1)}}
-.bar-in{transform-box:fill-box;transform-origin:bottom;animation:barin .8s cubic-bezier(.16,1,.3,1) both}
-@keyframes gx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-.gx{transform-origin:left;animation:gx .9s cubic-bezier(.16,1,.3,1) both}
-@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
-.mk-beat{animation:beat 1.6s ease-in-out infinite}
-@keyframes ring{0%{transform:scale(.6);opacity:.5}100%{transform:scale(2.2);opacity:0}}
-.pulse-ring{animation:ring 2.6s ease-out infinite}
-@media (prefers-reduced-motion:reduce){.pulse-ring{animation:none!important}.mk-swap,.sw-line,.area-in,.bar-in,.gx,.mk-beat{animation:none!important}.sw-line{stroke-dasharray:none}.mk-float,.mk-float-slow,.mq,.hero-grid,.dot,.msg-in,.wf-pop{animation:none!important}.kb-bar{animation:none;width:100%}.kb-check{animation:none;opacity:1}.ln>span,.rv{transform:none!important;opacity:1!important;transition:none!important}.spn{display:none}.chk{opacity:1;transform:none;transition:none}}
 `;
 
-const wrap = "mx-auto w-full max-w-[1400px] px-6 md:px-12";
-const ring = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F7BFF] focus-visible:ring-offset-2";
-const ringDark = `${ring} focus-visible:ring-offset-[#0B1F3B]`;
-const field = "mt-2 w-full rounded-[3px] border border-[#CBD8EE] bg-[#F4F8FE] px-4 py-3 text-[#0B1F3B] placeholder:text-[#5B6B84] focus:border-[#0047AB] focus:outline-none focus:ring-2 focus:ring-[#0047AB]/30";
-const label = "text-sm font-medium text-[#0B1F3B]";
-
-function Lines({ lines, className = "", h1 = false }: { lines: React.ReactNode[]; className?: string; h1?: boolean }) {
-  const Tag = (h1 ? "h1" : "h2") as "h2";
-  return (
-    <Tag data-r className={`${pop.className} font-extralight ${className}`}>
-      {lines.map((l, i) => (
-        <span key={i} className="ln block">
-          <span style={{ transitionDelay: `${i * 110}ms` }}>{l}</span>
-        </span>
-      ))}
-    </Tag>
-  );
-}
-
-const Acc = ({ children, dark = true }: { children: React.ReactNode; dark?: boolean }) => (
-  <span className={`${pw.className} text-[.58em] font-normal tracking-normal ${dark ? "text-[#6EA1FF]" : "text-[#0047AB]"}`}>{children}</span>
-);
-
-/* ------------------------------ PAGE ------------------------------ */
-
-export default function AboutClient() {
-  const main = React.useRef<HTMLElement>(null);
-
-  React.useEffect(() => {
-    const el = main.current!;
-    const io = new IntersectionObserver(
-      (es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }),
-      { threshold: 0.15, rootMargin: "0px 0px -6% 0px" }
-    );
-    el.querySelectorAll("[data-r],.rv").forEach((n) => io.observe(n));
-    return () => io.disconnect();
-  }, []);
+export default function PromoVideo() {
+  const [run, setRun] = useState(0); // changing the key restarts every CSS animation
+  const frame = useRef<HTMLDivElement>(null);
 
   return (
-    <main ref={main} id="main" className={`${rob.className} overflow-x-clip bg-white text-[#0B1F3B]`}>
-      <style>{PAGE_CSS}</style>
-      <Hero />
-      <Manifesto />
-      <Stats />
-      <Values />
-      <Services />
-      <Team />
-      <Closing />
-    </main>
+    <section className={`dp-wrap ${font.className}`}>
+      <style>{css}</style>
+      <div ref={frame} className="dp-frame">
+        <div
+          key={run}
+          className="dp-stage dp-play"
+          role="img"
+          aria-label="Animated promo for Devntom Solutions: help your next customer find a standout website, built modern, fast and tailored to your goals. Visit devntomsolutions.com"
+        >
+      <div className="dp-bg" aria-hidden="true"><i></i><i></i><i></i>
+      <b className="dp-dot" style={st("--x:8;--v:9s")}></b><b className="dp-dot" style={st("--x:22;--v:12s;--w:2s")}></b><b className="dp-dot" style={st("--x:35;--v:10s;--w:5s")}></b><b className="dp-dot" style={st("--x:49;--v:13s;--w:1s")}></b>
+      <b className="dp-dot" style={st("--x:63;--v:9s;--w:4s")}></b><b className="dp-dot" style={st("--x:77;--v:11s;--w:7s")}></b><b className="dp-dot" style={st("--x:90;--v:12s;--w:3s")}></b></div>
+      
+      {/* 0-6s: Your next customer could be searching for your business right now. */}
+      <section className="dp-sc dp-s1">
+        <div className="dp-k" style={st("--d:0s;--l:1.7s")}>Your next customer</div>
+        <div className="dp-k" style={st("--d:1.6s;--l:1.6s")}>could be searching for</div>
+        <div className="dp-k dp-bl" style={st("--d:3.1s;--l:1.5s")}>your business</div>
+        <div className="dp-k" style={st("--d:4.5s;--l:1.5s;--s:6.4")}>right now.</div>
+        <div className="dp-sb dp-p" style={st("--x:22;--y:22;--w:56;--h:8;--d:.6s")}><span className="dp-mg"></span><span className="dp-ty" style={st("--d:1.2s;--l:1.9s;--tw:34cqw")}>best website developer near me</span></div>
+        <div className="dp-res dp-p" style={st("--x:24;--y:33;--w:52;--h:5.6;--d:3.3s")}><i></i><s></s><s></s></div>
+        <div className="dp-res dp-p" style={st("--x:24;--y:40.4;--w:52;--h:5.6;--d:3.6s")}><i></i><s></s><s></s></div>
+        <div className="dp-res dp-p" style={st("--x:24;--y:47.8;--w:52;--h:5.6;--d:3.9s")}><i></i><s></s><s></s></div>
+      </section>
+      
+      {/* 6-12s: will they find a business that stands out? */}
+      <section className="dp-sc dp-s2">
+        <div className="dp-k" style={st("--d:0s;--l:1.6s")}>The question is,</div>
+        <div className="dp-k" style={st("--d:1.5s;--l:2s")}>will they find a business</div>
+        <div className="dp-k dp-bl" style={st("--d:3.4s;--l:2.6s")}>that stands out?</div>
+        <div className="dp-res dp-p" style={st("--x:24;--y:20;--w:52;--h:6.2;--d:.4s")}><i></i><s></s><s></s></div>
+        <div className="dp-res dp-p" style={st("--x:24;--y:28;--w:52;--h:6.2;--d:.6s")}><i></i><s></s><s></s></div>
+        <div className="dp-res dp-p" style={st("--x:24;--y:36;--w:52;--h:6.2;--d:.8s")}><i></i><s></s><s></s></div>
+        <div className="dp-res dp-me dp-p" style={st("--x:24;--y:47;--w:52;--h:6.2;--d:1s")}><i></i>Your business</div>
+        <div className="dp-ring" style={st("left:50%;top:41%;--d:4.6s;--n:2;--g:9")}></div>
+        <svg className="dp-cur" viewBox="0 0 24 24" style={st("--d:3.8s")}><path d="M3 2l17 8-7.5 2L9 20z" fill="#0b0f1a" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round"/></svg>
+      </section>
+      
+      {/* 12-18s: At Devntom Solutions, we build modern, high-performance websites tailored to your business goals. */}
+      <section className="dp-sc dp-s3">
+        <div className="dp-mk dp-p dp-pop2" style={st("--x:6;--y:6;--w:7;--h:5.7;--d:.1s")}></div>
+        <div className="dp-t" style={st("--y:13;--d:.4s")}>At <span className="dp-bl">Devntom Solutions,</span></div>
+        <div className="dp-t" style={st("--y:19;--d:1.2s")}>we build modern,</div>
+        <div className="dp-t" style={st("--y:25;--d:2.1s")}>high-performance websites</div>
+        <div className="dp-t" style={st("--y:31;--d:3s")}>tailored to your</div>
+        <div className="dp-t dp-bl" style={st("--y:37;--d:3.4s")}>business goals.</div>
+        <div className="dp-spin dp-p" style={st("--x:56;--y:8;--w:40;--h:40")}></div>
+        <div className="dp-w dp-p" style={st("--x:58;--y:15;--w:36;--h:27;--d:.6s")}>
+          <div className="dp-b dp-p dp-g" style={st("--x:2;--y:3.4;--w:32;--h:2.2;--d:1.2s")}></div>
+          <div className="dp-b dp-p" style={st("--x:2;--y:7;--w:32;--h:7;--d:1.5s")}></div>
+          <div className="dp-b dp-p" style={st("--x:2;--y:16;--w:9.6;--h:6;--d:1.9s")}></div>
+          <div className="dp-b dp-p" style={st("--x:12.7;--y:16;--w:9.6;--h:6;--d:2.1s")}></div>
+          <div className="dp-b dp-p" style={st("--x:23.4;--y:16;--w:9.6;--h:6;--d:2.3s")}></div>
+        </div>
+        <div className="dp-chip" style={st("--x:55;--y:9;--r:-5deg;--d:2.4s")}><i>M</i>Modern</div>
+        <div className="dp-chip" style={st("--x:73;--y:41;--r:4deg;--c:#16a34a;--d:2.8s")}><i>F</i>High-performance</div>
+        <div className="dp-chip" style={st("--x:58;--y:47;--r:-3deg;--c:#8b5cf6;--d:3.2s")}><i>T</i>Tailored to you</div>
+      </section>
+      
+      {/* 18-22s: professional business websites to powerful e-commerce stores */}
+      <section className="dp-sc dp-s4">
+        <div className="dp-k" style={st("--d:0s;--l:2s;--y:6")}>From professional business websites</div>
+        <div className="dp-k dp-bl" style={st("--d:2s;--l:2s;--y:6")}>to powerful e-commerce stores</div>
+        <div className="dp-w dp-p" style={st("--x:7;--y:18;--w:40;--h:30;--d:.3s")}>
+          <div className="dp-b dp-p dp-g" style={st("--x:2;--y:3.6;--w:36;--h:2.2;--d:.7s")}></div>
+          <div className="dp-b dp-p" style={st("--x:2;--y:7.4;--w:36;--h:8;--d:.9s")}></div>
+          <div className="dp-b dp-p" style={st("--x:2;--y:17.4;--w:11;--h:7;--d:1.2s")}></div>
+          <div className="dp-b dp-p" style={st("--x:14.5;--y:17.4;--w:11;--h:7;--d:1.4s")}></div>
+          <div className="dp-b dp-p" style={st("--x:27;--y:17.4;--w:11;--h:7;--d:1.6s")}></div>
+        </div>
+        <div className="dp-w dp-p" style={st("--x:53;--y:18;--w:40;--h:30;--d:.6s")}>
+          <div className="dp-b dp-p dp-g" style={st("--x:2;--y:3.6;--w:28;--h:2.2;--d:1.1s")}></div>
+          <div className="dp-b dp-p" style={st("--x:2;--y:7.6;--w:11;--h:10;--d:1.4s")}></div>
+          <div className="dp-b dp-p" style={st("--x:14.5;--y:7.6;--w:11;--h:10;--d:1.6s")}></div>
+          <div className="dp-b dp-p" style={st("--x:27;--y:7.6;--w:11;--h:10;--d:1.8s")}></div>
+          <div className="dp-b dp-p dp-g" style={st("--x:2;--y:19;--w:8;--h:1.6;--d:2s")}></div>
+          <div className="dp-b dp-p dp-g" style={st("--x:14.5;--y:19;--w:8;--h:1.6;--d:2.1s")}></div>
+          <div className="dp-b dp-p dp-g" style={st("--x:27;--y:19;--w:8;--h:1.6;--d:2.2s")}></div>
+          <div className="dp-b dp-p" style={st("--x:2;--y:23;--w:14;--h:4;--d:2.4s")}></div>
+        </div>
+        <div className="dp-chip" style={st("--x:78;--y:14;--r:5deg;--c:#16a34a;--d:2.7s")}><i>+1</i>New order</div>
+      </section>
+      
+      {/* 22-26s: we turn your ideas into websites that build trust, attract customers, and help your business grow */}
+      <section className="dp-sc dp-s5">
+        <div className="dp-k" style={st("--d:0s;--l:1.7s;--y:5;--s:4.6")}>we turn your ideas into websites</div>
+        <div className="dp-k" style={st("--d:1.6s;--l:2.4s;--y:5;--s:4.6")}>that build trust, attract customers,<br />and help your business grow.</div>
+        <div className="dp-card dp-p" style={st("--x:8;--y:20;--w:26;--h:13;--d:.9s")}><b>✓</b>Build trust</div>
+        <div className="dp-card dp-p" style={st("--x:37;--y:20;--w:26;--h:13;--d:1.5s")}><b>+</b>Attract customers</div>
+        <div className="dp-card dp-p" style={st("--x:66;--y:20;--w:26;--h:13;--d:2.1s")}><b>↑</b>Grow your business</div>
+        <div className="dp-bar dp-p" style={st("--x:12;--y:48;--w:5;--h:4;--d:1.2s")}></div><div className="dp-bar dp-p" style={st("--x:22;--y:46;--w:5;--h:6;--d:1.4s")}></div>
+        <div className="dp-bar dp-p" style={st("--x:32;--y:45;--w:5;--h:7;--d:1.6s")}></div><div className="dp-bar dp-p" style={st("--x:42;--y:43;--w:5;--h:9;--d:1.8s")}></div>
+        <div className="dp-bar dp-p" style={st("--x:52;--y:41;--w:5;--h:11;--d:2s")}></div><div className="dp-bar dp-p" style={st("--x:62;--y:38;--w:5;--h:14;--d:2.2s")}></div>
+        <div className="dp-bar dp-p" style={st("--x:72;--y:36;--w:5;--h:16;--d:2.4s")}></div><div className="dp-bar dp-p" style={st("--x:82;--y:33;--w:5;--h:19;--d:2.6s")}></div>
+        <svg className="dp-p" viewBox="0 0 100 24" style={st("--x:9;--y:29;--w:82;--h:20")} preserveAspectRatio="none"><path className="dp-ln" pathLength="1" style={st("--d:1.4s")} d="M3 21 L15 19 L27 20 L39 15 L51 14 L63 9 L75 7 L96 2"/></svg>
+      </section>
+      
+      {/* 26-32s: deserves more than just an online presence */}
+      <section className="dp-sc dp-s6">
+        <div className="dp-k" style={st("--d:0s;--l:1.6s;--y:22")}>Your business deserves</div>
+        <div className="dp-k" style={st("--d:1.5s;--l:1.5s;--y:22")}>more than just an</div>
+        <div className="dp-k" style={st("--d:2.9s;--l:1.5s;--y:22")}><span className="dp-sk" style={st("--d:3.3s")}>online presence.</span></div>
+        <div className="dp-k" style={st("--d:4.2s;--l:1.8s;--y:15;--s:4.6")}>It deserves a website</div>
+        <div className="dp-k dp-bl" style={st("--d:4.5s;--l:1.5s;--y:23;--s:8.4")}>that makes an impact.</div>
+        <div className="dp-ring" style={st("--d:4.6s;--g:10")}></div><div className="dp-ring" style={st("--d:4.85s;--g:14")}></div><div className="dp-ring" style={st("--d:5.1s;--g:18")}></div>
+      </section>
+      
+      {/* 32-37s: Close */}
+      <section className="dp-sc dp-s7 dp-nv">
+        <div className="dp-ring" style={st("left:33.3cqw;top:22.1cqw;--d:.2s;--n:3;--g:8;border-color:#3d86ff")}></div>
+        <div className="dp-row">
+          <div className="dp-mk dp-pop2" style={st("--d:.1s")}></div>
+          <div><div className="dp-wm dp-up" style={st("--d:.4s")}>Devntom</div><span className="dp-so dp-up" style={st("--d:.7s")}>SOLUTIONS</span></div>
+        </div>
+        <div className="dp-tag" style={st("--d:1.2s")}>Where Systems Become Strategy</div>
+        <div className="dp-pill" style={st("--d:1.8s")}>Visit devntomsolutions.com</div>
+      </section>
+      
+      <div className="dp-pg"></div>
+        </div>
+      </div>
+      <div className="dp-ctl">
+        <button type="button" onClick={() => setRun((r) => r + 1)}>Replay</button>
+        <button type="button" onClick={() => frame.current?.requestFullscreen?.()}>Full screen</button>
+      </div>
+    </section>
   );
 }
