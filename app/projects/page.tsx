@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import ProjectsClient from "./ProjectsClient";
-// import { projects } from "@/data/projects"; // your data: map its fields onto the Project type in ProjectsClient
+import { projects } from "./projects";
 
 const SITE = "https://www.devntomsolutions.com";
-const TITLE = "Our Projects ";
-const DESC = "A selection of websites, online stores, web apps, marketing campaigns and AI automation projects delivered by DEVNTOM Solutions.";
+const TITLE = "Our Projects";
+const DESC = `Explore ${projects.length} DEVNTOM Solutions case studies across business websites, e-commerce platforms and custom web applications.`;
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -26,7 +26,7 @@ export default function Page() {
   return (
     <>
       {jsonLd.map((d, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(d) }} />)}
-      <ProjectsClient /* projects={projects} */ />
+      <ProjectsClient projects={projects} />
     </>
   );
 }

@@ -159,45 +159,6 @@ const services = [
   ],
 ] as const;
 
-// REPLACE with real projects (title, text, tags, stack, href) once case studies are ready.
-const projects = [
-  [
-    "Business website with SEO",
-    "A fast, search-optimised company website with a CMS and lead forms.",
-    ["Website", "SEO", "CMS"],
-    "Next.js, Tailwind",
-    "/projects",
-  ],
-  [
-    "AI workflow automation",
-    "Automated intake, routing and reporting that removes repetitive manual work.",
-    ["AI", "Automation"],
-    "Python, Node.js",
-    "/projects",
-  ],
-  [
-    "Custom CRM platform",
-    "A tailored CRM that tracks leads, tasks and approvals in one place.",
-    ["Software", "Dashboard"],
-    "React, Node.js, Cloud",
-    "/projects",
-  ],
-  [
-    "Mobile app with backend",
-    "A cross-platform app with secure accounts, notifications and an admin panel.",
-    ["Mobile", "API"],
-    "React Native, Node.js",
-    "/projects",
-  ],
-  [
-    "E-commerce store",
-    "A fast storefront with catalogue, checkout and order management.",
-    ["E-commerce", "Website"],
-    "Next.js, Node.js",
-    "/projects",
-  ],
-] as const;
-
 const reasons = [
   [
     "Systems, not isolated features",
@@ -272,21 +233,21 @@ const stepBg = [
 const posts = [
   [
     "Pricing",
-    "How much does website development cost in Pakistan?",
-    "What drives the price of a business website and how to budget for it.",
-    "/blog/website-development-cost-pakistan",
+    "How much does a website really cost? What moves the price",
+    "The factors that decide the cost, the questions that expose hidden fees, and how to get an accurate quote.",
+    "/blog/how-much-does-a-website-cost",
   ],
   [
     "Comparison",
-    "Custom website vs template website: which is better?",
-    "When a template is enough and when custom development pays off.",
-    "/blog/custom-vs-template-website",
+    "Next.js or WordPress: which is right for your business?",
+    "Both can power an excellent website. The right choice depends on your team, goals and custom needs.",
+    "/blog/nextjs-vs-wordpress",
   ],
   [
     "Guide",
-    "How to choose a website development company",
-    "Questions to ask, proof to look for and red flags to avoid.",
-    "/blog/how-to-choose-website-development-company",
+    "How to brief a web design agency and get an accurate quote",
+    "What to include in a clear brief, the questions to ask, and the warning signs to watch for.",
+    "/blog/how-to-brief-a-web-agency",
   ],
 ];
 
@@ -423,9 +384,8 @@ const stepLabel = [
 ];
 const stepX = [100, 300, 500, 700, 900, 1100];
 
-// Brand logos (react-icons). Only list companies you have actually worked with,
-// logos imply a client relationship. Format: [Icon, name, brand colour on hover]
-const clients: [typeof SiReact, string, string][] = [
+// Platform and tool logos shown as technologies in the wider ecosystem, not client endorsements.
+const platforms: [typeof SiReact, string, string][] = [
   [FaMicrosoft, "Microsoft", "#00A4EF"],
   [SiGoogle, "Google", "#4285F4"],
   [FaAmazon, "Amazon", "#FF9900"],
@@ -1462,15 +1422,15 @@ export default function HomeClient() {
         </div>
       </section>
 
-      {/* 2b. CLIENTS (about) */}
+      {/* 2b. PLATFORMS (about) */}
       <section
-        aria-label="Companies we have worked with"
+        aria-label="Digital platforms and tools"
         className="relative overflow-hidden bg-white py-0"
       >
         <div className="mx-auto flex max-w-[1400px] items-center gap-4 px-6 py-3 md:px-12">
           <span className="h-px w-8 bg-[#DCE5EF]" />
           <p className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#94A3B8]">
-            Trusted by companies worldwide
+            Digital platforms and tools
           </p>
           <span className="h-px flex-1 bg-[#EEF2F7]" />
         </div>
@@ -1490,7 +1450,7 @@ export default function HomeClient() {
               style={{ willChange: "transform" }}
             >
               {[0, 1].flatMap((k) =>
-                clients.map(([Icon, name, color]) => (
+                platforms.map(([Icon, name, color]) => (
                   <div
                     key={`${k}-${name}`}
                     aria-hidden={k === 1 || undefined}

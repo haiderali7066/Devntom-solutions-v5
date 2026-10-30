@@ -12,11 +12,12 @@
  * related services, FAQ and the contact form. All screens are illustrations, not client work.
  *
  * Palette: cobalt, navy, white, black.
- * Before launch, search this file for "TESTIMONIALS" to see where to drop your component.
+ * Includes the shared client stories section.
  */
 
 import * as React from "react";
 import Link from "next/link";
+import Testimonials from "@/components/Testimonials";
 import { Poppins, Roboto, Playwrite_CA } from "next/font/google";
 import {
   ArrowRight, ArrowUpRight, BarChart3, Bell, Bot, CalendarCheck, Check, FileText, GitBranch, Globe, Headphones,
@@ -610,7 +611,7 @@ export default function AiAutomationChatbotsPage() {
         </div>
       </section>
 
-      {/* TESTIMONIALS: drop your existing <Testimonials /> component here and import it at the top of this file. */}
+      <Testimonials />
 
       {/* 4. RELATED SERVICES */}
       <section className="bg-white py-24 md:py-32" aria-label="Related services">

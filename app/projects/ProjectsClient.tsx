@@ -11,8 +11,8 @@
  * big typographic index where a preview image follows the cursor (on touch screens each row shows a
  * thumbnail instead).
  *
- * Projects: pass your real work with <ProjectsClient projects={...} /> (see the Project type below).
- * With no prop it shows SAMPLE projects so the page is never empty. REPLACE: search this file for "SAMPLE".
+ * Projects: pass published work with <ProjectsClient projects={...} /> (see the Project type below).
+ * If no projects are available, the page shows an honest empty state instead of sample work.
  *
  * Performance: nothing animates layout or paint on scroll. The preview follower moves with one transform
  * per frame, and only while a row is hovered.
@@ -38,29 +38,17 @@ const BLACK = "#02050B";
 /* ------------------------------ DATA ------------------------------ */
 
 export type Project = {
-  slug: string; // links to /projects/[slug]
+  slug: string;
   title: string;
   category: string;
-  year: string;
-  summary: string;
-  tags: string[];
+  summary?: string;
+  industry?: string;
+  url?: string;
+  year?: string;
+  tags?: string[];
   image?: string; // full URL or a /public path. A gradient shows if it is missing or fails to load.
   client?: string;
 };
-
-const IMG = (id: string, w = 1400) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=75`;
-
-// SAMPLE projects: replace by passing `projects` from your data.
-const SAMPLE: Project[] = [
-  { slug: "sample-company-website", title: "Company website redesign", category: "Website", year: "2026", summary: "A faster, clearer site for a professional services firm, built to turn visitors into enquiries.", tags: ["Next.js", "SEO", "CMS"], image: IMG("1507238691740-187a5b1d37b8") },
-  { slug: "sample-online-store", title: "Online store for a fashion brand", category: "E-commerce", year: "2026", summary: "A fast storefront with secure checkout and simple stock management.", tags: ["Storefront", "Payments"], image: IMG("1441986300917-64674bd600d8") },
-  { slug: "sample-dashboard", title: "Operations dashboard", category: "Web App", year: "2025", summary: "A browser-based dashboard that replaced a patchwork of spreadsheets.", tags: ["React", "API", "Dashboards"], image: IMG("1551288049-bebda4e38f71") },
-  { slug: "sample-campaign", title: "Lead generation campaign", category: "Marketing", year: "2025", summary: "Search and social campaigns with landing pages built to convert.", tags: ["Google Ads", "Landing pages"], image: IMG("1460925895917-afdab827c52f") },
-  { slug: "sample-chatbot", title: "Customer support chatbot", category: "AI", year: "2026", summary: "An assistant trained on a company's own content, with handover to the team.", tags: ["Chatbot", "Automation"], image: IMG("1531746790731-6c087fecd65a") },
-  { slug: "sample-crm", title: "Custom CRM for a services team", category: "Software", year: "2025", summary: "Leads, jobs and invoices in one place, shaped around how the team works.", tags: ["Custom software", "Integrations"], image: IMG("1461749280684-dccba630e2f6") },
-  { slug: "sample-landing", title: "Product launch landing page", category: "Website", year: "2025", summary: "A focused one-page launch with fast load times and tracking set up.", tags: ["Landing page", "Speed"], image: IMG("1498050108023-c5249f4df085") },
-  { slug: "sample-automation", title: "Lead follow-up automation", category: "AI", year: "2026", summary: "Enquiries read, scored and routed in seconds, with replies sent automatically.", tags: ["Workflows", "CRM"], image: IMG("1522202176988-66273c2fd55f") },
-];
 
 /* ------------------------------ SMALL HELPERS ------------------------------ */
 
@@ -84,23 +72,28 @@ const cover = { background: `linear-gradient(140deg, ${NAVY} 0%, ${COBALT} 100%)
 /* ------------------------------ HERO ------------------------------ */
 
 function Hero({ count, cats }: { count: number; cats: number }) {
+  const hasProjects = count > 0;
   return (
     <section className="relative isolate overflow-hidden text-white" aria-label="Projects" style={{ background: `radial-gradient(70% 60% at 76% 34%, ${COBALT}70 0%, transparent 65%), radial-gradient(50% 50% at 8% 90%, ${COBALT}33 0%, transparent 70%), linear-gradient(180deg, ${BLACK} 0%, ${NAVY} 100%)` }}>
       <div aria-hidden className="hero-grid pointer-events-none absolute inset-0 -z-10 opacity-[0.16]" />
       <div className={`${wrap} relative pb-24 pt-36 md:pb-32 md:pt-44`}>
         <p className="rv inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/[0.06] py-2 pl-3 pr-5 text-[11px] uppercase tracking-[0.18em] text-[#DCE7FB]">
           <span className="h-2 w-2 rounded-full bg-[#2F7BFF]" />
-          Selected work
+          {hasProjects ? "Selected work" : "Our work"}
         </p>
         <div className="mt-7 flex flex-wrap items-end justify-between gap-10">
-          <Lines h1 className="max-w-4xl text-[clamp(2.7rem,6.6vw,6.4rem)] leading-[0.96] tracking-[-0.045em] [text-shadow:0_2px_40px_rgba(2,5,11,.5)]" lines={["Work we are", <><b className="font-bold">proud</b> <Acc>of.</Acc></>]} />
-          <dl className="rv flex gap-10 pb-2" style={{ transitionDelay: "200ms" }}>
-            <div><dt className="text-xs uppercase tracking-[0.18em] text-white/60">Projects</dt><dd className={`${pop.className} mt-1 text-4xl font-semibold tracking-[-0.04em]`}>{count}</dd></div>
-            <div><dt className="text-xs uppercase tracking-[0.18em] text-white/60">Disciplines</dt><dd className={`${pop.className} mt-1 text-4xl font-semibold tracking-[-0.04em]`}>{cats}</dd></div>
-          </dl>
+          <Lines h1 className="max-w-4xl text-[clamp(2.7rem,6.6vw,6.4rem)] leading-[0.96] tracking-[-0.045em] [text-shadow:0_2px_40px_rgba(2,5,11,.5)]" lines={hasProjects ? ["Work we are", <><b className="font-bold">proud</b> <Acc>of.</Acc></>] : ["Good work", <><b className="font-bold">takes</b> <Acc>shape.</Acc></>]} />
+          {hasProjects && (
+            <dl className="rv flex gap-10 pb-2" style={{ transitionDelay: "200ms" }}>
+              <div><dt className="text-xs uppercase tracking-[0.18em] text-white/60">Projects</dt><dd className={`${pop.className} mt-1 text-4xl font-semibold tracking-[-0.04em]`}>{count}</dd></div>
+              <div><dt className="text-xs uppercase tracking-[0.18em] text-white/60">Project types</dt><dd className={`${pop.className} mt-1 text-4xl font-semibold tracking-[-0.04em]`}>{cats}</dd></div>
+            </dl>
+          )}
         </div>
         <p className="rv mt-8 max-w-xl text-lg font-light leading-relaxed text-[#DCE7FB]" style={{ transitionDelay: "150ms" }}>
-          Websites, stores, apps, campaigns and automation, designed and built for businesses that wanted more from their digital side.
+          {hasProjects
+            ? "Websites, stores, apps, campaigns and automation, designed and built for businesses that wanted more from their digital side."
+            : "We are preparing a selection of recent projects. In the meantime, explore what our team can build for your business."}
         </p>
       </div>
     </section>
@@ -112,33 +105,40 @@ function Hero({ count, cats }: { count: number; cats: number }) {
 const SPANS = ["md:col-span-7", "md:col-span-5", "md:col-span-5", "md:col-span-7"];
 
 function GridCard({ p, i }: { p: Project; i: number }) {
+  const onPointerMove = (e: React.PointerEvent<HTMLAnchorElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--cx", `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty("--cy", `${e.clientY - r.top}px`);
+  };
+
+  const content = (
+    <>
+      <div className="relative h-[320px] overflow-hidden rounded-[6px] md:h-[440px]" style={cover}>
+        <Img src={p.image} alt="" className="transition-transform duration-700 group-hover:scale-[1.05]" />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#02050B]/70 via-transparent to-transparent" />
+        <span className="absolute left-5 top-5 rounded-full border border-white/40 bg-black/30 px-3.5 py-1.5 text-xs text-white">{p.category}</span>
+        {p.year && <span className="absolute right-5 top-5 text-sm tracking-widest text-white/90">{p.year}</span>}
+        {p.url && <span aria-hidden className="pointer-events-none absolute z-10 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 scale-0 items-center justify-center rounded-full bg-[#0047AB] text-sm font-medium text-white transition-transform duration-300 group-hover:scale-100" style={{ left: "var(--cx, 50%)", top: "var(--cy, 50%)" }}>Visit website</span>}
+      </div>
+      <div className="mt-5 flex items-start justify-between gap-6">
+        <div>
+          <h3 className={`${pop.className} text-2xl font-extralight tracking-[-0.03em] md:text-3xl`}>{p.title}</h3>
+          {p.summary && <p className="mt-2 max-w-md font-light leading-relaxed text-[#3B4A63]">{p.summary}</p>}
+          {p.industry && <p className={`${p.summary ? "mt-2" : "mt-3"} text-sm text-[#5B6B84]`}><span className="font-medium text-[#3B4A63]">Industry:</span> {p.industry}</p>}
+          {!!p.tags?.length && <ul className="mt-4 flex flex-wrap gap-2">{p.tags.map((t) => <li key={t} className="rounded-full border border-[#CBD8EE] px-3 py-1 text-xs text-[#3B4A63]">{t}</li>)}</ul>}
+        </div>
+        {p.url && <ArrowUpRight size={26} className="mt-1 shrink-0 text-[#0047AB] transition group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true" />}
+      </div>
+    </>
+  );
+
   return (
     <li className={`wf-pop ${SPANS[i % 4]}`} style={{ animationDelay: `${(i % 4) * 70}ms` }}>
-      <Link
-        href={`/projects/${p.slug}`}
-        className={`group block ${ring}`}
-        onPointerMove={(e) => {
-          const r = e.currentTarget.getBoundingClientRect();
-          e.currentTarget.style.setProperty("--cx", `${e.clientX - r.left}px`);
-          e.currentTarget.style.setProperty("--cy", `${e.clientY - r.top}px`);
-        }}
-      >
-        <div className="relative h-[320px] overflow-hidden rounded-[6px] md:h-[440px]" style={cover}>
-          <Img src={p.image} alt="" className="transition-transform duration-700 group-hover:scale-[1.05]" />
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#02050B]/70 via-transparent to-transparent" />
-          <span className="absolute left-5 top-5 rounded-full border border-white/40 bg-black/30 px-3.5 py-1.5 text-xs text-white">{p.category}</span>
-          <span className="absolute right-5 top-5 text-sm tracking-widest text-white/90">{p.year}</span>
-          <span aria-hidden className="pointer-events-none absolute z-10 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 scale-0 items-center justify-center rounded-full bg-[#0047AB] text-sm font-medium text-white transition-transform duration-300 group-hover:scale-100" style={{ left: "var(--cx, 50%)", top: "var(--cy, 50%)" }}>View</span>
-        </div>
-        <div className="mt-5 flex items-start justify-between gap-6">
-          <div>
-            <h3 className={`${pop.className} text-2xl font-extralight tracking-[-0.03em] md:text-3xl`}>{p.title}</h3>
-            <p className="mt-2 max-w-md font-light leading-relaxed text-[#3B4A63]">{p.summary}</p>
-            <ul className="mt-4 flex flex-wrap gap-2">{p.tags.map((t) => <li key={t} className="rounded-full border border-[#CBD8EE] px-3 py-1 text-xs text-[#3B4A63]">{t}</li>)}</ul>
-          </div>
-          <ArrowUpRight size={26} className="mt-1 shrink-0 text-[#0047AB] transition group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true" />
-        </div>
-      </Link>
+      {p.url ? (
+        <a href={p.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${p.title} website (opens in a new tab)`} className={`group block ${ring}`} onPointerMove={onPointerMove}>{content}</a>
+      ) : (
+        <div className="block">{content}</div>
+      )}
     </li>
   );
 }
@@ -170,17 +170,23 @@ function ListView({ items }: { items: Project[] }) {
   return (
     <>
       <ul ref={wrapRef} className="border-t border-[#CBD8EE]" onPointerMove={move} onPointerLeave={() => setHot(null)}>
-        {items.map((p, i) => (
-          <li key={p.slug} className="wf-pop" style={{ animationDelay: `${i * 40}ms` }} onPointerEnter={() => setHot(i)}>
-            <Link href={`/projects/${p.slug}`} className={`group grid items-center gap-x-6 gap-y-3 border-b border-[#CBD8EE] py-8 transition-colors hover:bg-[#F4F8FE] md:grid-cols-12 md:px-4 md:py-10 ${ring}`}>
-              <span className="relative h-40 overflow-hidden rounded-[4px] md:hidden" style={cover}><Img src={p.image} alt="" /></span>
+        {items.map((p, i) => {
+          const row = (
+            <>
+              {p.image && <span className="relative h-40 overflow-hidden rounded-[4px] md:hidden" style={cover}><Img src={p.image} alt="" /></span>}
               <span className="text-sm text-[#5B6B84] md:col-span-1">{String(i + 1).padStart(2, "0")}</span>
               <h3 className={`${pop.className} text-3xl font-extralight tracking-[-0.035em] transition-colors group-hover:text-[#0047AB] md:col-span-6 md:text-5xl`}>{p.title}</h3>
-              <span className="text-sm text-[#3B4A63] md:col-span-3">{p.category}</span>
-              <span className="flex items-center justify-between gap-4 text-sm text-[#5B6B84] md:col-span-2 md:justify-end"><span>{p.year}</span><ArrowUpRight size={22} className="text-[#0047AB] transition group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true" /></span>
-            </Link>
-          </li>
-        ))}
+              <span className="text-sm text-[#3B4A63] md:col-span-3">{p.industry ?? p.category}</span>
+              <span className="flex items-center justify-between gap-4 text-sm text-[#5B6B84] md:col-span-2 md:justify-end"><span>{p.url ? "Visit website" : "Project overview"}</span>{p.url && <ArrowUpRight size={22} className="text-[#0047AB] transition group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true" />}</span>
+            </>
+          );
+          const rowClass = `group grid items-center gap-x-6 gap-y-3 border-b border-[#CBD8EE] py-8 transition-colors ${p.url ? "hover:bg-[#F4F8FE]" : ""} md:grid-cols-12 md:px-4 md:py-10 ${ring}`;
+          return (
+            <li key={p.slug} className="wf-pop" style={{ animationDelay: `${i * 40}ms` }} onPointerEnter={() => p.image && setHot(i)}>
+              {p.url ? <a href={p.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${p.title} website (opens in a new tab)`} className={rowClass}>{row}</a> : <div className={rowClass}>{row}</div>}
+            </li>
+          );
+        })}
       </ul>
       {/* the follower: a single transformed element, shown only while a row is hovered, hidden on touch */}
       <div aria-hidden ref={prev} className="pv pointer-events-none fixed left-0 top-0 z-30 hidden h-[220px] w-[320px] overflow-hidden rounded-[8px] shadow-[0_30px_80px_rgba(2,5,11,.35)] transition-opacity duration-200 md:block" style={{ ...cover, opacity: hot === null ? 0 : 1 }}>
@@ -195,6 +201,26 @@ function ListView({ items }: { items: Project[] }) {
 /* ------------------------------ WORK ------------------------------ */
 
 function Work({ projects }: { projects: Project[] }) {
+  if (projects.length > 0) return <ProjectWork projects={projects} />;
+
+  return (
+    <section id="work" className="bg-white py-16 md:py-24" aria-label="Projects">
+      <div className={wrap}>
+        <div className="rounded-[2rem] border border-[#CBD8EE] bg-[#F7F9FC] px-7 py-10 md:px-12 md:py-14">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#0047AB]">Case studies coming soon</p>
+          <h2 className={`${pop.className} mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.04em] text-[#0B1F3B] md:text-5xl`}>See what we can build for you.</h2>
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-[#5B6B84]">Our team is preparing a selection of recent work. Explore our services or tell us what you are planning.</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/services" className={`inline-flex items-center gap-2 rounded-full bg-[#0047AB] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#0B1F3B] ${ring}`}>Explore services <ArrowRight size={15} aria-hidden="true" /></Link>
+            <Link href="/contact" className={`inline-flex items-center gap-2 rounded-full border border-[#CBD8EE] px-6 py-3 text-sm font-medium text-[#0B1F3B] transition hover:border-[#0047AB] hover:text-[#0047AB] ${ring}`}>Start a project <ArrowUpRight size={15} aria-hidden="true" /></Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProjectWork({ projects }: { projects: Project[] }) {
   const [cat, setCat] = React.useState("All");
   const [view, setView] = React.useState<"grid" | "list">("grid");
   const cats = React.useMemo(() => ["All", ...Array.from(new Set(projects.map((p) => p.category)))], [projects]);
@@ -324,7 +350,7 @@ const Acc = ({ children, dark = true }: { children: React.ReactNode; dark?: bool
 
 /* ------------------------------ PAGE ------------------------------ */
 
-export default function ProjectsClient({ projects = SAMPLE }: { projects?: Project[] }) {
+export default function ProjectsClient({ projects = [] }: { projects?: Project[] }) {
   const main = React.useRef<HTMLElement>(null);
 
   React.useEffect(() => {

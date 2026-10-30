@@ -20,6 +20,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Testimonials from "@/components/Testimonials";
 import { Poppins, Roboto, Playwrite_CA } from "next/font/google";
 import {
   ArrowRight, ArrowUpRight, Bot, Building2, Check, Database, FileText, Layers, LayoutDashboard, LifeBuoy, MapPin, Plug,
@@ -629,7 +630,7 @@ export default function CustomSoftwareClient({ faqs = FAQS, geo }: { faqs?: read
       <Cost />
       <Places />
 
-      {/* TESTIMONIALS: drop your existing <Testimonials /> component here and import it at the top of this file. */}
+      <Testimonials />
 
       {/* 4. RELATED SERVICES */}
       <section className="bg-white py-24 md:py-32" aria-label="Related services">

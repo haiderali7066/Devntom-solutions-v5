@@ -13,11 +13,14 @@
  * Images are Unsplash links for now: swap the ids in PH, or the IMG() helper, for your own.
  *
  * Palette: cobalt, navy, white, black.
- * Before launch, search this file for "TESTIMONIALS" to see where to drop your component.
+ * Includes the shared client stories section.
  */
 
 import * as React from "react";
 import Link from "next/link";
+import Testimonials from "@/components/Testimonials";
+import { projects as caseStudies } from "../../projects/projects";
+import type { Project } from "../../projects/ProjectsClient";
 import { Poppins, Roboto, Roboto_Mono, Playwrite_CA } from "next/font/google";
 import { ArrowRight, ArrowUpRight, Bell, Check, Code2, Gauge, LayoutDashboard, Plus, Search, ShieldCheck, ShoppingCart, Smartphone, Star } from "lucide-react";
 
@@ -97,15 +100,6 @@ const faqs = [
 const serviceOptions = ["Website Development", "Digital Marketing", "Custom Software", "Mobile Apps", "AI Automation", "UI/UX Design", "SEO", "Something else"];
 
 const jsonLd = [
-  {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    name: "Website Development",
-    serviceType: "Website development",
-    description: DESC,
-    url: SITE + PATH,
-    provider: { "@type": "Organization", name: "DEVNTOM Solutions", url: SITE },
-  },
   {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -1033,46 +1027,38 @@ function TypesSection() {
 
 /* ------------------------------ SELECTED WORK ------------------------------ */
 
-// REPLACE: put your real projects here (name, kind, tags, href and an image id or full URL),
-// or drop your existing <Projects /> component into this section and delete WorkSection.
-const work = [
-  { name: "Client project 01", kind: "Company website", tags: ["Next.js", "SEO"], href: "/projects", img: PH.desk, tall: true },
-  { name: "Client project 02", kind: "E-commerce store", tags: ["Storefront", "Payments"], href: "/projects", img: PH.store, tall: false },
-  { name: "Client project 03", kind: "Web application", tags: ["React", "API"], href: "/projects", img: PH.dashboard, tall: false },
-  { name: "Client project 04", kind: "Landing page", tags: ["Conversion", "Speed"], href: "/projects", img: PH.team, tall: true },
-  { name: "Client project 05", kind: "Redesign", tags: ["UI/UX", "Migration"], href: "/projects", img: PH.design, tall: true },
-  { name: "Client project 06", kind: "CMS and blog", tags: ["Editor", "SEO"], href: "/projects", img: PH.typing, tall: false },
-] as const;
+const work = caseStudies
+  .filter((project): project is Project & { url: string } =>
+    project.category === "Websites & Business Platforms" && typeof project.url === "string",
+  )
+  .slice(0, 6);
 
 function WorkCard({ w, i }: { w: (typeof work)[number]; i: number }) {
+  const onPointerMove = (e: React.PointerEvent<HTMLAnchorElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--cx", `${e.clientX - r.left}px`);
+    e.currentTarget.style.setProperty("--cy", `${e.clientY - r.top}px`);
+  };
+
   return (
     <li className="rv" style={{ transitionDelay: `${(i % 2) * 90}ms` }}>
-      <Link
-        href={w.href}
-        className={`group relative block ${ringDark}`}
-        onPointerMove={(e) => {
-          const r = e.currentTarget.getBoundingClientRect();
-          e.currentTarget.style.setProperty("--cx", `${e.clientX - r.left}px`);
-          e.currentTarget.style.setProperty("--cy", `${e.clientY - r.top}px`);
-        }}
-      >
-        <div className={`relative overflow-hidden rounded-[6px] ${w.tall ? "aspect-[4/5]" : "aspect-[4/3]"}`} style={{ background: `linear-gradient(140deg, ${NAVY} 0%, ${COBALT} 100%)` }}>
-          <div data-pimg className="absolute inset-0 will-change-transform" style={{ transform: "scale(1.2)" }}>
-            <Img src={IMG(w.img, 1400)} alt={`${w.kind}: ${w.name}`} className="transition duration-700 group-hover:scale-[1.04]" />
-          </div>
+      <a href={w.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${w.title} website (opens in a new tab)`} className={`group relative block ${ringDark}`} onPointerMove={onPointerMove}>
+        <div className={`relative overflow-hidden rounded-[6px] ${i % 3 === 0 ? "aspect-[4/5]" : "aspect-[4/3]"}`} style={{ background: `linear-gradient(140deg, ${NAVY} 0%, ${COBALT} 100%)` }}>
+          <div aria-hidden className="absolute inset-0 opacity-35" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,.4) 1px,transparent 1px)", backgroundSize: "20px 20px" }} />
           <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#02050B]/75 via-transparent to-[#02050B]/20" />
           <span className="absolute left-5 top-4 text-sm tracking-widest text-white/90">{String(i + 1).padStart(2, "0")}</span>
-          <span className="absolute right-5 top-4 rounded-full border border-white/40 bg-black/20 px-3 py-1 text-xs text-white backdrop-blur">{w.kind}</span>
-          <span aria-hidden className="pointer-events-none absolute z-10 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 scale-0 items-center justify-center rounded-full bg-[#0047AB] text-sm font-medium text-white transition-transform duration-300 group-hover:scale-100" style={{ left: "var(--cx, 50%)", top: "var(--cy, 50%)" }}>View</span>
+          <span className="absolute right-5 top-4 rounded-full border border-white/40 bg-black/20 px-3 py-1 text-xs text-white backdrop-blur">Website</span>
+          <span className={`${pop.className} absolute bottom-7 left-7 right-7 text-3xl font-semibold leading-tight tracking-[-0.04em] text-white/90 md:text-4xl`}>{w.industry}</span>
+          <span aria-hidden className="pointer-events-none absolute z-10 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 scale-0 items-center justify-center rounded-full bg-[#0047AB] text-sm font-medium text-white transition-transform duration-300 group-hover:scale-100" style={{ left: "var(--cx, 50%)", top: "var(--cy, 50%)" }}>Visit website</span>
         </div>
         <div className="mt-5 flex items-start justify-between gap-6">
           <div>
-            <h3 className={`${pop.className} text-2xl font-extralight tracking-[-0.03em]`}>{w.name}</h3>
-            <ul className="mt-3 flex flex-wrap gap-2">{w.tags.map((t) => <li key={t} className="rounded-full border border-white/25 px-3 py-1 text-xs text-white/80">{t}</li>)}</ul>
+            <h3 className={`${pop.className} text-2xl font-extralight tracking-[-0.03em]`}>{w.title}</h3>
+            <p className="mt-2 text-sm font-light text-white/65">{w.industry}</p>
           </div>
           <ArrowUpRight size={26} className="mt-1 shrink-0 text-[#6EA1FF] transition group-hover:-translate-y-1 group-hover:translate-x-1" aria-hidden="true" />
         </div>
-      </Link>
+      </a>
     </li>
   );
 }
@@ -1086,7 +1072,6 @@ function WorkSection() {
     const el = root.current;
     if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const cols = Array.from(el.querySelectorAll<HTMLElement>("[data-col]"));
-    const imgs = Array.from(el.querySelectorAll<HTMLElement>("[data-pimg]"));
     const word = el.querySelector<HTMLElement>("[data-word]");
     const grid = el.querySelector<HTMLElement>("[data-grid]");
     let raf = 0;
@@ -1101,11 +1086,6 @@ function WorkSection() {
         const speed = Number(c.dataset.col);
         const base = Number(c.dataset.base || 0);
         c.style.transform = wide ? `translate3d(0, ${(base + pc * speed).toFixed(1)}px, 0)` : "";
-      });
-      imgs.forEach((im) => {
-        const pr = im.parentElement!.getBoundingClientRect();
-        const c = (pr.top + pr.height / 2 - vh / 2) / vh;
-        im.style.transform = `translate3d(0, ${(c * -44).toFixed(1)}px, 0) scale(1.2)`;
       });
       if (word) {
         const r = el.getBoundingClientRect();
@@ -1138,8 +1118,8 @@ function WorkSection() {
           </Link>
         </div>
         <div data-grid className="mt-20 grid gap-x-10 gap-y-14 md:grid-cols-2 lg:gap-x-20">
-          <ul data-col="-40" className="space-y-14 will-change-transform md:space-y-24">{left.map((w) => <WorkCard key={w.name} w={w} i={work.indexOf(w)} />)}</ul>
-          <ul data-col="90" data-base="110" className="space-y-14 will-change-transform md:space-y-24">{right.map((w) => <WorkCard key={w.name} w={w} i={work.indexOf(w)} />)}</ul>
+          <ul data-col="-40" className="space-y-14 will-change-transform md:space-y-24">{left.map((w) => <WorkCard key={w.slug} w={w} i={work.indexOf(w)} />)}</ul>
+          <ul data-col="90" data-base="110" className="space-y-14 will-change-transform md:space-y-24">{right.map((w) => <WorkCard key={w.slug} w={w} i={work.indexOf(w)} />)}</ul>
         </div>
       </div>
     </section>
@@ -1305,7 +1285,7 @@ export default function WebsiteDevelopmentPage() {
         </div>
       </section>
 
-      {/* TESTIMONIALS: drop your existing <Testimonials /> component here and import it at the top of this file. */}
+      <Testimonials />
 
       {/* 4. RELATED SERVICES */}
       <section className="bg-white py-24 md:py-32" aria-label="Related services">

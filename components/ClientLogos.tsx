@@ -2,9 +2,8 @@ import type { CSSProperties } from "react";
 import { SiApple, SiCisco, SiGoogle, SiHubspot, SiMeta, SiReact, SiSap, SiShopify, SiStripe } from "react-icons/si";
 import { FaAmazon, FaMicrosoft } from "react-icons/fa";
 
-// Brand logos (react-icons). Only list companies you have actually worked with,
-// logos imply a client relationship. Format: [Icon, name, brand colour on hover]
-const clients: [typeof SiReact, string, string][] = [
+// Platform and tool logos. These are not client endorsements.
+const platforms: [typeof SiReact, string, string][] = [
   [FaMicrosoft, "Microsoft", "#00A4EF"],
   [SiGoogle, "Google", "#4285F4"],
   [FaAmazon, "Amazon", "#FF9900"],
@@ -19,10 +18,10 @@ const clients: [typeof SiReact, string, string][] = [
 
 export default function ClientLogos() {
   return (
-    <section aria-label="Companies we have worked with" className="relative overflow-hidden bg-white py-0">
+    <section aria-label="Digital platforms and tools" className="relative overflow-hidden bg-white py-0">
       <div className="mx-auto flex max-w-[1400px] items-center gap-4 px-6 py-3 md:px-12">
         <span className="h-px w-8 bg-[#DCE5EF]" />
-        <p className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#94A3B8]">Trusted by companies worldwide</p>
+        <p className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#94A3B8]">Digital platforms and tools</p>
         <span className="h-px flex-1 bg-[#EEF2F7]" />
       </div>
 
@@ -36,7 +35,7 @@ export default function ClientLogos() {
         >
           <div className="mq2 flex w-max items-center" style={{ willChange: "transform" }}>
             {[0, 1].flatMap((k) =>
-              clients.map(([Icon, name, color]) => (
+              platforms.map(([Icon, name, color]) => (
                 <div
                   key={`${k}-${name}`}
                   aria-hidden={k === 1 || undefined}

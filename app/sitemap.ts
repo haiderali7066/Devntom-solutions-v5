@@ -3,7 +3,7 @@ import { getAllPosts } from "./blog/posts";
 import { VAT_COUNTRIES } from "./tools/vat-calculator/vat-countries";
 
 const SITE = "https://www.devntomsolutions.com";
-const UPDATED = "2026-10-13"; // update when page content changes meaningfully
+const UPDATED = "2026-10-30"; // update when page content changes meaningfully
 
 type Entry = { path: string; live: boolean; priority: number; freq: "daily" | "weekly" | "monthly" | "yearly" };
 
