@@ -38,8 +38,8 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESC,
   alternates: { canonical: SITE + PATH },
-  openGraph: { title: TITLE, description: DESC, url: SITE + PATH, type: "website" },
-  twitter: { card: "summary_large_image" },
+  openGraph: { title: TITLE, description: DESC, url: SITE + PATH, type: "website", images: [{ url: "/og.png", width: 1200, height: 630, alt: "Custom software by Devntom Solutions" }] },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESC, images: ["/og.png"] },
 };
 
 export default function Page() {

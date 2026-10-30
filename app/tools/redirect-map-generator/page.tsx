@@ -27,11 +27,13 @@ export const metadata: Metadata = {
     url: URL,
     siteName: 'DEVNTOM Solutions',
     type: 'website',
+    images: [{ url: '/og-tools.png', width: 1200, height: 630, alt: 'Redirect map generator by Devntom Solutions' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Redirect Map Generator – Bulk 301 Redirects from CSV',
     description: 'Generate Next.js, Vercel, Nginx, Apache and Netlify redirects from a CSV in your browser.',
+    images: ['/og-tools.png'],
   },
 };
 

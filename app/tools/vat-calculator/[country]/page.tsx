@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, siteName: 'DEVNTOM Solutions', type: 'website' },
-    twitter: { card: 'summary_large_image', title, description },
+    openGraph: { title, description, url, siteName: 'DEVNTOM Solutions', type: 'website', images: [{ url: '/og-tools.png', width: 1200, height: 630, alt: `${c.name} ${c.taxName} calculator` }] },
+    twitter: { card: 'summary_large_image', title, description, images: ['/og-tools.png'] },
   };
 }
 

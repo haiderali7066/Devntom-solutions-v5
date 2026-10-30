@@ -41,7 +41,7 @@ const values = [
 const services: [LucideIcon, string, string, string][] = [
   [Globe, "Website Development", "/services/website-development", "Fast, secure sites built with Next.js and React."],
   [Megaphone, "Digital Marketing", "/services/digital-marketing", "SEO, ads, social and email with clear reporting."],
-  [Bot, "AI Automation and Chatbots", "/services/ai-automation-chatbots", "Assistants and workflows that handle routine work."],
+  [Bot, "AI Automation and Chatbots", "/services/ai-automation", "Assistants and workflows that handle routine work."],
   [Code2, "Custom Software", "/services/custom-software-development", "CRMs, ERPs, SaaS and internal tools."],
   [Smartphone, "Mobile Apps", "/services/mobile-app-development", "Native and cross-platform apps."],
   [Palette, "UI/UX Design", "/services/ui-ux-design", "Interfaces people understand on the first visit."],

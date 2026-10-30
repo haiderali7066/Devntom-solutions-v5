@@ -24,7 +24,6 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
   openGraph: {
     type: "website", url: `${BASE}/tools`, siteName: "DEVNTOM Solutions", title: TITLE, description: DESC,
-    // PLACEHOLDER: add a 1200x630 image at /public/og-tools.png
     images: [{ url: "/og-tools.png", width: 1200, height: 630, alt: "DEVNTOM Solutions online tools" }],
   },
   twitter: { card: "summary_large_image", site: "@DevntomS18433", title: TITLE, description: DESC, images: ["/og-tools.png"] },

@@ -143,7 +143,7 @@ const places = [
 ] as const;
 
 const related = [
-  ["AI Automation and Chatbots", "/services/ai-automation-chatbots", "Add assistants and automation to the software you build."],
+  ["AI Automation and Chatbots", "/services/ai-automation", "Add assistants and automation to the software you build."],
   ["Website Development", "/services/website-development", "Fast, secure websites that connect to your systems."],
   ["Digital Marketing", "/services/digital-marketing", "Bring the right customers to your platform."],
   ["Mobile Apps", "/services/mobile-app-development", "Native and cross-platform apps to go with your software."],
@@ -393,7 +393,7 @@ function AiSection() {
         <div className="lg:col-span-5">
           <Lines className="t2" lines={[<>AI-powered</>, <>software <b className="font-bold">development</b></>]} />
           <p className="rv mt-6 max-w-md font-light leading-relaxed text-[#3B4A63]">We can build intelligence into your software where it clearly helps: reading documents, answering questions and routing work, always with limits you control and a person able to step in.</p>
-          <Link href="/services/ai-automation-chatbots" className={`rv group mt-8 inline-flex items-center gap-3 rounded-full border border-[#0B1F3B]/30 px-7 py-3.5 text-sm font-medium transition hover:border-[#0047AB] hover:text-[#0047AB] ${ring}`}>
+          <Link href="/services/ai-automation" className={`rv group mt-8 inline-flex items-center gap-3 rounded-full border border-[#0B1F3B]/30 px-7 py-3.5 text-sm font-medium transition hover:border-[#0047AB] hover:text-[#0047AB] ${ring}`}>
             AI automation and chatbots <ArrowRight size={16} className="transition group-hover:translate-x-1" aria-hidden="true" />
           </Link>
         </div>

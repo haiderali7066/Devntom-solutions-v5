@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESC,
   alternates: { canonical: SITE + "/industries" },
-  openGraph: { title: TITLE, description: DESC, url: SITE + "/industries", type: "website" },
-  twitter: { card: "summary_large_image" },
+  openGraph: { title: TITLE, description: DESC, url: SITE + "/industries", type: "website", images: [{ url: "/og.png", width: 1200, height: 630, alt: "Industries served by Devntom Solutions" }] },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESC, images: ["/og.png"] },
 };
 
 const jsonLd = [

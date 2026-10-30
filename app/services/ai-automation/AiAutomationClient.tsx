@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * /services/ai-automation-chatbots
+ * /services/ai-automation
  *
  * One self-contained file: no imports from your own files, no Nav, no Footer
  * (both live in app/layout.tsx).
@@ -37,8 +37,7 @@ const NAVY = "#0B1F3B";
 const BLACK = "#02050B";
 
 const SITE = "https://www.devntomsolutions.com";
-const PATH = "/services/ai-automation-chatbots";
-const TITLE = "AI Automation and Chatbot Development | DEVNTOM Solutions";
+const PATH = "/services/ai-automation";
 const DESC = "AI chatbots and workflow automation that answer customers, qualify leads and handle routine work, connected to your CRM, calendar and tools. DEVNTOM Solutions, Lahore, Riyadh and London.";
 
 /* ------------------------------ CONTENT ------------------------------ */
@@ -558,15 +557,6 @@ export default function AiAutomationChatbotsPage() {
 
   return (
     <main ref={main} id="main" className={`${rob.className} overflow-x-clip bg-white text-[#0B1F3B]`}>
-      {/* Page metadata. React 19 / Next 15 move these into <head>. */}
-      <title>{TITLE}</title>
-      <meta name="description" content={DESC} />
-      <link rel="canonical" href={SITE + PATH} />
-      <meta property="og:title" content={TITLE} />
-      <meta property="og:description" content={DESC} />
-      <meta property="og:url" content={SITE + PATH} />
-      <meta property="og:type" content="website" />
-      <meta name="twitter:card" content="summary_large_image" />
       {jsonLd.map((d, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(d) }} />)}
       <style>{PAGE_CSS}</style>
 

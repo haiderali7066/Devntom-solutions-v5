@@ -37,8 +37,6 @@ const WHITE = "#FFFFFF";
 
 const SITE = "https://www.devntomsolutions.com";
 const PATH = "/services/website-development";
-const TITLE = "Website Development Services | DEVNTOM Solutions";
-const DESC = "Fast, secure, responsive websites built with Next.js and React: company sites, e-commerce and web apps with SEO built in. DEVNTOM Solutions, Lahore, Riyadh and London.";
 
 /* ------------------------------ CONTENT ------------------------------ */
 
@@ -1247,15 +1245,6 @@ export default function WebsiteDevelopmentPage() {
 
   return (
     <main ref={main} id="main" className={`${rob.className} overflow-x-clip bg-white text-[#0B1F3B]`}>
-      {/* Page metadata. React 19 / Next 15 move these into <head>. */}
-      <title>{TITLE}</title>
-      <meta name="description" content={DESC} />
-      <link rel="canonical" href={SITE + PATH} />
-      <meta property="og:title" content={TITLE} />
-      <meta property="og:description" content={DESC} />
-      <meta property="og:url" content={SITE + PATH} />
-      <meta property="og:type" content="website" />
-      <meta name="twitter:card" content="summary_large_image" />
       {jsonLd.map((d, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(d) }} />)}
       <style>{PAGE_CSS}</style>
 

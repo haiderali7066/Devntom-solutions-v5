@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: DESC,
   alternates: { canonical: "/terms-and-conditions" },
   robots: { index: true, follow: true },
-  openGraph: { type: "website", url: `${BASE}/terms-and-conditions`, siteName: CO.name, title: TITLE, description: DESC },
+  openGraph: { type: "website", url: `${BASE}/terms-and-conditions`, siteName: CO.name, title: TITLE, description: DESC, images: [{ url: "/og.png", width: 1200, height: 630, alt: "Devntom Solutions" }] },
   twitter: { card: "summary", title: TITLE, description: DESC },
 };
 

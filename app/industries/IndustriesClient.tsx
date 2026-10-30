@@ -56,7 +56,7 @@ const industries: Industry[] = [
     intro: "Clinics, practices and health businesses need clear information, simple booking and careful handling of personal data.",
     builds: ["Clinic and practice websites", "Online appointment booking", "Patient reminders and follow-up", "Secure enquiry forms"],
     challenges: [["Missed appointments", "Automated reminders by message or email"], ["Phones always busy", "A chatbot that answers common questions and books slots"], ["Trust at first glance", "A clear, fast, accessible website"]],
-    services: [["Website Development", "/services/website-development"], ["AI Automation and Chatbots", "/services/ai-automation-chatbots"]],
+    services: [["Website Development", "/services/website-development"], ["AI Automation and Chatbots", "/services/ai-automation"]],
   },
   {
     name: "Retail and E-commerce",
@@ -83,7 +83,7 @@ const industries: Industry[] = [
     intro: "Schools, academies and training providers need easy enrolment, clear course information and tools that save staff time.",
     builds: ["School and academy websites", "Course catalogues and enrolment forms", "Student and parent portals", "Admissions chatbots"],
     challenges: [["Repeated admissions questions", "A chatbot trained on your own prospectus"], ["Paper forms", "Online enrolment that feeds your records"], ["Reaching new students", "Search and social campaigns for each intake"]],
-    services: [["Website Development", "/services/website-development"], ["AI Automation and Chatbots", "/services/ai-automation-chatbots"]],
+    services: [["Website Development", "/services/website-development"], ["AI Automation and Chatbots", "/services/ai-automation"]],
   },
   {
     name: "Finance and Fintech",
@@ -92,7 +92,7 @@ const industries: Industry[] = [
     intro: "Financial businesses need interfaces people can trust, secure flows and tools that handle repetitive checks.",
     builds: ["Fintech web apps and dashboards", "Secure customer portals", "Document and invoice processing", "Reporting and analytics"],
     challenges: [["Manual document handling", "Automated reading and checking, with exceptions flagged"], ["Complex products to explain", "Clear design and guided flows"], ["Reporting by hand", "Dashboards that update themselves"]],
-    services: [["Custom Software", "/services/custom-software-development"], ["AI Automation and Chatbots", "/services/ai-automation-chatbots"]],
+    services: [["Custom Software", "/services/custom-software-development"], ["AI Automation and Chatbots", "/services/ai-automation"]],
   },
   {
     name: "Hospitality and Travel",
@@ -119,7 +119,7 @@ const industries: Industry[] = [
     intro: "Logistics, distribution and operations teams need tools that track work, share status and cut manual entry.",
     builds: ["Tracking and status portals", "Internal dashboards and admin tools", "Quote and order systems", "Workflow automation between systems"],
     challenges: [["Information in many places", "One system that connects your tools"], ["Customers asking for updates", "Self-service status pages and chat"], ["Manual data entry", "Automations that move data for you"]],
-    services: [["Custom Software", "/services/custom-software-development"], ["AI Automation and Chatbots", "/services/ai-automation-chatbots"]],
+    services: [["Custom Software", "/services/custom-software-development"], ["AI Automation and Chatbots", "/services/ai-automation"]],
   },
 ];
 

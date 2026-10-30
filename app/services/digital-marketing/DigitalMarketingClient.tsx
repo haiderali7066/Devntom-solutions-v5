@@ -79,7 +79,7 @@ const steps = [
 
 const related = [
   ["Website Development", "/services/website-development", "A fast site that turns visitors into enquiries."],
-  ["AI Automation and Chatbots", "/services/ai-automation-chatbots", "Answer and qualify every lead the moment it arrives."],
+  ["AI Automation and Chatbots", "/services/ai-automation", "Answer and qualify every lead the moment it arrives."],
   ["UI/UX Design", "/services/ui-ux-design", "Landing pages and flows designed to convert."],
   ["Custom Software", "/services/custom-software-development", "CRMs and dashboards that connect to your campaigns."],
 ] as const;

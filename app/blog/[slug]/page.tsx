@@ -13,7 +13,7 @@ import { fmtDate, getAllPosts, getPost, getRelated, readingMins, slugify, wordCo
 const pop = Poppins({ subsets: ["latin"], weight: ["200", "300", "400", "600", "700"], display: "swap" });
 const rob = Roboto({ subsets: ["latin"], weight: ["300", "400", "500", "700"], display: "swap" });
 const BASE = "https://www.devntomsolutions.com";
-const OG_FALLBACK = "/og-blog.png"; // PLACEHOLDER: add a 1200x630 image at /public/og-blog.png
+const OG_FALLBACK = "/og-blog.png";
 
 type Props = { params: Promise<{ slug: string }> };
 

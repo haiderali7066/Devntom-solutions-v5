@@ -460,40 +460,8 @@ const techRows: [typeof SiReact, string][][] = [
     [SiShopify, "Shopify"],
   ],
 ];
-// SAMPLE TEXT: replace with real, approved client testimonials before launch
-// [quote, name, role and company, service tag]
-const quotes = [
-  [
-    "They treated our platform as a business system, not a task list. Delivery was predictable and communication was clear.",
-    "Client name",
-    "Role, Company",
-    "Custom software",
-  ],
-  [
-    "Our new website loads fast and our enquiries went up within weeks of launch.",
-    "Client name",
-    "Role, Company",
-    "Website",
-  ],
-  [
-    "The AI automation removed hours of manual reporting every week. The team explained every step.",
-    "Client name",
-    "Role, Company",
-    "AI automation",
-  ],
-  [
-    "From design to deployment, one team handled everything. No hand-offs, no surprises.",
-    "Client name",
-    "Role, Company",
-    "End-to-end build",
-  ],
-  [
-    "They understood our market and built exactly what we needed, on schedule.",
-    "Client name",
-    "Role, Company",
-    "Web platform",
-  ],
-] as const;
+type Testimonial = readonly [quote: string, name: string, role: string, tag: string];
+const quotes: Testimonial[] = [];
 
 function Testimonials() {
   const wrap = "mx-auto w-full max-w-[1400px] px-6 md:px-12";
@@ -2139,7 +2107,7 @@ export default function HomeClient() {
       </section>
 
       {/* 8b. TESTIMONIALS */}
-      <Testimonials />
+      {quotes.length > 0 && <Testimonials />}
 
       {/* 9. INSIGHTS */}
       <section className="bg-white py-24 md:py-36" aria-labelledby="blog">

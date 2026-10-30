@@ -7,6 +7,20 @@ export const metadata: Metadata = {
   description:
     'Free VAT, GST and sales tax calculators for Saudi Arabia (15%), UAE (5%), Pakistan (18%), Bahrain (10%), Oman (5%) and Australia (10%). Add or remove tax in seconds.',
   alternates: { canonical: 'https://www.devntomsolutions.com/tools/vat-calculator' },
+  openGraph: {
+    type: 'website',
+    url: 'https://www.devntomsolutions.com/tools/vat-calculator',
+    siteName: 'DEVNTOM Solutions',
+    title: 'VAT, GST & Sales Tax Calculators | DEVNTOM Solutions',
+    description: 'Free VAT and sales tax calculators for six countries. Add or remove tax in seconds.',
+    images: [{ url: '/og-tools.png', width: 1200, height: 630, alt: 'Tax calculators by Devntom Solutions' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'VAT, GST & Sales Tax Calculators | DEVNTOM Solutions',
+    description: 'Free VAT and sales tax calculators for six countries. Add or remove tax in seconds.',
+    images: ['/og-tools.png'],
+  },
 };
 
 export default function Page() {

@@ -25,11 +25,13 @@ export const metadata: Metadata = {
     url: URL,
     siteName: 'DEVNTOM Solutions',
     type: 'website',
+    images: [{ url: '/og-tools.png', width: 1200, height: 630, alt: 'ZATCA QR code generator by Devntom Solutions' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'ZATCA QR Code Generator – Free Saudi E-Invoice QR',
     description: 'Generate and decode ZATCA TLV Base64 QR codes in your browser.',
+    images: ['/og-tools.png'],
   },
 };
 
