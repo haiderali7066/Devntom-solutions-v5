@@ -11,13 +11,13 @@ const quotes: Testimonial[] = [];
 export default function Testimonials() {
   if (quotes.length === 0) {
     return (
-      <section className="bg-[#F4F8FE] py-16 md:py-20" aria-label="Client stories">
+      <section id="testimonials" className="bg-[#F4F8FE] py-16 md:py-20" aria-label="Testimonials">
         <div className="mx-auto max-w-[1400px] px-6 md:px-12">
           <div className="flex flex-col items-start justify-between gap-7 rounded-[4px] border border-[#CBD8EE] bg-white p-7 md:flex-row md:items-center md:p-10">
             <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#0047AB]">Client stories</p>
-              <h2 className={`${pop.className} mt-3 text-2xl font-semibold tracking-[-0.035em] text-[#0B1F3B] md:text-4xl`}>See what we’ve built for clients.</h2>
-              <p className="mt-3 text-sm leading-relaxed text-[#5B6B84]">We’re preparing client feedback for publication. Browse our published case studies in the meantime.</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#0047AB]">Testimonials</p>
+              <h2 className={`${pop.className} mt-3 text-2xl font-semibold tracking-[-0.035em] text-[#0B1F3B] md:text-4xl`}>Client feedback</h2>
+              <p className="mt-3 text-sm leading-relaxed text-[#5B6B84]">We’ll share client feedback here once it’s ready to publish. Browse our published case studies in the meantime.</p>
             </div>
             <Link href="/projects" className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-[#0047AB] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#0B1F3B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B4FF] focus-visible:ring-offset-2">
               Explore case studies <ArrowRight size={16} className="transition group-hover:translate-x-1" aria-hidden="true" />
@@ -127,6 +127,7 @@ function TestimonialCarousel() {
 
   return (
     <section
+      id="testimonials"
       aria-labelledby="tst"
       className="relative overflow-hidden bg-white py-20 md:py-28"
       onFocus={() => setPaused(true)}
